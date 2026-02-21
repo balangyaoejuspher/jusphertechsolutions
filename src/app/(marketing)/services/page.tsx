@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Code2, BriefcaseBusiness, Headphones, CheckCircle, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -78,6 +79,11 @@ const process = [
     description: "Onboard your new team member and hit the ground running. We stay available for ongoing support.",
   },
 ]
+
+export const metadata: Metadata = {
+  title: "Services",
+  description: "Hire vetted developers, virtual assistants, and project managers. Flexible arrangements, fast matching, guaranteed quality.",
+}
 
 export default function ServicesPage() {
   return (

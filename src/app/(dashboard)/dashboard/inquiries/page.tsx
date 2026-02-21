@@ -11,6 +11,7 @@ import {
     MessageSquare,
     ChevronDown,
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const initialInquiries = [
     {
@@ -140,7 +141,7 @@ export default function DashboardInquiriesPage() {
             {/* Status Tabs */}
             <div className="flex gap-2 flex-wrap mb-6">
                 {statuses.map((s) => (
-                    <button
+                    <Button
                         key={s.value}
                         onClick={() => setFilterStatus(s.value)}
                         className={cn(
@@ -159,7 +160,7 @@ export default function DashboardInquiriesPage() {
                         )}>
                             {counts[s.value as keyof typeof counts]}
                         </span>
-                    </button>
+                    </Button>
                 ))}
             </div>
 
@@ -229,12 +230,14 @@ export default function DashboardInquiriesPage() {
                         {/* Panel Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
                             <h3 className="font-bold text-zinc-900">Inquiry Details</h3>
-                            <button
+                            <Button
                                 onClick={() => setSelected(null)}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 transition-colors"
+                                variant="ghost"
+                                size="icon"
+                                className="w-8 h-8 rounded-lg text-zinc-400 hover:bg-zinc-100 transition-colors"
                             >
                                 <X size={16} />
-                            </button>
+                            </Button>
                         </div>
 
                         {/* Panel Content */}
@@ -291,7 +294,7 @@ export default function DashboardInquiriesPage() {
                                     Status
                                 </p>
                                 <div className="relative">
-                                    <button
+                                    <Button
                                         onClick={() => setStatusDropdown(statusDropdown === selected.id ? null : selected.id)}
                                         className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-700 hover:border-zinc-300 transition-all"
                                     >
@@ -302,11 +305,11 @@ export default function DashboardInquiriesPage() {
                                             {statusLabels[selected.status]}
                                         </span>
                                         <ChevronDown size={15} className="text-zinc-400" />
-                                    </button>
+                                    </Button>
                                     {statusDropdown === selected.id && (
                                         <div className="absolute top-12 left-0 right-0 bg-white border border-zinc-200 rounded-xl shadow-lg py-1 z-10">
                                             {["new", "in_progress", "resolved"].map((s) => (
-                                                <button
+                                                <Button
                                                     key={s}
                                                     onClick={() => updateStatus(selected.id, s)}
                                                     className="w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-50 flex items-center gap-2"
@@ -317,7 +320,7 @@ export default function DashboardInquiriesPage() {
                                                     )}>
                                                         {statusLabels[s]}
                                                     </span>
-                                                </button>
+                                                </Button>
                                             ))}
                                         </div>
                                     )}
@@ -333,13 +336,13 @@ export default function DashboardInquiriesPage() {
                                     <Mail size={15} />
                                     Reply via Email
                                 </a>
-                                <button
+                                <Button
                                     onClick={() => deleteInquiry(selected.id)}
                                     className="flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-200 text-red-500 hover:bg-red-50 hover:border-red-200 font-medium text-sm transition-all"
                                 >
                                     <X size={15} />
                                     Delete Inquiry
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>

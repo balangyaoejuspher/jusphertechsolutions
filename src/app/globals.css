@@ -124,3 +124,24 @@
     font-family: var(--font-dm-sans), sans-serif;
   }
 }
+
+.cl-footerAction__signUp,
+.cl-footer,
+.cl-footerPages {
+  display: none !important;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}

@@ -11,6 +11,7 @@ import {
     Check,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const initialTalent = [
     {
@@ -65,9 +66,18 @@ const initialTalent = [
 
 const roles = [
     { value: "all", label: "All Roles" },
-    { value: "developer", label: "Developers" },
-    { value: "va", label: "Virtual Assistants" },
-    { value: "project_manager", label: "Project Managers" },
+    { value: "developer", label: "Developer" },
+    { value: "va", label: "Virtual Assistant" },
+    { value: "project_manager", label: "Project Manager" },
+    { value: "designer", label: "Designer" },
+    { value: "ui_ux", label: "UI/UX Designer" },
+    { value: "data_analyst", label: "Data Analyst" },
+    { value: "content_writer", label: "Content Writer" },
+    { value: "marketing", label: "Marketing" },
+    { value: "customer_support", label: "Customer Support" },
+    { value: "accountant", label: "Accountant" },
+    { value: "video_editor", label: "Video Editor" },
+    { value: "seo_specialist", label: "SEO Specialist" },
 ]
 
 const gradients = [
@@ -160,7 +170,7 @@ export default function DashboardTalentPage() {
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 {/* Search */}
-                <div className="relative flex-1 max-w-sm">
+                <div className="relative flex-1">
                     <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                     <input
                         type="text"
@@ -172,22 +182,22 @@ export default function DashboardTalentPage() {
                 </div>
 
                 {/* Role Filter */}
-                <div className="flex gap-2 flex-wrap">
-                    {roles.map((role) => (
-                        <button
-                            key={role.value}
-                            onClick={() => setFilterRole(role.value)}
-                            className={cn(
-                                "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                                filterRole === role.value
-                                    ? "bg-zinc-900 text-white"
-                                    : "bg-white border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300"
-                            )}
-                        >
-                            {role.label}
-                        </button>
-                    ))}
-                </div>
+                <Select value={filterRole} onValueChange={setFilterRole}>
+                    <SelectTrigger className="w-full sm:w-52 rounded-xl border-zinc-200 text-sm text-zinc-700">
+                        <SelectValue placeholder="All Roles" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                        {roles.map((role) => (
+                            <SelectItem
+                                key={role.value}
+                                value={role.value}
+                                className="text-sm"
+                            >
+                                {role.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Table */}

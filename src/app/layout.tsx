@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { siteConfig } from "@/config/site"
 import { Playfair_Display, DM_Sans } from "next/font/google"
 import "./globals.css"
 import { ClerkProvider } from "@clerk/nextjs"
@@ -17,9 +18,41 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "Portfolio Agency",
-  description:
-    "We connect businesses with top-tier developers, virtual assistants, and project managers.",
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  keywords: [
+    "hire developers",
+    "virtual assistants",
+    "project managers",
+    "remote talent",
+    "outsourcing",
+    "portfolio agency",
+    "Philippines",
+  ],
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  metadataBase: new URL(siteConfig.url),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteConfig.url,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    creator: "@portfolioagency",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({

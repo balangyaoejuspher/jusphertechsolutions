@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
+import { SignedIn, UserButton } from "@clerk/nextjs"
 import { siteConfig } from "@/config/site"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -71,28 +71,9 @@ export function Navbar() {
                             ))}
                         </nav>
 
-                        {/* Desktop Auth */}
+                        {/* Desktop Right */}
                         <div className="hidden md:flex items-center gap-2">
                             <ThemeToggle />
-                            <SignedOut>
-                                <SignInButton mode="modal">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg"
-                                    >
-                                        Sign In
-                                    </Button>
-                                </SignInButton>
-                                <Link href="/sign-up">
-                                    <Button
-                                        size="sm"
-                                        className="rounded-lg bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950 hover:bg-zinc-700 dark:hover:bg-amber-300 font-semibold shadow-sm"
-                                    >
-                                        Get Started
-                                    </Button>
-                                </Link>
-                            </SignedOut>
                             <SignedIn>
                                 <Link href="/dashboard">
                                     <Button
@@ -127,13 +108,11 @@ export function Navbar() {
                     isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 )}
             >
-                {/* Backdrop */}
                 <div
                     className="absolute inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm"
                     onClick={() => setIsOpen(false)}
                 />
 
-                {/* Drawer */}
                 <div
                     className={cn(
                         "absolute top-0 right-0 h-full w-72 bg-white dark:bg-zinc-950 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 border-l border-zinc-100 dark:border-white/5 transition-transform duration-300 ease-out flex flex-col",
@@ -186,39 +165,24 @@ export function Navbar() {
                         ))}
                     </nav>
 
-                    {/* Mobile Auth */}
-                    <div className="px-4 py-5 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-2">
-                        <div className="flex items-center justify-between mb-1">
+                    {/* Mobile Footer */}
+                    <div className="px-4 py-5 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">
                                 Appearance
                             </span>
                             <ThemeToggle />
                         </div>
-                        <SignedOut>
-                            <SignInButton mode="modal">
-                                <Button
-                                    variant="outline"
-                                    className="w-full rounded-xl border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5"
-                                >
-                                    Sign In
-                                </Button>
-                            </SignInButton>
-                            <Link href="/sign-up" className="w-full">
-                                <Button className="w-full rounded-xl bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950 hover:bg-zinc-700 dark:hover:bg-amber-300 font-semibold">
-                                    Get Started
-                                </Button>
-                            </Link>
-                        </SignedOut>
                         <SignedIn>
                             <Link href="/dashboard" className="w-full">
                                 <Button
                                     variant="outline"
-                                    className="w-full rounded-xl border-zinc-200 dark:border-white/10"
+                                    className="w-full rounded-xl border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300"
                                 >
                                     Dashboard
                                 </Button>
                             </Link>
-                            <div className="flex items-center gap-3 px-1 pt-1">
+                            <div className="flex items-center gap-3 px-1">
                                 <UserButton />
                                 <span className="text-sm text-zinc-500 dark:text-zinc-400">My Account</span>
                             </div>

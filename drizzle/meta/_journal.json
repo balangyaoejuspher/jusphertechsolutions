@@ -8,6 +8,27 @@
       "when": 1771639572525,
       "tag": "0000_worried_nekra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771656645503,
+      "tag": "0001_glossy_the_hood",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771660813784,
+      "tag": "0002_loose_glorian",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1771661509001,
+      "tag": "0003_stale_roland_deschain",
+      "breakpoints": true
     }
   ]
 }

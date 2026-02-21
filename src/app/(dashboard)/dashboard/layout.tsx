@@ -1,6 +1,15 @@
-import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
+import type { Metadata } from "next"
 import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
+import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
+import { getAdminSession } from "@/lib/admin-auth"
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function DashboardLayout({
     children,
@@ -13,9 +22,15 @@ export default async function DashboardLayout({
         redirect("/sign-in")
     }
 
+    const admin = await getAdminSession()
+
+    if (!admin) {
+        redirect("/unauthorized")
+    }
+
     return (
         <div className="flex min-h-screen">
-            <DashboardSidebar />
+            <DashboardSidebar admin={admin} />
             <main className="flex-1 bg-zinc-50 overflow-auto">
                 {children}
             </main>

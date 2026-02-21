@@ -1,10 +1,14 @@
 import { initTRPC } from "@trpc/server"
 import { auth } from "@clerk/nextjs/server"
 import { ZodError } from "zod"
+import { db } from "@/server/db/client"  // 👈 add this
 
 export const createTRPCContext = async () => {
   const { userId } = await auth()
-  return { userId }
+  return {
+    userId,
+    db,
+  }
 }
 
 const t = initTRPC.context<typeof createTRPCContext>().create({

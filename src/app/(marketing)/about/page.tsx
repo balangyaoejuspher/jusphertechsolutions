@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { ArrowRight, Heart, Shield, Zap, Globe, Users, Trophy } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -62,6 +63,11 @@ const stats = [
   { value: "30+", label: "Countries Represented" },
   { value: "98%", label: "Client Satisfaction" },
 ]
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Learn about Portfolio Agency — our story, our values, and the team behind the platform.",
+}
 
 export default function AboutPage() {
   return (
