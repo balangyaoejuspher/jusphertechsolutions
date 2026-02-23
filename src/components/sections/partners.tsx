@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import { Code2, Layers3 } from "lucide-react"
 import Image from "next/image"
 
@@ -105,8 +106,8 @@ export function Partners() {
             <div className="container mx-auto px-6 md:px-12 mt-10">
                 <div className="flex items-center justify-center flex-wrap gap-2">
                     {badges.map((badge, i) => (
-                        <>
-                            <div key={badge.src} className="relative h-24 w-48">
+                        <Fragment key={badge.src}>
+                            <div className="relative h-24 w-48">
                                 <Image
                                     src={badge.src}
                                     alt={badge.alt}
@@ -117,7 +118,7 @@ export function Partners() {
                             {i < badges.length - 1 && (
                                 <div className="w-px h-10 bg-zinc-200 dark:bg-zinc-800 mx-1" />
                             )}
-                        </>
+                        </Fragment>
                     ))}
                 </div>
             </div>

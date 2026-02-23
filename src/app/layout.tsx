@@ -5,6 +5,7 @@ import "./globals.css"
 import { ClerkProvider } from "@clerk/nextjs"
 import { TRPCProvider } from "@/components/shared/trpc-provider"
 import { ThemeProvider } from "@/components/shared/theme-provider"
+import { MouseFlashlight } from "@/components/shared/mouse-flashlight"
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -29,7 +30,9 @@ export const metadata: Metadata = {
     "project managers",
     "remote talent",
     "outsourcing",
-    "portfolio agency",
+    "jusphertechsolutions",
+    "juspher tech",
+    "juspher solutions",
     "Philippines",
   ],
   authors: [{ name: siteConfig.name }],
@@ -66,6 +69,7 @@ export default function RootLayout({
         <body className={`${playfair.variable} ${dmSans.variable} font-sans antialiased`}>
           <ThemeProvider>
             <TRPCProvider>
+              <MouseFlashlight /> 
               {children}
             </TRPCProvider>
           </ThemeProvider>

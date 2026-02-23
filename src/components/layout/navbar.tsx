@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button"
 import { mainNav, servicesMenu, productsMenu } from "@/config/navigation"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
-import { SignedIn, UserButton } from "@clerk/nextjs"
+import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs"
 import Image from "next/image"
 import {
     Blocks,
+    CalendarDays,
     ChevronDown,
     ChevronRight,
-    Menu, X
+    LogIn,
+    Menu,
+    X,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -33,12 +36,14 @@ function MegaMenu({
     onMouseLeave: () => void
 }) {
     return (
-        <div className={cn(
-            "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[680px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/40 overflow-hidden transition-all duration-200 z-50",
-            isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
-        )}
+        <div
+            className={cn(
+                "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[680px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/40 overflow-hidden transition-all duration-200 z-50",
+                isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+            )}
             onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}>
+            onMouseLeave={onMouseLeave}
+        >
             <div className="h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
             <div className="p-5 grid grid-cols-2 gap-6">
                 {items.map((group) => (
@@ -94,15 +99,16 @@ function ProductsMegaMenu({
     onMouseLeave: () => void
 }) {
     return (
-        <div className={cn(
-            "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[560px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/40 overflow-hidden transition-all duration-200 z-50",
-            isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
-        )}
+        <div
+            className={cn(
+                "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[560px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/40 overflow-hidden transition-all duration-200 z-50",
+                isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+            )}
             onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}>
+            onMouseLeave={onMouseLeave}
+        >
             <div className="h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
             <div className="p-5 grid grid-cols-2 gap-4">
-                {/* Left — product list */}
                 <div>
                     <p className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-3 px-2">
                         Software Products
@@ -129,8 +135,6 @@ function ProductsMegaMenu({
                         ))}
                     </div>
                 </div>
-
-                {/* Right — featured blockchain + view all */}
                 <div className="flex flex-col gap-3">
                     <p className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-1 px-2">
                         Featured
@@ -173,7 +177,11 @@ function ProductsMegaMenu({
 // MOBILE ACCORDION
 // ============================================================
 
-function MobileAccordion({ label, items }: { label: string; items: typeof servicesMenu; onClose: () => void }) {
+function MobileAccordion({ label, items, onClose }: {
+    label: string
+    items: typeof servicesMenu
+    onClose: () => void
+}) {
     const [open, setOpen] = useState(false)
     return (
         <div>
@@ -182,7 +190,7 @@ function MobileAccordion({ label, items }: { label: string; items: typeof servic
                 className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white transition-all"
             >
                 {label}
-                <ChevronDown size={15} className={cn("opacity-40 transition-transform duration-200", open ? "rotate-180" : "")} />
+                <ChevronDown size={15} className={cn("opacity-40 transition-transform duration-200", open && "rotate-180")} />
             </button>
             {open && (
                 <div className="ml-3 mt-1 flex flex-col gap-0.5 pb-1">
@@ -195,6 +203,7 @@ function MobileAccordion({ label, items }: { label: string; items: typeof servic
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    onClick={onClose}
                                     className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white transition-all"
                                 >
                                     <item.icon size={14} className="shrink-0 text-zinc-400" />
@@ -227,21 +236,16 @@ export function Navbar() {
     }
 
     const closeMenu = () => {
-        closeTimer.current = setTimeout(() => {
-            setActiveMenu(null)
-        }, 100)
+        closeTimer.current = setTimeout(() => setActiveMenu(null), 100)
     }
 
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 12)
-        window.addEventListener("scroll", handleScroll)
-        return () => window.removeEventListener("scroll", handleScroll)
+        const onScroll = () => setScrolled(window.scrollY > 12)
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
     }, [])
 
-    useEffect(() => {
-        setIsOpen(false)
-        setActiveMenu(null)
-    }, [pathname])
+    useEffect(() => { setIsOpen(false); setActiveMenu(null) }, [pathname])
 
     useEffect(() => {
         document.body.style.overflow = isOpen ? "hidden" : ""
@@ -249,20 +253,14 @@ export function Navbar() {
     }, [isOpen])
 
     useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (navRef.current && !navRef.current.contains(e.target as Node)) {
-                setActiveMenu(null)
-            }
+        const handler = (e: MouseEvent) => {
+            if (navRef.current && !navRef.current.contains(e.target as Node)) setActiveMenu(null)
         }
-        document.addEventListener("mousedown", handleClick)
-        return () => document.removeEventListener("mousedown", handleClick)
+        document.addEventListener("mousedown", handler)
+        return () => document.removeEventListener("mousedown", handler)
     }, [])
 
-    useEffect(() => {
-        return () => {
-            if (closeTimer.current) clearTimeout(closeTimer.current)
-        }
-    }, [])
+    useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current) }, [])
 
     return (
         <>
@@ -280,17 +278,9 @@ export function Navbar() {
 
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-                            {/* Icon */}
                             <div className="w-8 h-8 rounded-lg overflow-hidden transition-transform group-hover:scale-105 shrink-0">
-                                <Image
-                                    src="/icon.svg"
-                                    alt={siteConfig.fullName}
-                                    width={32}
-                                    height={32}
-                                    className="w-full h-full object-contain"
-                                />
+                                <Image src="/icon.svg" alt={siteConfig.fullName} width={32} height={32} className="w-full h-full object-contain" />
                             </div>
-
                             <div className="hidden sm:flex flex-col leading-none">
                                 <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">
                                     {siteConfig.name.toUpperCase()}
@@ -303,139 +293,89 @@ export function Navbar() {
 
                         {/* Desktop Nav */}
                         <nav className="hidden lg:flex items-center gap-0.5">
-                            <Link
-                                href="/"
-                                className={cn(
-                                    "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150",
-                                    pathname === "/"
-                                        ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
-                                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
-                                )}
-                            >
+                            <Link href="/" className={cn("px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150", pathname === "/" ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5")}>
                                 Home
                             </Link>
 
-                            {/* Services mega menu */}
-                            <div
-                                className="relative"
-                                onMouseEnter={() => openMenu("services")}
-                                onMouseLeave={closeMenu}
-                            >
+                            {/* Services mega */}
+                            <div className="relative" onMouseEnter={() => openMenu("services")} onMouseLeave={closeMenu}>
                                 <div className="flex items-center">
-                                    {/* Clicking "Services" text navigates to /services */}
-                                    <Link
-                                        href="/services"
-                                        className={cn(
-                                            "flex items-center px-4 py-2 text-sm font-medium rounded-l-lg transition-all duration-150",
-                                            pathname.startsWith("/services")
-                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
-                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
-                                        )}
-                                    >
+                                    <Link href="/services" className={cn("flex items-center px-4 py-2 text-sm font-medium rounded-l-lg transition-all duration-150", pathname.startsWith("/services") ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5")}>
                                         Services
                                     </Link>
-
-                                    {/* Chevron toggles the mega menu */}
-                                    <button
-                                        onClick={() => setActiveMenu(activeMenu === "services" ? null : "services")}
-                                        className={cn(
-                                            "flex items-center px-1.5 py-2 text-sm font-medium rounded-r-lg transition-all duration-150",
-                                            pathname.startsWith("/services")
-                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
-                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
-                                        )}
-                                    >
-                                        <ChevronDown
-                                            size={13}
-                                            className={cn("transition-transform duration-200", activeMenu === "services" ? "rotate-180" : "")}
-                                        />
+                                    <button onClick={() => setActiveMenu(activeMenu === "services" ? null : "services")} className={cn("flex items-center px-1.5 py-2 text-sm font-medium rounded-r-lg transition-all duration-150", pathname.startsWith("/services") ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5")}>
+                                        <ChevronDown size={13} className={cn("transition-transform duration-200", activeMenu === "services" && "rotate-180")} />
                                     </button>
                                 </div>
-
-                                <MegaMenu
-                                    items={servicesMenu}
-                                    isOpen={activeMenu === "services"}
-                                    onMouseEnter={() => openMenu("services")}
-                                    onMouseLeave={closeMenu}
-                                />
+                                <MegaMenu items={servicesMenu} isOpen={activeMenu === "services"} onMouseEnter={() => openMenu("services")} onMouseLeave={closeMenu} />
                             </div>
 
-                            <Link
-                                href="/talent"
-                                className={cn(
-                                    "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150",
-                                    pathname === "/talent"
-                                        ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
-                                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
-                                )}
-                            >
+                            <Link href="/talent" className={cn("px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150", pathname === "/talent" ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5")}>
                                 Talent
                             </Link>
 
-                            {/* Products mega menu */}
-                            <div
-                                className="relative"
-                                onMouseEnter={() => openMenu("products")}
-                                onMouseLeave={closeMenu}
-                            >
+                            {/* Products mega */}
+                            <div className="relative" onMouseEnter={() => openMenu("products")} onMouseLeave={closeMenu}>
                                 <div className="flex items-center">
-                                    <Link
-                                        href="/products"
-                                        className={cn(
-                                            "flex items-center px-4 py-2 text-sm font-medium rounded-l-lg transition-all duration-150",
-                                            pathname.startsWith("/products")
-                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
-                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
-                                        )}
-                                    >
+                                    <Link href="/products" className={cn("flex items-center px-4 py-2 text-sm font-medium rounded-l-lg transition-all duration-150", pathname.startsWith("/products") ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5")}>
                                         Products
                                     </Link>
-                                    <button
-                                        onClick={() => setActiveMenu(activeMenu === "products" ? null : "products")}
-                                        className={cn(
-                                            "flex items-center px-1.5 py-2 text-sm font-medium rounded-r-lg transition-all duration-150",
-                                            pathname.startsWith("/products")
-                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
-                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
-                                        )}
-                                    >
-                                        <ChevronDown
-                                            size={13}
-                                            className={cn("transition-transform duration-200", activeMenu === "products" ? "rotate-180" : "")}
-                                        />
+                                    <button onClick={() => setActiveMenu(activeMenu === "products" ? null : "products")} className={cn("flex items-center px-1.5 py-2 text-sm font-medium rounded-r-lg transition-all duration-150", pathname.startsWith("/products") ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5")}>
+                                        <ChevronDown size={13} className={cn("transition-transform duration-200", activeMenu === "products" && "rotate-180")} />
                                     </button>
                                 </div>
-
-                                <ProductsMegaMenu
-                                    isOpen={activeMenu === "products"}
-                                    onMouseEnter={() => openMenu("products")}
-                                    onMouseLeave={closeMenu}
-                                />
+                                <ProductsMegaMenu isOpen={activeMenu === "products"} onMouseEnter={() => openMenu("products")} onMouseLeave={closeMenu} />
                             </div>
 
-                            {/* Simple links */}
+                            {/* Blog, About, Contact */}
                             {mainNav.filter((item) => item.href !== "/talent").map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={cn(
-                                        "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150",
-                                        pathname === item.href
-                                            ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
-                                            : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
-                                    )}
-                                >
+                                <Link key={item.href} href={item.href} className={cn("px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150", pathname === item.href ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5")}>
                                     {item.label}
                                 </Link>
                             ))}
                         </nav>
 
-                        {/* Desktop Right */}
+                        {/* Desktop Right Actions */}
                         <div className="hidden lg:flex items-center gap-2 shrink-0">
+
                             <ThemeToggle />
+
+                            {/* Divider */}
+                            <div className="w-px h-5 bg-zinc-200 dark:bg-white/10 mx-1" />
+
+                            {/* Book a Meeting */}
+                            <Link href="/book-a-meeting?type=discovery">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="rounded-xl h-9 border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:border-amber-400/60 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-400/5 gap-1.5 text-xs font-semibold transition-all"
+                                >
+                                    <CalendarDays size={13} />
+                                    Book a Meeting
+                                </Button>
+                            </Link>
+
+                            {/* Signed out — Log In */}
+                            <SignedOut>
+                                <Link href="/sign-in">
+                                    <Button
+                                        size="sm"
+                                        className="rounded-xl h-9 bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-100 text-white dark:text-zinc-900 gap-1.5 text-xs font-semibold"
+                                    >
+                                        <LogIn size={13} />
+                                        Log In
+                                    </Button>
+                                </Link>
+                            </SignedOut>
+
+                            {/* Signed in — Dashboard + avatar */}
                             <SignedIn>
                                 <Link href="/dashboard">
-                                    <Button variant="ghost" size="sm" className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-9 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-xs"
+                                    >
                                         Dashboard
                                     </Button>
                                 </Link>
@@ -443,7 +383,7 @@ export function Navbar() {
                             </SignedIn>
                         </div>
 
-                        {/* Mobile Toggle */}
+                        {/* Mobile hamburger */}
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
@@ -456,113 +396,81 @@ export function Navbar() {
             </header>
 
             {/* Mobile Drawer */}
-            <div className={cn(
-                "fixed inset-0 z-40 lg:hidden transition-all duration-300",
-                isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-            )}>
+            <div className={cn("fixed inset-0 z-40 lg:hidden transition-all duration-300", isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none")}>
                 <div className="absolute inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
                 <div className={cn(
                     "absolute top-0 right-0 h-full w-80 bg-white dark:bg-zinc-950 shadow-2xl border-l border-zinc-100 dark:border-white/5 transition-transform duration-300 ease-out flex flex-col",
                     isOpen ? "translate-x-0" : "translate-x-full"
                 )}>
-                    {/* Header */}
+
+                    {/* Drawer header */}
                     <div className="flex items-center justify-between px-5 h-16 border-b border-zinc-100 dark:border-white/5 shrink-0">
-                        <Link href="/" className="flex items-center gap-2.5 group">
+                        <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2.5 group">
                             <div className="w-7 h-7 rounded-md overflow-hidden shrink-0">
-                                <Image
-                                    src="/icon.svg"
-                                    alt={siteConfig.fullName}
-                                    width={28}
-                                    height={28}
-                                    className="w-full h-full object-contain"
-                                />
+                                <Image src="/icon.svg" alt={siteConfig.fullName} width={28} height={28} className="w-full h-full object-contain" />
                             </div>
                             <div className="flex flex-col leading-none">
-                                <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">
-                                    {siteConfig.name}
-                                </span>
-                                <span className="text-[9px] font-semibold text-zinc-400 dark:text-amber-400/70 tracking-widest uppercase mt-0.5">
-                                    {siteConfig.slogan}
-                                </span>
+                                <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">{siteConfig.name}</span>
+                                <span className="text-[9px] font-semibold text-zinc-400 dark:text-amber-400/70 tracking-widest uppercase mt-0.5">{siteConfig.slogan}</span>
                             </div>
                         </Link>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                        >
+                        <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">
                             <X size={18} />
                         </button>
                     </div>
 
-                    {/* Nav */}
+                    {/* Drawer nav */}
                     <nav className="flex flex-col px-3 py-4 gap-1 flex-1 overflow-y-auto">
-                        <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest px-3 mb-2">
-                            Navigation
-                        </p>
+                        <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest px-3 mb-2">Navigation</p>
 
-                        {/* Home */}
-                        <Link
-                            href="/"
-                            className={cn(
-                                "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                                pathname === "/"
-                                    ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
-                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white"
-                            )}
-                        >
-                            Home
-                            <ChevronRight size={15} className="opacity-40" />
+                        <Link href="/" onClick={() => setIsOpen(false)} className={cn("flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all", pathname === "/" ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white")}>
+                            Home <ChevronRight size={15} className="opacity-40" />
                         </Link>
 
-                        {/* Services accordion */}
                         <MobileAccordion label="Services" items={servicesMenu} onClose={() => setIsOpen(false)} />
 
-                        {/* Talent */}
-                        <Link
-                            href="/talent"
-                            className={cn(
-                                "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                                pathname === "/talent"
-                                    ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
-                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white"
-                            )}
-                        >
-                            Talent
-                            <ChevronRight size={15} className="opacity-40" />
+                        <Link href="/talent" onClick={() => setIsOpen(false)} className={cn("flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all", pathname === "/talent" ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white")}>
+                            Talent <ChevronRight size={15} className="opacity-40" />
                         </Link>
 
-                        {/* Products accordion */}
                         <MobileAccordion label="Products" items={productsMenu} onClose={() => setIsOpen(false)} />
 
-                        {/* Blog, About, Contact */}
                         {mainNav.filter((item) => item.href !== "/talent").map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                                    pathname === item.href
-                                        ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
-                                        : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white"
-                                )}
-                            >
-                                {item.label}
-                                <ChevronRight size={15} className="opacity-40" />
+                            <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={cn("flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all", pathname === item.href ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white")}>
+                                {item.label} <ChevronRight size={15} className="opacity-40" />
                             </Link>
                         ))}
                     </nav>
 
-                    {/* Footer */}
+                    {/* Drawer footer */}
                     <div className="px-4 py-5 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-3 shrink-0">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">
-                                Appearance
-                            </span>
+
+                        {/* Book a meeting CTA — always visible */}
+                        <Link href="/book-a-meeting?type=discovery" onClick={() => setIsOpen(false)}>
+                            <Button className="w-full rounded-xl h-11 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold gap-2">
+                                <CalendarDays size={15} />
+                                Book a Discovery Call
+                            </Button>
+                        </Link>
+
+                        <div className="flex items-center justify-between px-1">
+                            <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">Appearance</span>
                             <ThemeToggle />
                         </div>
+
+                        {/* Auth */}
+                        <SignedOut>
+                            <Link href="/sign-in" onClick={() => setIsOpen(false)}>
+                                <Button variant="outline" className="w-full rounded-xl h-11 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 gap-2 font-semibold">
+                                    <LogIn size={15} />
+                                    Log In to Client Portal
+                                </Button>
+                            </Link>
+                        </SignedOut>
+
                         <SignedIn>
-                            <Link href="/dashboard" className="w-full">
+                            <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                                 <Button variant="outline" className="w-full rounded-xl border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300">
                                     Dashboard
                                 </Button>
