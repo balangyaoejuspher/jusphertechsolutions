@@ -52,6 +52,17 @@ export const serviceStatusEnum = pgEnum("service_status", [
   "inactive",
 ])
 
+export const clientTypeEnum = pgEnum("client_type", [
+  "company",
+  "individual",
+])
+
+export const clientStatusEnum = pgEnum("client_status", [
+  "active",
+  "prospect",
+  "inactive",
+])
+
 // ============================================================
 // ADMINS
 // ============================================================
@@ -123,6 +134,42 @@ export const inquiries = pgTable("inquiries", {
 })
 
 // ============================================================
+// CLIENTS
+// ============================================================
+
+export const clients = pgTable("clients", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  // Nullable — only set once the client registers via Clerk
+  clerkUserId: text("clerk_user_id").unique(),
+
+  // Identity
+  type: clientTypeEnum("type").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  phone: text("phone"),
+  website: text("website"),
+  location: text("location"),
+
+  // Individual-specific (null when type = "company")
+  company: text("company"),
+  position: text("position"),
+
+  // Status
+  status: clientStatusEnum("status").default("prospect").notNull(),
+
+  // Services subscribed to — stored as string tags matching your service labels
+  services: text("services").array().default([]).notNull(),
+
+  // Internal admin notes
+  notes: text("notes"),
+
+  // Timestamps
+  joinedDate: timestamp("joined_date").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+// ============================================================
 // SITE SETTINGS
 // ============================================================
 
@@ -157,6 +204,10 @@ export const inquiriesRelations = relations(inquiries, ({ one }) => ({
   }),
 }))
 
+export const clientsRelations = relations(clients, ({ many }) => ({
+  inquiries: many(inquiries),
+}))
+
 // ============================================================
 // TYPES
 // ============================================================
@@ -174,3 +225,7 @@ export type Inquiry = typeof inquiries.$inferSelect
 export type NewInquiry = typeof inquiries.$inferInsert
 
 export type SiteSetting = typeof siteSettings.$inferSelect
+export type NewSiteSetting = typeof siteSettings.$inferInsert
+
+export type ClientRow = typeof clients.$inferSelect
+export type NewClientRow = typeof clients.$inferInsert

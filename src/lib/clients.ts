@@ -1,21 +1,4 @@
-export type ClientType = "company" | "individual"
-export type ClientStatus = "active" | "inactive" | "prospect"
-
-export type Client = {
-    id: string
-    type: ClientType
-    name: string
-    email: string
-    phone?: string
-    website?: string
-    location?: string
-    company?: string      // for individual — which company they belong to
-    position?: string     // for individual
-    status: ClientStatus
-    services: string[]
-    notes?: string
-    joinedDate: string
-}
+import { Client } from "@/types/client";
 
 export const seedClients: Client[] = [
     {

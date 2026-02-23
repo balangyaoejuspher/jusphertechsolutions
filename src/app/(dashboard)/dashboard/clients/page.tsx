@@ -7,8 +7,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Client, ClientStatus, ClientType, seedClients } from "@/lib/clients"
+import { seedClients } from "@/lib/clients"
 import { cn } from "@/lib/utils"
+import { ClientStatus, Client, ClientType } from "@/types"
 import {
     Building2,
     Check,

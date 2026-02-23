@@ -219,6 +219,37 @@ function MobileAccordion({ label, items, onClose }: {
 }
 
 // ============================================================
+// DASHBOARD LINK (shows "Admin" or "My Portal" based on role)
+// ============================================================
+
+function DashboardLink() {
+    const [href, setHref] = useState<string | null>(null)
+
+    useEffect(() => {
+        fetch("/api/me")
+            .then((r) => r.json())
+            .then((data) => {
+                if (data.role === "admin") setHref("/dashboard")
+                if (data.role === "client") setHref("/portal")
+            })
+    }, [])
+
+    if (!href) return null
+
+    return (
+        <Link href={href}>
+            <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-xs"
+            >
+                {href === "/dashboard" ? "Admin" : "My Portal"}
+            </Button>
+        </Link>
+    )
+}
+
+// ============================================================
 // MAIN NAVBAR
 // ============================================================
 
@@ -370,16 +401,8 @@ export function Navbar() {
 
                             {/* Signed in — Dashboard + avatar */}
                             <SignedIn>
-                                <Link href="/dashboard">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-9 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-xs"
-                                    >
-                                        Dashboard
-                                    </Button>
-                                </Link>
-                                <UserButton afterSignOutUrl="/" />
+                                <DashboardLink />
+                                <UserButton />
                             </SignedIn>
                         </div>
 
