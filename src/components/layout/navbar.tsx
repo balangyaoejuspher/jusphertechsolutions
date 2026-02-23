@@ -1,19 +1,236 @@
 "use client"
 
+import { ThemeToggle } from "@/components/shared/theme-toggle"
+import { Button } from "@/components/ui/button"
+import { mainNav, servicesMenu, productsMenu } from "@/config/navigation"
+import { siteConfig } from "@/config/site"
+import { cn } from "@/lib/utils"
+import { SignedIn, UserButton } from "@clerk/nextjs"
+import Image from "next/image"
+import {
+    Blocks,
+    ChevronDown,
+    ChevronRight,
+    Menu, X
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { SignedIn, UserButton } from "@clerk/nextjs"
-import { siteConfig } from "@/config/site"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
-import { Menu, X, ChevronRight } from "lucide-react"
-import { ThemeToggle } from "@/components/shared/theme-toggle"
+import { useEffect, useRef, useState } from "react"
+
+// ============================================================
+// DESKTOP MEGA MENU
+// ============================================================
+
+function MegaMenu({
+    items,
+    isOpen,
+    onMouseEnter,
+    onMouseLeave,
+}: {
+    items: typeof servicesMenu
+    isOpen: boolean
+    onMouseEnter: () => void
+    onMouseLeave: () => void
+}) {
+    return (
+        <div className={cn(
+            "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[680px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/40 overflow-hidden transition-all duration-200 z-50",
+            isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+        )}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}>
+            <div className="h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+            <div className="p-5 grid grid-cols-2 gap-6">
+                {items.map((group) => (
+                    <div key={group.category}>
+                        <p className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-3 px-2">
+                            {group.category}
+                        </p>
+                        <div className="flex flex-col gap-0.5">
+                            {group.items.map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-zinc-50 dark:hover:bg-white/5 transition-all duration-150"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 group-hover:bg-amber-50 dark:group-hover:bg-amber-400/10 transition-colors">
+                                        <item.icon size={15} className="text-zinc-500 dark:text-zinc-400 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-900 dark:group-hover:text-white leading-tight">
+                                            {item.label}
+                                        </p>
+                                        <p className="text-xs text-zinc-400 dark:text-zinc-600 leading-tight mt-0.5">
+                                            {item.desc}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="px-5 py-3 bg-zinc-50 dark:bg-white/5 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+                <p className="text-xs text-zinc-400 dark:text-zinc-600">Can't find what you need?</p>
+                <Link href="/contact" className="text-xs font-semibold text-amber-500 dark:text-amber-400 hover:text-amber-600 transition-colors flex items-center gap-1">
+                    Contact us <ChevronRight size={12} />
+                </Link>
+            </div>
+        </div>
+    )
+}
+
+// ============================================================
+// PRODUCTS MEGA MENU
+// ============================================================
+
+function ProductsMegaMenu({
+    isOpen,
+    onMouseEnter,
+    onMouseLeave,
+}: {
+    isOpen: boolean
+    onMouseEnter: () => void
+    onMouseLeave: () => void
+}) {
+    return (
+        <div className={cn(
+            "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[560px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/40 overflow-hidden transition-all duration-200 z-50",
+            isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+        )}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}>
+            <div className="h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+            <div className="p-5 grid grid-cols-2 gap-4">
+                {/* Left — product list */}
+                <div>
+                    <p className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-3 px-2">
+                        Software Products
+                    </p>
+                    <div className="flex flex-col gap-0.5">
+                        {productsMenu[0].items.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-zinc-50 dark:hover:bg-white/5 transition-all duration-150"
+                            >
+                                <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 group-hover:bg-amber-50 dark:group-hover:bg-amber-400/10 transition-colors">
+                                    <item.icon size={15} className="text-zinc-500 dark:text-zinc-400 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-900 dark:group-hover:text-white leading-tight">
+                                        {item.label}
+                                    </p>
+                                    <p className="text-xs text-zinc-400 dark:text-zinc-600 leading-tight mt-0.5">
+                                        {item.desc}
+                                    </p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Right — featured blockchain + view all */}
+                <div className="flex flex-col gap-3">
+                    <p className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-1 px-2">
+                        Featured
+                    </p>
+                    <Link
+                        href="/services/blockchain"
+                        className="group relative p-4 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-800 dark:to-zinc-900 border border-white/10 hover:border-amber-400/30 transition-all overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+                        <div className="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center mb-3">
+                            <Blocks size={17} className="text-amber-400" />
+                        </div>
+                        <p className="text-sm font-bold text-white mb-1">Blockchain & Web3</p>
+                        <p className="text-xs text-zinc-400 leading-relaxed">
+                            Certified Web3 developer. Smart contracts, DeFi, NFT platforms & more.
+                        </p>
+                        <div className="mt-3 flex items-center gap-1 text-amber-400 text-xs font-semibold">
+                            Learn more <ChevronRight size={12} />
+                        </div>
+                    </Link>
+                    <Link
+                        href="/products"
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:border-amber-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all"
+                    >
+                        View all products <ChevronRight size={14} />
+                    </Link>
+                </div>
+            </div>
+            <div className="px-5 py-3 bg-zinc-50 dark:bg-white/5 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+                <p className="text-xs text-zinc-400 dark:text-zinc-600">Need a custom solution?</p>
+                <Link href="/contact" className="text-xs font-semibold text-amber-500 dark:text-amber-400 hover:text-amber-600 transition-colors flex items-center gap-1">
+                    Talk to us <ChevronRight size={12} />
+                </Link>
+            </div>
+        </div>
+    )
+}
+
+// ============================================================
+// MOBILE ACCORDION
+// ============================================================
+
+function MobileAccordion({ label, items }: { label: string; items: typeof servicesMenu; onClose: () => void }) {
+    const [open, setOpen] = useState(false)
+    return (
+        <div>
+            <button
+                onClick={() => setOpen(!open)}
+                className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white transition-all"
+            >
+                {label}
+                <ChevronDown size={15} className={cn("opacity-40 transition-transform duration-200", open ? "rotate-180" : "")} />
+            </button>
+            {open && (
+                <div className="ml-3 mt-1 flex flex-col gap-0.5 pb-1">
+                    {items.map((group) => (
+                        <div key={group.category}>
+                            <p className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest px-4 py-2">
+                                {group.category}
+                            </p>
+                            {group.items.map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white transition-all"
+                                >
+                                    <item.icon size={14} className="shrink-0 text-zinc-400" />
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
+// ============================================================
+// MAIN NAVBAR
+// ============================================================
 
 export function Navbar() {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
+    const [activeMenu, setActiveMenu] = useState<string | null>(null)
+    const navRef = useRef<HTMLDivElement>(null)
+    const closeTimer = useRef<NodeJS.Timeout | null>(null)
+
+    const openMenu = (name: string) => {
+        if (closeTimer.current) clearTimeout(closeTimer.current)
+        setActiveMenu(name)
+    }
+
+    const closeMenu = () => {
+        closeTimer.current = setTimeout(() => {
+            setActiveMenu(null)
+        }, 100)
+    }
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 12)
@@ -23,6 +240,7 @@ export function Navbar() {
 
     useEffect(() => {
         setIsOpen(false)
+        setActiveMenu(null)
     }, [pathname])
 
     useEffect(() => {
@@ -30,9 +248,26 @@ export function Navbar() {
         return () => { document.body.style.overflow = "" }
     }, [isOpen])
 
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (navRef.current && !navRef.current.contains(e.target as Node)) {
+                setActiveMenu(null)
+            }
+        }
+        document.addEventListener("mousedown", handleClick)
+        return () => document.removeEventListener("mousedown", handleClick)
+    }, [])
+
+    useEffect(() => {
+        return () => {
+            if (closeTimer.current) clearTimeout(closeTimer.current)
+        }
+    }, [])
+
     return (
         <>
             <header
+                ref={navRef}
                 className={cn(
                     "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
                     scrolled
@@ -44,18 +279,142 @@ export function Navbar() {
                     <div className="flex h-16 items-center justify-between">
 
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-2.5 group">
-                            <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-amber-400 flex items-center justify-center transition-transform group-hover:scale-105">
-                                <span className="text-white dark:text-zinc-950 text-sm font-black">PA</span>
+                        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+                            {/* Icon */}
+                            <div className="w-8 h-8 rounded-lg overflow-hidden transition-transform group-hover:scale-105 shrink-0">
+                                <Image
+                                    src="/icon.svg"
+                                    alt={siteConfig.fullName}
+                                    width={32}
+                                    height={32}
+                                    className="w-full h-full object-contain"
+                                />
                             </div>
-                            <span className="font-bold text-zinc-900 dark:text-white tracking-tight hidden sm:block">
-                                {siteConfig.name}
-                            </span>
+
+                            <div className="hidden sm:flex flex-col leading-none">
+                                <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">
+                                    {siteConfig.name.toUpperCase()}
+                                </span>
+                                <span className="text-[10px] font-semibold text-zinc-400 dark:text-amber-400/70 tracking-widest uppercase mt-0.5">
+                                    {siteConfig.slogan}
+                                </span>
+                            </div>
                         </Link>
 
                         {/* Desktop Nav */}
-                        <nav className="hidden md:flex items-center gap-1">
-                            {siteConfig.nav.map((item) => (
+                        <nav className="hidden lg:flex items-center gap-0.5">
+                            <Link
+                                href="/"
+                                className={cn(
+                                    "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150",
+                                    pathname === "/"
+                                        ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
+                                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
+                                )}
+                            >
+                                Home
+                            </Link>
+
+                            {/* Services mega menu */}
+                            <div
+                                className="relative"
+                                onMouseEnter={() => openMenu("services")}
+                                onMouseLeave={closeMenu}
+                            >
+                                <div className="flex items-center">
+                                    {/* Clicking "Services" text navigates to /services */}
+                                    <Link
+                                        href="/services"
+                                        className={cn(
+                                            "flex items-center px-4 py-2 text-sm font-medium rounded-l-lg transition-all duration-150",
+                                            pathname.startsWith("/services")
+                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
+                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
+                                        )}
+                                    >
+                                        Services
+                                    </Link>
+
+                                    {/* Chevron toggles the mega menu */}
+                                    <button
+                                        onClick={() => setActiveMenu(activeMenu === "services" ? null : "services")}
+                                        className={cn(
+                                            "flex items-center px-1.5 py-2 text-sm font-medium rounded-r-lg transition-all duration-150",
+                                            pathname.startsWith("/services")
+                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
+                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
+                                        )}
+                                    >
+                                        <ChevronDown
+                                            size={13}
+                                            className={cn("transition-transform duration-200", activeMenu === "services" ? "rotate-180" : "")}
+                                        />
+                                    </button>
+                                </div>
+
+                                <MegaMenu
+                                    items={servicesMenu}
+                                    isOpen={activeMenu === "services"}
+                                    onMouseEnter={() => openMenu("services")}
+                                    onMouseLeave={closeMenu}
+                                />
+                            </div>
+
+                            <Link
+                                href="/talent"
+                                className={cn(
+                                    "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150",
+                                    pathname === "/talent"
+                                        ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
+                                        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
+                                )}
+                            >
+                                Talent
+                            </Link>
+
+                            {/* Products mega menu */}
+                            <div
+                                className="relative"
+                                onMouseEnter={() => openMenu("products")}
+                                onMouseLeave={closeMenu}
+                            >
+                                <div className="flex items-center">
+                                    <Link
+                                        href="/products"
+                                        className={cn(
+                                            "flex items-center px-4 py-2 text-sm font-medium rounded-l-lg transition-all duration-150",
+                                            pathname.startsWith("/products")
+                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
+                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
+                                        )}
+                                    >
+                                        Products
+                                    </Link>
+                                    <button
+                                        onClick={() => setActiveMenu(activeMenu === "products" ? null : "products")}
+                                        className={cn(
+                                            "flex items-center px-1.5 py-2 text-sm font-medium rounded-r-lg transition-all duration-150",
+                                            pathname.startsWith("/products")
+                                                ? "text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10"
+                                                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
+                                        )}
+                                    >
+                                        <ChevronDown
+                                            size={13}
+                                            className={cn("transition-transform duration-200", activeMenu === "products" ? "rotate-180" : "")}
+                                        />
+                                    </button>
+                                </div>
+
+                                <ProductsMegaMenu
+                                    isOpen={activeMenu === "products"}
+                                    onMouseEnter={() => openMenu("products")}
+                                    onMouseLeave={closeMenu}
+                                />
+                            </div>
+
+                            {/* Simple links */}
+                            {mainNav.filter((item) => item.href !== "/talent").map((item) => (
                                 <Link
                                     key={item.href}
                                     href={item.href}
@@ -72,15 +431,11 @@ export function Navbar() {
                         </nav>
 
                         {/* Desktop Right */}
-                        <div className="hidden md:flex items-center gap-2">
+                        <div className="hidden lg:flex items-center gap-2 shrink-0">
                             <ThemeToggle />
                             <SignedIn>
                                 <Link href="/dashboard">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg"
-                                    >
+                                    <Button variant="ghost" size="sm" className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg">
                                         Dashboard
                                     </Button>
                                 </Link>
@@ -91,43 +446,46 @@ export function Navbar() {
                         {/* Mobile Toggle */}
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                             aria-label="Toggle menu"
                         >
                             {isOpen ? <X size={20} /> : <Menu size={20} />}
                         </button>
-
                     </div>
                 </div>
             </header>
 
-            {/* Mobile Drawer Overlay */}
-            <div
-                className={cn(
-                    "fixed inset-0 z-40 md:hidden transition-all duration-300",
-                    isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                )}
-            >
-                <div
-                    className="absolute inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm"
-                    onClick={() => setIsOpen(false)}
-                />
+            {/* Mobile Drawer */}
+            <div className={cn(
+                "fixed inset-0 z-40 lg:hidden transition-all duration-300",
+                isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            )}>
+                <div className="absolute inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
-                <div
-                    className={cn(
-                        "absolute top-0 right-0 h-full w-72 bg-white dark:bg-zinc-950 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 border-l border-zinc-100 dark:border-white/5 transition-transform duration-300 ease-out flex flex-col",
-                        isOpen ? "translate-x-0" : "translate-x-full"
-                    )}
-                >
-                    {/* Drawer Header */}
-                    <div className="flex items-center justify-between px-5 h-16 border-b border-zinc-100 dark:border-white/5">
-                        <Link href="/" className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-md bg-zinc-900 dark:bg-amber-400 flex items-center justify-center">
-                                <span className="text-white dark:text-zinc-950 text-xs font-black">PA</span>
+                <div className={cn(
+                    "absolute top-0 right-0 h-full w-80 bg-white dark:bg-zinc-950 shadow-2xl border-l border-zinc-100 dark:border-white/5 transition-transform duration-300 ease-out flex flex-col",
+                    isOpen ? "translate-x-0" : "translate-x-full"
+                )}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 h-16 border-b border-zinc-100 dark:border-white/5 shrink-0">
+                        <Link href="/" className="flex items-center gap-2.5 group">
+                            <div className="w-7 h-7 rounded-md overflow-hidden shrink-0">
+                                <Image
+                                    src="/icon.svg"
+                                    alt={siteConfig.fullName}
+                                    width={28}
+                                    height={28}
+                                    className="w-full h-full object-contain"
+                                />
                             </div>
-                            <span className="font-bold text-zinc-900 dark:text-white text-sm">
-                                {siteConfig.name}
-                            </span>
+                            <div className="flex flex-col leading-none">
+                                <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">
+                                    {siteConfig.name}
+                                </span>
+                                <span className="text-[9px] font-semibold text-zinc-400 dark:text-amber-400/70 tracking-widest uppercase mt-0.5">
+                                    {siteConfig.slogan}
+                                </span>
+                            </div>
                         </Link>
                         <button
                             onClick={() => setIsOpen(false)}
@@ -137,36 +495,66 @@ export function Navbar() {
                         </button>
                     </div>
 
-                    {/* Nav Links */}
-                    <nav className="flex flex-col px-3 py-4 gap-1 flex-1">
+                    {/* Nav */}
+                    <nav className="flex flex-col px-3 py-4 gap-1 flex-1 overflow-y-auto">
                         <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest px-3 mb-2">
                             Navigation
                         </p>
-                        {siteConfig.nav.map((item) => (
+
+                        {/* Home */}
+                        <Link
+                            href="/"
+                            className={cn(
+                                "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                                pathname === "/"
+                                    ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
+                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white"
+                            )}
+                        >
+                            Home
+                            <ChevronRight size={15} className="opacity-40" />
+                        </Link>
+
+                        {/* Services accordion */}
+                        <MobileAccordion label="Services" items={servicesMenu} onClose={() => setIsOpen(false)} />
+
+                        {/* Talent */}
+                        <Link
+                            href="/talent"
+                            className={cn(
+                                "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                                pathname === "/talent"
+                                    ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
+                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white"
+                            )}
+                        >
+                            Talent
+                            <ChevronRight size={15} className="opacity-40" />
+                        </Link>
+
+                        {/* Products accordion */}
+                        <MobileAccordion label="Products" items={productsMenu} onClose={() => setIsOpen(false)} />
+
+                        {/* Blog, About, Contact */}
+                        {mainNav.filter((item) => item.href !== "/talent").map((item) => (
                             <Link
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150",
+                                    "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
                                     pathname === item.href
                                         ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
                                         : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white"
                                 )}
                             >
                                 {item.label}
-                                <ChevronRight
-                                    size={15}
-                                    className={cn(
-                                        "opacity-40",
-                                        pathname === item.href ? "opacity-60" : ""
-                                    )}
-                                />
+                                <ChevronRight size={15} className="opacity-40" />
                             </Link>
                         ))}
                     </nav>
 
-                    {/* Mobile Footer */}
-                    <div className="px-4 py-5 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-3">
+                    {/* Footer */}
+                    <div className="px-4 py-5 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-3 shrink-0">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">
                                 Appearance
@@ -175,15 +563,12 @@ export function Navbar() {
                         </div>
                         <SignedIn>
                             <Link href="/dashboard" className="w-full">
-                                <Button
-                                    variant="outline"
-                                    className="w-full rounded-xl border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300"
-                                >
+                                <Button variant="outline" className="w-full rounded-xl border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300">
                                     Dashboard
                                 </Button>
                             </Link>
                             <div className="flex items-center gap-3 px-1">
-                                <UserButton />
+                                <UserButton afterSignOutUrl="/" />
                                 <span className="text-sm text-zinc-500 dark:text-zinc-400">My Account</span>
                             </div>
                         </SignedIn>

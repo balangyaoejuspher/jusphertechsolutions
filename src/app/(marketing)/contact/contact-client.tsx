@@ -37,7 +37,7 @@ const contactInfo = [
     {
         icon: Mail,
         label: "Email Us",
-        value: "hello@portfolioagency.com",
+        value: "support@jusphertechsolution.com",
         sub: "We reply within 24 hours",
     },
     {

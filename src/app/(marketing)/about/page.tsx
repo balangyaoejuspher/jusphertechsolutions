@@ -32,8 +32,8 @@ const values = [
 
 const team = [
   {
-    name: "Rafael Cruz",
-    role: "Founder & CEO",
+    name: "Juspher Balangyao",
+    role: "Founder, CEO",
     bio: "10+ years in talent acquisition and tech startups. Built this agency to solve the hiring problem he kept running into.",
     gradient: "from-amber-500 to-orange-400",
   },
@@ -75,8 +75,8 @@ export default function AboutPage() {
 
       {/* Hero */}
       <section className="relative pt-24 pb-20 md:pt-32 md:pb-28 overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:48px_48px]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white dark:to-zinc-950" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:48px_48px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white dark:to-zinc-950" />
 
         <div className="container relative mx-auto px-6 md:px-12 text-center">
           <p className="text-amber-500 dark:text-amber-400 text-xs font-semibold tracking-[0.2em] uppercase mb-5">

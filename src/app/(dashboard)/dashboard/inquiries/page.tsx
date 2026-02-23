@@ -106,9 +106,7 @@ export default function DashboardInquiriesPage() {
     const updateStatus = (id: string, status: string) => {
         setInquiries(inquiries.map((i) => (i.id === id ? { ...i, status } : i)))
         setStatusDropdown(null)
-        if (selected?.id === id) {
-            setSelected({ ...selected, status })
-        }
+        if (selected?.id === id) setSelected({ ...selected, status })
     }
 
     const deleteInquiry = (id: string) => {
@@ -117,11 +115,7 @@ export default function DashboardInquiriesPage() {
     }
 
     const formatDate = (date: string) =>
-        new Date(date).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        })
+        new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 
     const counts = {
         all: inquiries.length,
@@ -132,10 +126,11 @@ export default function DashboardInquiriesPage() {
 
     return (
         <div className="p-8 md:p-10 h-full">
+
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-zinc-900 mb-1">Inquiries</h1>
-                <p className="text-zinc-500 text-sm">{inquiries.length} total client inquiries</p>
+                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">Inquiries</h1>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm">{inquiries.length} total client inquiries</p>
             </div>
 
             {/* Status Tabs */}
@@ -147,16 +142,16 @@ export default function DashboardInquiriesPage() {
                         className={cn(
                             "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
                             filterStatus === s.value
-                                ? "bg-zinc-900 text-white"
-                                : "bg-white border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300"
+                                ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
+                                : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20"
                         )}
                     >
                         {s.label}
                         <span className={cn(
                             "text-xs px-1.5 py-0.5 rounded-md font-semibold",
                             filterStatus === s.value
-                                ? "bg-white/20 text-white"
-                                : "bg-zinc-100 text-zinc-500"
+                                ? "bg-white/20 text-white dark:text-zinc-950"
+                                : "bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400"
                         )}>
                             {counts[s.value as keyof typeof counts]}
                         </span>
@@ -172,7 +167,7 @@ export default function DashboardInquiriesPage() {
                     placeholder="Search by name, company or email..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 text-sm text-zinc-900 bg-white placeholder:text-zinc-300 outline-none focus:border-amber-400 transition-all"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-900 dark:text-white bg-white dark:bg-zinc-900 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none focus:border-amber-400 dark:focus:border-amber-400 transition-all"
                 />
             </div>
 
@@ -185,7 +180,7 @@ export default function DashboardInquiriesPage() {
                     selected ? "w-full lg:w-2/5" : "w-full"
                 )}>
                     {filtered.length === 0 ? (
-                        <div className="text-center py-16 text-zinc-400 text-sm bg-white border border-zinc-100 rounded-2xl">
+                        <div className="text-center py-16 text-zinc-400 dark:text-zinc-600 text-sm bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl">
                             No inquiries found.
                         </div>
                     ) : (
@@ -194,16 +189,16 @@ export default function DashboardInquiriesPage() {
                                 key={inquiry.id}
                                 onClick={() => setSelected(inquiry)}
                                 className={cn(
-                                    "bg-white border rounded-2xl p-5 cursor-pointer transition-all duration-150 hover:shadow-sm",
+                                    "bg-white dark:bg-zinc-900 border rounded-2xl p-5 cursor-pointer transition-all duration-150 hover:shadow-sm",
                                     selected?.id === inquiry.id
-                                        ? "border-amber-400 shadow-sm shadow-amber-100"
-                                        : "border-zinc-100 hover:border-zinc-200"
+                                        ? "border-amber-400 shadow-sm shadow-amber-100 dark:shadow-amber-500/10"
+                                        : "border-zinc-100 dark:border-white/5 hover:border-zinc-200 dark:hover:border-white/10"
                                 )}
                             >
                                 <div className="flex items-start justify-between gap-3 mb-3">
                                     <div className="min-w-0">
-                                        <p className="font-semibold text-zinc-900 text-sm truncate">{inquiry.name}</p>
-                                        <p className="text-zinc-400 text-xs truncate">{inquiry.company}</p>
+                                        <p className="font-semibold text-zinc-900 dark:text-white text-sm truncate">{inquiry.name}</p>
+                                        <p className="text-zinc-400 dark:text-zinc-500 text-xs truncate">{inquiry.company}</p>
                                     </div>
                                     <span className={cn(
                                         "px-2.5 py-1 rounded-lg text-xs font-medium shrink-0",
@@ -212,10 +207,10 @@ export default function DashboardInquiriesPage() {
                                         {statusLabels[inquiry.status]}
                                     </span>
                                 </div>
-                                <p className="text-zinc-500 text-xs leading-relaxed line-clamp-2 mb-3">
+                                <p className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed line-clamp-2 mb-3">
                                     {inquiry.message}
                                 </p>
-                                <div className="flex items-center gap-1.5 text-zinc-300 text-xs">
+                                <div className="flex items-center gap-1.5 text-zinc-300 dark:text-zinc-600 text-xs">
                                     <Calendar size={11} />
                                     {formatDate(inquiry.date)}
                                 </div>
@@ -226,15 +221,16 @@ export default function DashboardInquiriesPage() {
 
                 {/* Detail Panel */}
                 {selected && (
-                    <div className="hidden lg:flex flex-col flex-1 bg-white border border-zinc-100 rounded-2xl overflow-hidden">
+                    <div className="hidden lg:flex flex-col flex-1 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl overflow-hidden">
+
                         {/* Panel Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-                            <h3 className="font-bold text-zinc-900">Inquiry Details</h3>
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-white/5">
+                            <h3 className="font-bold text-zinc-900 dark:text-white">Inquiry Details</h3>
                             <Button
                                 onClick={() => setSelected(null)}
                                 variant="ghost"
                                 size="icon"
-                                className="w-8 h-8 rounded-lg text-zinc-400 hover:bg-zinc-100 transition-colors"
+                                className="w-8 h-8 rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                             >
                                 <X size={16} />
                             </Button>
@@ -242,6 +238,7 @@ export default function DashboardInquiriesPage() {
 
                         {/* Panel Content */}
                         <div className="flex-1 overflow-y-auto p-6">
+
                             {/* Contact Info */}
                             <div className="flex flex-col gap-3 mb-6">
                                 <div className="flex items-center gap-3">
@@ -249,28 +246,25 @@ export default function DashboardInquiriesPage() {
                                         {selected.name.charAt(0)}
                                     </div>
                                     <div>
-                                        <p className="font-bold text-zinc-900">{selected.name}</p>
-                                        <p className="text-zinc-400 text-xs">{selected.company}</p>
+                                        <p className="font-bold text-zinc-900 dark:text-white">{selected.name}</p>
+                                        <p className="text-zinc-400 dark:text-zinc-500 text-xs">{selected.company}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-2 bg-zinc-50 rounded-2xl p-4">
+                                <div className="flex flex-col gap-2 bg-zinc-50 dark:bg-white/5 rounded-2xl p-4">
                                     <div className="flex items-center gap-2.5 text-sm">
                                         <Mail size={14} className="text-zinc-400 shrink-0" />
-                                        <a
-                                            href={`mailto:${selected.email}`}
-                                            className="text-amber-500 hover:underline truncate"
-                                        >
+                                        <a href={`mailto:${selected.email}`} className="text-amber-500 hover:underline truncate">
                                             {selected.email}
                                         </a>
                                     </div>
                                     <div className="flex items-center gap-2.5 text-sm">
                                         <Building2 size={14} className="text-zinc-400 shrink-0" />
-                                        <span className="text-zinc-600">{selected.company}</span>
+                                        <span className="text-zinc-600 dark:text-zinc-400">{selected.company}</span>
                                     </div>
                                     <div className="flex items-center gap-2.5 text-sm">
                                         <Calendar size={14} className="text-zinc-400 shrink-0" />
-                                        <span className="text-zinc-600">{formatDate(selected.date)}</span>
+                                        <span className="text-zinc-600 dark:text-zinc-400">{formatDate(selected.date)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -279,45 +273,35 @@ export default function DashboardInquiriesPage() {
                             <div className="mb-6">
                                 <div className="flex items-center gap-2 mb-3">
                                     <MessageSquare size={14} className="text-zinc-400" />
-                                    <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">
-                                        Message
-                                    </p>
+                                    <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Message</p>
                                 </div>
-                                <p className="text-zinc-600 text-sm leading-relaxed bg-zinc-50 rounded-2xl p-4">
+                                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed bg-zinc-50 dark:bg-white/5 rounded-2xl p-4">
                                     {selected.message}
                                 </p>
                             </div>
 
                             {/* Status */}
                             <div className="mb-6">
-                                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">
-                                    Status
-                                </p>
+                                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">Status</p>
                                 <div className="relative">
                                     <Button
                                         onClick={() => setStatusDropdown(statusDropdown === selected.id ? null : selected.id)}
-                                        className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-700 hover:border-zinc-300 transition-all"
+                                        className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-white/20 transition-all"
                                     >
-                                        <span className={cn(
-                                            "px-2.5 py-1 rounded-lg text-xs font-medium",
-                                            statusStyles[selected.status]
-                                        )}>
+                                        <span className={cn("px-2.5 py-1 rounded-lg text-xs font-medium", statusStyles[selected.status])}>
                                             {statusLabels[selected.status]}
                                         </span>
                                         <ChevronDown size={15} className="text-zinc-400" />
                                     </Button>
                                     {statusDropdown === selected.id && (
-                                        <div className="absolute top-12 left-0 right-0 bg-white border border-zinc-200 rounded-xl shadow-lg py-1 z-10">
+                                        <div className="absolute top-12 left-0 right-0 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg py-1 z-10">
                                             {["new", "in_progress", "resolved"].map((s) => (
                                                 <Button
                                                     key={s}
                                                     onClick={() => updateStatus(selected.id, s)}
-                                                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-50 flex items-center gap-2"
+                                                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-white/5 flex items-center gap-2"
                                                 >
-                                                    <span className={cn(
-                                                        "px-2.5 py-1 rounded-lg text-xs font-medium",
-                                                        statusStyles[s]
-                                                    )}>
+                                                    <span className={cn("px-2.5 py-1 rounded-lg text-xs font-medium", statusStyles[s])}>
                                                         {statusLabels[s]}
                                                     </span>
                                                 </Button>
@@ -338,7 +322,7 @@ export default function DashboardInquiriesPage() {
                                 </a>
                                 <Button
                                     onClick={() => deleteInquiry(selected.id)}
-                                    className="flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-200 text-red-500 hover:bg-red-50 hover:border-red-200 font-medium text-sm transition-all"
+                                    className="flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-200 dark:border-white/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/20 font-medium text-sm transition-all"
                                 >
                                     <X size={15} />
                                     Delete Inquiry

@@ -5,10 +5,10 @@ import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 import { getAdminSession } from "@/lib/admin-auth"
 
 export const metadata: Metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
+    robots: {
+        index: false,
+        follow: false,
+    },
 }
 
 export default async function DashboardLayout({
@@ -31,7 +31,7 @@ export default async function DashboardLayout({
     return (
         <div className="flex min-h-screen">
             <DashboardSidebar admin={admin} />
-            <main className="flex-1 bg-zinc-50 overflow-auto">
+            <main className="flex-1 overflow-auto">
                 {children}
             </main>
         </div>

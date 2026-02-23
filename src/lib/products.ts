@@ -1,0 +1,202 @@
+import { Building2, CreditCard, Package, GraduationCap, ShoppingCart, Briefcase, type LucideIcon } from "lucide-react"
+
+export type ProductFeature = {
+    title: string
+    description: string
+}
+
+export type ProductPricing = {
+    label: string
+    price: string
+    note?: string
+    highlight?: boolean
+    features: string[]
+}
+
+export type Product = {
+    slug: string
+    label: string
+    tagline: string
+    description: string
+    icon: LucideIcon
+    accentColor: string
+    bgColor: string
+    borderColor: string
+    textColor: string
+    category: string
+    features: ProductFeature[]
+    pricing: ProductPricing[]
+    useCases: string[]
+    techHighlights: string[]
+}
+
+export const allProducts: Product[] = [
+    {
+        slug: "hris",
+        label: "HRIS",
+        tagline: "HR & Payroll, Finally Done Right",
+        description:
+            "A complete Human Resource Information System built for Philippine businesses. Manage employees, automate payroll, track attendance, handle leave requests, and stay compliant — all in one platform.",
+        icon: Building2,
+        accentColor: "amber",
+        bgColor: "bg-amber-50 dark:bg-amber-500/10",
+        borderColor: "border-amber-200 dark:border-amber-500/20",
+        textColor: "text-amber-600 dark:text-amber-400",
+        category: "Business Software",
+        features: [
+            { title: "Automated Payroll", description: "Compute salaries, deductions, SSS, PhilHealth, and Pag-IBIG contributions automatically every cutoff." },
+            { title: "Attendance & Timekeeping", description: "Track employee hours via biometric sync, manual entry, or mobile clock-in. No more spreadsheet reconciliation." },
+            { title: "Leave Management", description: "Employees file leaves online, managers approve in one click. Balances update in real time." },
+            { title: "Employee Records", description: "Centralized 201 files, employment history, documents, and performance data in a secure, searchable database." },
+            { title: "Payslip Generation", description: "Auto-generate digital payslips per employee per cutoff. Employees access their own portal anytime." },
+            { title: "Compliance Reports", description: "Generate BIR, SSS, PhilHealth, and Pag-IBIG reports ready for submission with a single click." },
+        ],
+        pricing: [
+            { label: "Starter", price: "₱1,500/mo", features: ["Up to 20 employees", "Payroll automation", "Leave management", "Email support"] },
+            { label: "Growth", price: "₱3,500/mo", highlight: true, note: "Most popular", features: ["Up to 100 employees", "Biometric sync", "Compliance reports", "Payslip portal", "Priority support"] },
+            { label: "Enterprise", price: "Custom", features: ["Unlimited employees", "Custom workflows", "API access", "Dedicated account manager", "On-site training"] },
+        ],
+        useCases: ["SMEs managing payroll manually on Excel", "Companies with 15–500 employees", "Businesses needing BIR & government compliance", "HR teams spending hours on monthly cutoffs"],
+        techHighlights: ["Real-time sync", "Role-based access control", "Audit trail on all actions", "Mobile-ready"],
+    },
+    {
+        slug: "loan",
+        label: "Loan Management",
+        tagline: "Lending Operations Without the Headache",
+        description:
+            "A robust lending and repayment system built for cooperatives, microfinance institutions, and in-house lending programs. Track loans, compute interest, collect payments, and monitor portfolio health — end to end.",
+        icon: CreditCard,
+        accentColor: "emerald",
+        bgColor: "bg-emerald-50 dark:bg-emerald-500/10",
+        borderColor: "border-emerald-200 dark:border-emerald-500/20",
+        textColor: "text-emerald-600 dark:text-emerald-400",
+        category: "Business Software",
+        features: [
+            { title: "Loan Application & Approval", description: "Digital application forms, document uploads, and a structured approval workflow with configurable signatories." },
+            { title: "Amortization Scheduling", description: "Auto-compute repayment schedules for any loan type: flat rate, diminishing balance, or custom terms." },
+            { title: "Payment Collection", description: "Record payments manually or via integrated channels. Automatic posting and balance updates on every transaction." },
+            { title: "Delinquency Monitoring", description: "Automatic flagging of overdue accounts with aging reports and configurable alert notifications." },
+            { title: "Borrower Ledger", description: "Full transaction history per borrower: disbursements, payments, penalties, and outstanding balance at a glance." },
+            { title: "Portfolio Dashboard", description: "Real-time overview of total portfolio, collections rate, PAR (portfolio at risk), and monthly trends." },
+        ],
+        pricing: [
+            { label: "Basic", price: "₱2,000/mo", features: ["Up to 200 active loans", "Amortization schedules", "Payment recording", "Basic reports"] },
+            { label: "Professional", price: "₱4,500/mo", highlight: true, note: "Most popular", features: ["Up to 2,000 active loans", "Delinquency alerts", "Portfolio dashboard", "Multi-branch support", "Priority support"] },
+            { label: "Enterprise", price: "Custom", features: ["Unlimited loans", "Custom loan products", "API & integrations", "Dedicated support", "On-site onboarding"] },
+        ],
+        useCases: ["Cooperatives and credit unions", "In-house employee lending programs", "Microfinance institutions", "Rural banks and lending companies"],
+        techHighlights: ["Configurable interest methods", "Multi-branch architecture", "Audit log on all transactions", "Export to Excel & PDF"],
+    },
+    {
+        slug: "inventory",
+        label: "Inventory System",
+        tagline: "Know Exactly What You Have, Always",
+        description:
+            "A smart inventory and stock management system for retail, warehousing, and distribution businesses. Track items, manage suppliers, fulfill orders, and get low-stock alerts before you run out.",
+        icon: Package,
+        accentColor: "blue",
+        bgColor: "bg-blue-50 dark:bg-blue-500/10",
+        borderColor: "border-blue-200 dark:border-blue-500/20",
+        textColor: "text-blue-600 dark:text-blue-400",
+        category: "Business Software",
+        features: [
+            { title: "Stock Tracking", description: "Real-time inventory levels across all locations, warehouses, or branches. Every movement recorded and timestamped." },
+            { title: "Purchase Orders", description: "Create and send POs to suppliers, receive deliveries, and automatically update stock levels on confirmation." },
+            { title: "Low-Stock Alerts", description: "Set reorder points per item. Get notified before you run out so you never lose a sale to stockouts." },
+            { title: "Product Variants", description: "Handle SKUs with multiple variants — size, color, unit — with individual stock counts and pricing." },
+            { title: "Stock Adjustments", description: "Log adjustments for damaged goods, returns, or manual corrections with reason codes and audit trail." },
+            { title: "Inventory Reports", description: "Stock valuation, movement history, fast vs. slow movers, and shrinkage reports on demand." },
+        ],
+        pricing: [
+            { label: "Starter", price: "₱1,200/mo", features: ["Up to 500 SKUs", "1 location", "Basic stock tracking", "Low-stock alerts"] },
+            { label: "Business", price: "₱3,000/mo", highlight: true, note: "Most popular", features: ["Up to 5,000 SKUs", "Multi-location", "PO management", "Barcode support", "Inventory reports"] },
+            { label: "Enterprise", price: "Custom", features: ["Unlimited SKUs", "Warehouse management", "API & integrations", "Custom reports", "Dedicated support"] },
+        ],
+        useCases: ["Retail stores with multiple branches", "Distributors and wholesalers", "Restaurants and F&B businesses", "E-commerce businesses with physical stock"],
+        techHighlights: ["Barcode & QR scanning", "Multi-warehouse support", "Real-time sync across branches", "CSV import/export"],
+    },
+    {
+        slug: "school",
+        label: "School Management",
+        tagline: "Run Your School, Not Paperwork",
+        description:
+            "An all-in-one school management platform covering enrollment, grades, attendance, scheduling, and a built-in LMS. Designed for K–12 schools, universities, and vocational institutions in the Philippines.",
+        icon: GraduationCap,
+        accentColor: "violet",
+        bgColor: "bg-violet-50 dark:bg-violet-500/10",
+        borderColor: "border-violet-200 dark:border-violet-500/20",
+        textColor: "text-violet-600 dark:text-violet-400",
+        category: "Business Software",
+        features: [
+            { title: "Online Enrollment", description: "Students enroll online, submit requirements digitally, and get confirmed without setting foot in the registrar's office." },
+            { title: "Grade Management", description: "Teachers encode grades per subject. Automatic computation of GWA, honor roll qualification, and promotion status." },
+            { title: "Attendance Tracking", description: "Daily attendance per class, per student, with absence notifications sent to parents automatically." },
+            { title: "Class Scheduling", description: "Build and publish class schedules, assign rooms and teachers, and detect conflicts before they happen." },
+            { title: "Learning Management System", description: "Post modules, assignments, quizzes, and announcements. Students access everything from their portal." },
+            { title: "Billing & Fees", description: "Generate statements of account, record payments, and track balances per student per semester." },
+        ],
+        pricing: [
+            { label: "Small School", price: "₱3,500/mo", features: ["Up to 300 students", "Enrollment & grading", "Attendance tracking", "Email support"] },
+            { label: "Institution", price: "₱7,500/mo", highlight: true, note: "Most popular", features: ["Up to 2,000 students", "Full LMS", "Parent portal", "Billing module", "Priority support"] },
+            { label: "University", price: "Custom", features: ["Unlimited students", "Multi-campus", "API integrations", "Custom workflows", "On-site training"] },
+        ],
+        useCases: ["Private K–12 schools", "Colleges and universities", "Vocational and technical schools", "Tutorial and review centers"],
+        techHighlights: ["Parent & student portal", "Mobile-friendly interface", "DepEd-aligned grading format", "Bulk data import"],
+    },
+    {
+        slug: "pos",
+        label: "POS System",
+        tagline: "Faster Checkout. Smarter Sales.",
+        description:
+            "A modern point-of-sale system built for retail, food service, and service businesses. Process transactions fast, manage your menu or product catalog, track daily sales, and close every day with confidence.",
+        icon: ShoppingCart,
+        accentColor: "rose",
+        bgColor: "bg-rose-50 dark:bg-rose-500/10",
+        borderColor: "border-rose-200 dark:border-rose-500/20",
+        textColor: "text-rose-600 dark:text-rose-400",
+        category: "Business Software",
+        features: [
+            { title: "Fast Transaction Processing", description: "Process sales, apply discounts, split bills, and accept multiple payment methods in seconds — even offline." },
+            { title: "Product & Menu Management", description: "Add, edit, and organize products or menu items with modifiers, variants, and category groupings." },
+            { title: "Receipt Printing", description: "Print official receipts or send digital receipts via SMS or email. BIR-compliant receipt format." },
+            { title: "Daily Sales Reports", description: "End-of-day summaries, cash drawer reconciliation, and sales breakdowns by item, category, and cashier." },
+            { title: "Discount & Promo Management", description: "Set up fixed discounts, percentage promos, senior/PWD discounts, and loyalty point redemptions." },
+            { title: "Multi-Branch Dashboard", description: "Monitor sales performance across all branches from a single admin dashboard in real time." },
+        ],
+        pricing: [
+            { label: "Single Terminal", price: "₱900/mo", features: ["1 POS terminal", "Product management", "Daily reports", "Receipt printing"] },
+            { label: "Business", price: "₱2,500/mo", highlight: true, note: "Most popular", features: ["Up to 5 terminals", "Multi-branch dashboard", "Inventory sync", "Promo management", "Priority support"] },
+            { label: "Enterprise", price: "Custom", features: ["Unlimited terminals", "Custom integrations", "Franchise support", "API access", "Dedicated support"] },
+        ],
+        useCases: ["Restaurants and cafés", "Retail and convenience stores", "Salons and service shops", "Franchised businesses with multiple branches"],
+        techHighlights: ["Offline-capable", "Thermal printer compatible", "Touchscreen-optimized", "Real-time branch sync"],
+    },
+    {
+        slug: "pm",
+        label: "Project Management",
+        tagline: "Ship Projects. Not Excuses.",
+        description:
+            "A clean, no-fluff project management tool built for software teams and agencies. Manage tasks, run sprints, track time, and keep your team aligned — without the bloat of tools you'll never fully use.",
+        icon: Briefcase,
+        accentColor: "sky",
+        bgColor: "bg-sky-50 dark:bg-sky-500/10",
+        borderColor: "border-sky-200 dark:border-sky-500/20",
+        textColor: "text-sky-600 dark:text-sky-400",
+        category: "Business Software",
+        features: [
+            { title: "Task & Backlog Management", description: "Create tasks, assign owners, set priorities and due dates. Organize everything in a backlog that your team actually maintains." },
+            { title: "Sprint Planning", description: "Drag tasks into sprints, set sprint goals, and track velocity. Built for Scrum teams and Kanban workflows alike." },
+            { title: "Kanban Boards", description: "Visual drag-and-drop boards for every project. Columns you define, statuses you control." },
+            { title: "Time Tracking", description: "Log hours per task. See where time actually goes — per person, per project, per sprint." },
+            { title: "Team Collaboration", description: "Comment on tasks, tag teammates, attach files, and keep all project context in one thread — not scattered across emails." },
+            { title: "Project Reports", description: "Burndown charts, sprint velocity, time reports, and project health overviews for stakeholders." },
+        ],
+        pricing: [
+            { label: "Team", price: "₱1,500/mo", features: ["Up to 10 members", "Unlimited projects", "Kanban boards", "Basic reports"] },
+            { label: "Agency", price: "₱3,500/mo", highlight: true, note: "Most popular", features: ["Up to 50 members", "Sprint planning", "Time tracking", "Client portal", "Priority support"] },
+            { label: "Enterprise", price: "Custom", features: ["Unlimited members", "SSO & advanced permissions", "API access", "Custom integrations", "Dedicated support"] },
+        ],
+        useCases: ["Software development teams", "Creative and design agencies", "IT departments managing multiple projects", "Outsourcing companies managing client work"],
+        techHighlights: ["Keyboard-shortcut driven", "Webhook & API support", "GitHub/GitLab integration ready", "Dark mode native"],
+    },
+]

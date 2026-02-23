@@ -4,6 +4,7 @@ import { Services } from "@/components/sections/services"
 import { TalentPreview } from "@/components/sections/talent-preview"
 import { CTABanner } from "@/components/sections/cta-banner"
 import { Partners } from "@/components/sections/partners"
+import { JoinTeamSection } from "@/components/sections/join-team"
 
 export const metadata: Metadata = {
   title: "Home",
@@ -16,8 +17,9 @@ export default function HomePage() {
       <Hero />
       <Services />
       <TalentPreview />
-      <CTABanner />
       <Partners />
+      <JoinTeamSection />
+      <CTABanner />
     </>
   )
 }

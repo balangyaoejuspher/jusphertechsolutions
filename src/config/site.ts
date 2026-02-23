@@ -1,12 +1,14 @@
 export const siteConfig = {
-  name: "Portfolio Agency",
+  name: "Juspher",
+  fullName: "Juspher Tech Solutions",
+  slogan: "Tech Solutions",
+  tagline: "Outsourcing & Software, Done Right.",
   description:
-    "We connect businesses with top-tier developers, virtual assistants, and project managers.",
+    "We connect businesses with top-tier developers, virtual assistants, and project managers — while delivering ready-made software products built for growth.",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   nav: [
-    { label: "Home", href: "/" },
-    { label: "Services", href: "/services" },
     { label: "Talent", href: "/talent" },
+    { label: "Blog", href: "/blog" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],

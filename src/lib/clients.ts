@@ -1,0 +1,84 @@
+export type ClientType = "company" | "individual"
+export type ClientStatus = "active" | "inactive" | "prospect"
+
+export type Client = {
+    id: string
+    type: ClientType
+    name: string
+    email: string
+    phone?: string
+    website?: string
+    location?: string
+    company?: string      // for individual — which company they belong to
+    position?: string     // for individual
+    status: ClientStatus
+    services: string[]
+    notes?: string
+    joinedDate: string
+}
+
+export const seedClients: Client[] = [
+    {
+        id: "1",
+        type: "company",
+        name: "Acme Corp",
+        email: "hello@acmecorp.com",
+        phone: "+1 (555) 123-4567",
+        website: "acmecorp.com",
+        location: "San Francisco, CA",
+        status: "active",
+        services: ["Frontend Development", "UI/UX Designers"],
+        notes: "Long-term retainer. Renews quarterly.",
+        joinedDate: "Jan 2024",
+    },
+    {
+        id: "2",
+        type: "individual",
+        name: "Sarah Thompson",
+        email: "sarah@techventures.io",
+        phone: "+44 7700 900123",
+        location: "London, UK",
+        company: "Tech Ventures",
+        position: "CTO",
+        status: "active",
+        services: ["Virtual Assistants", "Project Management"],
+        joinedDate: "Mar 2024",
+    },
+    {
+        id: "3",
+        type: "company",
+        name: "Globex Solutions",
+        email: "ops@globex.com",
+        website: "globex.com",
+        location: "Sydney, Australia",
+        status: "prospect",
+        services: ["Blockchain & Web3"],
+        notes: "Interested in smart contract audit. Follow up next week.",
+        joinedDate: "Feb 2025",
+    },
+    {
+        id: "4",
+        type: "individual",
+        name: "Marcus Lee",
+        email: "marcus@mlconsulting.com",
+        phone: "+1 (555) 987-6543",
+        location: "Toronto, Canada",
+        company: "ML Consulting",
+        position: "Founder",
+        status: "inactive",
+        services: ["Data Analysts"],
+        joinedDate: "Nov 2023",
+    },
+    {
+        id: "5",
+        type: "company",
+        name: "Brightwave Media",
+        email: "hello@brightwave.co",
+        website: "brightwave.co",
+        location: "Melbourne, Australia",
+        status: "active",
+        services: ["Video Editors", "Marketing & SEO"],
+        joinedDate: "Jun 2024",
+    },
+]
+
