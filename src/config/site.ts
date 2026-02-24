@@ -1,6 +1,6 @@
 export const siteConfig = {
-  name: "Juspher",
-  fullName: "Juspher Tech Solutions",
+  name: "Juspher & Co.",
+  fullName: "Juspher & Co. Tech Solutions",
   slogan: "Tech Solutions",
   tagline: "Outsourcing & Software, Done Right.",
   description:

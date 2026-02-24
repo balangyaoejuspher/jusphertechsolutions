@@ -1,10 +1,10 @@
 import { Suspense } from "react"
-import MeetingsPage, { MeetingsPageSkeleton } from "@/components/portal/meetings/MeetingsPage"
+import MeetingsList, { MeetingsPageSkeleton } from "@/components/portal/meetings/meeting-list"
 
 export default function Page() {
     return (
         <Suspense fallback={<MeetingsPageSkeleton />}>
-            <MeetingsPage />
+            <MeetingsList />
         </Suspense>
     )
 }

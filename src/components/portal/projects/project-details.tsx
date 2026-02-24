@@ -1,5 +1,7 @@
-import { MessageTeamButton } from "@/components/portal/MessageTeamButton"
+import { MessageTeam } from "@/components/portal/projects/message-team"
+import { Skeleton } from "@/components/ui/skeleton"
 import { requireActiveClient } from "@/lib/client-auth"
+import { PROJECT_ACTIVITY_COLORS, PROJECT_PRIORITY_CONFIG, PROJECT_STATUS_CONFIG } from "@/lib/helpers/constants"
 import { cn } from "@/lib/utils"
 import {
     AlertCircle,
@@ -17,12 +19,6 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
-import { Suspense } from "react"
-
-// ── Skeleton ──────────────────────────────────────────────────
-function Skeleton({ className }: { className?: string }) {
-    return <div className={cn("animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800", className)} />
-}
 
 export function ProjectDetailSkeleton() {
     return (
@@ -103,9 +99,9 @@ const mockProjects = [
         spent: "$5,200",
         remaining: "$3,300",
         team: [
-            { initials: "JB", name: "Juspher Balangyao", role: "Project Manager", email: "juspher@juspher.com" },
-            { initials: "AK", name: "Ana Kim", role: "Frontend Dev", email: "ana@juspher.com" },
-            { initials: "RM", name: "Rico Mendez", role: "Backend Dev", email: "rico@juspher.com" },
+            { initials: "JB", name: "Juspher Balangyao", role: "Project Manager", email: "juspher@juspherandco.com" },
+            { initials: "AK", name: "Ana Kim", role: "Frontend Dev", email: "ana@juspherandco.com" },
+            { initials: "RM", name: "Rico Mendez", role: "Backend Dev", email: "rico@juspherandco.com" },
         ],
         tags: ["Next.js", "PostgreSQL", "Stripe", "Tailwind", "TypeScript"],
         milestones: [
@@ -133,8 +129,8 @@ const mockProjects = [
         startDate: "Feb 1, 2026", dueDate: "Apr 20, 2026",
         budget: "$12,000", spent: "$3,600", remaining: "$8,400",
         team: [
-            { initials: "JB", name: "Juspher Balangyao", role: "Project Manager", email: "juspher@juspher.com" },
-            { initials: "ML", name: "Mark Lim", role: "Mobile Dev", email: "mark@juspher.com" },
+            { initials: "JB", name: "Juspher Balangyao", role: "Project Manager", email: "juspher@juspherandco.com" },
+            { initials: "ML", name: "Mark Lim", role: "Mobile Dev", email: "mark@juspherandco.com" },
         ],
         tags: ["React Native", "Node.js", "Firebase", "TypeScript"],
         milestones: [
@@ -156,7 +152,7 @@ const mockProjects = [
         status: "review", priority: "high", progress: 90,
         startDate: "Jan 20, 2026", dueDate: "Feb 28, 2026",
         budget: "$3,200", spent: "$2,900", remaining: "$300",
-        team: [{ initials: "AK", name: "Ana Kim", role: "UI/UX Designer", email: "ana@juspher.com" }],
+        team: [{ initials: "AK", name: "Ana Kim", role: "UI/UX Designer", email: "ana@juspherandco.com" }],
         tags: ["Figma", "React", "Tailwind"],
         milestones: [
             { label: "Audit & Research", done: true, date: "Jan 20, 2026", description: "Existing UI reviewed." },
@@ -177,7 +173,7 @@ const mockProjects = [
         status: "completed", priority: "low", progress: 100,
         startDate: "Aug 1, 2025", dueDate: "Jan 31, 2026",
         budget: "$4,800", spent: "$4,800", remaining: "$0",
-        team: [{ initials: "SV", name: "Sofia Vega", role: "SEO Specialist", email: "sofia@juspher.com" }],
+        team: [{ initials: "SV", name: "Sofia Vega", role: "SEO Specialist", email: "sofia@juspherandco.com" }],
         tags: ["SEO", "Content", "Analytics"],
         milestones: [
             { label: "Technical Audit", done: true, date: "Aug 10, 2025", description: "Site audit completed." },
@@ -197,7 +193,7 @@ const mockProjects = [
         status: "on_hold", priority: "medium", progress: 45,
         startDate: "Dec 1, 2025", dueDate: "Mar 1, 2026",
         budget: "$2,400", spent: "$1,080", remaining: "$1,320",
-        team: [{ initials: "LC", name: "Lea Cruz", role: "Virtual Assistant", email: "lea@juspher.com" }],
+        team: [{ initials: "LC", name: "Lea Cruz", role: "Virtual Assistant", email: "lea@juspherandco.com" }],
         tags: ["Admin Support", "Scheduling", "Email"],
         milestones: [
             { label: "Onboarding", done: true, date: "Dec 1, 2025", description: "Tools and access setup." },
@@ -210,28 +206,8 @@ const mockProjects = [
             { id: "a2", text: "Email management setup complete", time: "Dec 5", icon: CheckCircle, color: "emerald" },
         ],
     },
+
 ]
-
-// ── Config ────────────────────────────────────────────────────
-const statusConfig = {
-    in_progress: { label: "In Progress", icon: CircleDot, color: "bg-amber-50  dark:bg-amber-400/10  text-amber-600  dark:text-amber-400  border-amber-200  dark:border-amber-400/20" },
-    review: { label: "In Review", icon: AlertCircle, color: "bg-blue-50   dark:bg-blue-400/10   text-blue-600   dark:text-blue-400   border-blue-200   dark:border-blue-400/20" },
-    completed: { label: "Completed", icon: CheckCircle, color: "bg-emerald-50 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-400/20" },
-    on_hold: { label: "On Hold", icon: PauseCircle, color: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-white/10" },
-}
-
-const priorityConfig = {
-    high: "text-red-500   dark:text-red-400   bg-red-50   dark:bg-red-400/10   border-red-200   dark:border-red-400/20",
-    medium: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-400/10 border-amber-200 dark:border-amber-400/20",
-    low: "text-zinc-500  dark:text-zinc-400  bg-zinc-100 dark:bg-zinc-800     border-zinc-200  dark:border-white/10",
-}
-
-const activityColorMap: Record<string, string> = {
-    emerald: "bg-emerald-50 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20 text-emerald-500 dark:text-emerald-400",
-    blue: "bg-blue-50   dark:bg-blue-400/10   border-blue-200   dark:border-blue-400/20   text-blue-500   dark:text-blue-400",
-    amber: "bg-amber-50  dark:bg-amber-400/10  border-amber-200  dark:border-amber-400/20  text-amber-500  dark:text-amber-400",
-    zinc: "bg-zinc-100  dark:bg-zinc-800      border-zinc-200   dark:border-white/10      text-zinc-500   dark:text-zinc-400",
-}
 
 // ── Content (async) ───────────────────────────────────────────
 export async function ProjectDetailContent({ id }: { id: string }) {
@@ -241,7 +217,7 @@ export async function ProjectDetailContent({ id }: { id: string }) {
     const project = mockProjects.find((p) => p.id === id)
     if (!project) notFound()
 
-    const status = statusConfig[project.status as keyof typeof statusConfig]
+    const status = PROJECT_STATUS_CONFIG[project.status as keyof typeof PROJECT_STATUS_CONFIG]
     const StatusIcon = status.icon
     const doneMilestones = project.milestones.filter((m) => m.done).length
     const budgetPct = Math.round((parseFloat(project.spent.replace(/\D/g, "")) / parseFloat(project.budget.replace(/\D/g, ""))) * 100)
@@ -262,14 +238,14 @@ export async function ProjectDetailContent({ id }: { id: string }) {
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold", status.color)}>
                             <StatusIcon size={11} />{status.label}
                         </span>
-                        <span className={cn("inline-flex px-2 py-0.5 rounded-lg border text-[11px] font-semibold capitalize", priorityConfig[project.priority as keyof typeof priorityConfig])}>
+                        <span className={cn("inline-flex px-2 py-0.5 rounded-lg border text-[11px] font-semibold capitalize", PROJECT_PRIORITY_CONFIG[project.priority as keyof typeof PROJECT_PRIORITY_CONFIG])}>
                             {project.priority} priority
                         </span>
                     </div>
                     <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-1">{project.name}</h1>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl leading-relaxed">{project.description}</p>
                 </div>
-                <MessageTeamButton team={project.team} projectName={project.name} />
+                <MessageTeam team={project.team} projectName={project.name} />
             </div>
 
             {/* Stats */}
@@ -397,7 +373,7 @@ export async function ProjectDetailContent({ id }: { id: string }) {
                                 const ActivityIcon = item.icon
                                 return (
                                     <div key={item.id} className="flex items-start gap-4 px-6 py-4">
-                                        <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 mt-0.5", activityColorMap[item.color])}>
+                                        <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 mt-0.5", PROJECT_ACTIVITY_COLORS[item.color])}>
                                             <ActivityIcon size={13} />
                                         </div>
                                         <div className="flex-1 min-w-0">

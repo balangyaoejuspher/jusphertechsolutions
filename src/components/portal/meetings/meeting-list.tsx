@@ -1,14 +1,26 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
-    Video, Calendar, Clock, ChevronRight, X, Send, CheckCircle,
-    AlertTriangle, XCircle, RefreshCw, HelpCircle, Plus,
-    Link as LinkIcon, User, Users, ChevronLeft, Eye,
-    MapPin, AlignLeft, MessageSquare,
+    Calendar,
+    CheckCircle,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Eye,
+    HelpCircle,
+    Link as LinkIcon,
+    MapPin,
+    MessageSquare,
+    Plus,
+    RefreshCw,
+    Send,
+    Video,
+    X,
+    XCircle
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useMemo, useState } from "react"
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -23,6 +35,7 @@ type Meeting = {
     time: string          // "10:00 AM"
     duration: number      // minutes
     status: MeetingStatus
+    host: { name: string; initials: string; role: string }
     type: "video" | "call" | "in_person"
     attendees: { name: string; initials: string; role: string }[]
     joinUrl?: string
@@ -40,10 +53,11 @@ const mockMeetings: Meeting[] = [
         project: "E-Commerce Web App",
         date: "Feb 25, 2026", dateISO: "2026-02-25", time: "10:00 AM", duration: 60,
         status: "scheduled", type: "video",
+        host: { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
         attendees: [
             { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
-            { name: "Ana Kim", initials: "AK", role: "Frontend Dev" },
-            { name: "Rico Mendez", initials: "RM", role: "Backend Dev" },
+            { name: "Ana Kim",           initials: "AK", role: "Frontend Dev" },
+            { name: "Rico Mendez",       initials: "RM", role: "Backend Dev" },
         ],
         joinUrl: "https://meet.google.com/abc-defg-hij",
         agenda: "1. Demo of completed frontend\n2. Backend API walkthrough\n3. Q&A and feedback\n4. Next sprint planning",
@@ -53,9 +67,10 @@ const mockMeetings: Meeting[] = [
         project: "Mobile App (iOS/Android)",
         date: "Mar 3, 2026", dateISO: "2026-03-03", time: "2:00 PM", duration: 90,
         status: "scheduled", type: "video",
+        host: { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
         attendees: [
             { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
-            { name: "Mark Lim", initials: "ML", role: "Mobile Dev" },
+            { name: "Mark Lim",          initials: "ML", role: "Mobile Dev" },
         ],
         joinUrl: "https://meet.google.com/xyz-uvwx-yz",
         agenda: "1. Project scope overview\n2. Timeline and milestones\n3. Communication plan\n4. Tool access setup",
@@ -65,6 +80,7 @@ const mockMeetings: Meeting[] = [
         project: "Dashboard Redesign",
         date: "Feb 20, 2026", dateISO: "2026-02-20", time: "3:00 PM", duration: 45,
         status: "completed", type: "video",
+        host: { name: "Ana Kim", initials: "AK", role: "UI/UX Designer" },
         attendees: [
             { name: "Ana Kim", initials: "AK", role: "UI/UX Designer" },
         ],
@@ -75,9 +91,10 @@ const mockMeetings: Meeting[] = [
         project: "Virtual Assistant Support",
         date: "Feb 15, 2026", dateISO: "2026-02-15", time: "11:00 AM", duration: 30,
         status: "rescheduled", type: "call",
+        host: { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
         attendees: [
             { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
-            { name: "Lea Cruz", initials: "LC", role: "Virtual Assistant" },
+            { name: "Lea Cruz",          initials: "LC", role: "Virtual Assistant" },
         ],
         notes: "Rescheduled to Feb 28 at 11:00 AM at client's request.",
     },
@@ -86,6 +103,7 @@ const mockMeetings: Meeting[] = [
         project: "SEO & Content Strategy",
         date: "Jan 30, 2026", dateISO: "2026-01-30", time: "4:00 PM", duration: 60,
         status: "completed", type: "video",
+        host: { name: "Sofia Vega", initials: "SV", role: "SEO Specialist" },
         attendees: [
             { name: "Sofia Vega", initials: "SV", role: "SEO Specialist" },
         ],
@@ -96,6 +114,7 @@ const mockMeetings: Meeting[] = [
         project: "E-Commerce Web App",
         date: "Feb 10, 2026", dateISO: "2026-02-10", time: "9:00 AM", duration: 60,
         status: "cancelled", type: "video",
+        host: { name: "Rico Mendez", initials: "RM", role: "Backend Dev" },
         attendees: [
             { name: "Rico Mendez", initials: "RM", role: "Backend Dev" },
         ],
@@ -106,6 +125,7 @@ const mockMeetings: Meeting[] = [
         project: "Mobile App (iOS/Android)",
         date: "Mar 10, 2026", dateISO: "2026-03-10", time: "1:00 PM", duration: 30,
         status: "pending", type: "video",
+        host: { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
         attendees: [
             { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
         ],
@@ -116,9 +136,10 @@ const mockMeetings: Meeting[] = [
         project: "E-Commerce Web App",
         date: "Mar 17, 2026", dateISO: "2026-03-17", time: "10:00 AM", duration: 45,
         status: "pending", type: "video",
+        host: { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
         attendees: [
             { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
-            { name: "Ana Kim", initials: "AK", role: "Frontend Dev" },
+            { name: "Ana Kim",           initials: "AK", role: "Frontend Dev" },
         ],
         agenda: "Monthly progress review and upcoming milestone planning.",
     },
@@ -670,7 +691,7 @@ export function MeetingsPageSkeleton() {
 
 // ── Page ──────────────────────────────────────────────────────
 
-export default function MeetingsPage() {
+export default function Meetings() {
     const [activeTab, setActiveTab] = useState("all")
     const [selected, setSelected] = useState<Meeting | null>(null)
     const [selectedDate, setSelectedDate] = useState<string | null>(null)

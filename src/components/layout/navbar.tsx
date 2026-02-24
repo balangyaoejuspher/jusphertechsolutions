@@ -20,10 +20,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
-// ============================================================
-// DESKTOP MEGA MENU
-// ============================================================
-
 function MegaMenu({
     items,
     isOpen,
@@ -84,10 +80,6 @@ function MegaMenu({
         </div>
     )
 }
-
-// ============================================================
-// PRODUCTS MEGA MENU
-// ============================================================
 
 function ProductsMegaMenu({
     isOpen,
@@ -173,10 +165,6 @@ function ProductsMegaMenu({
     )
 }
 
-// ============================================================
-// MOBILE ACCORDION
-// ============================================================
-
 function MobileAccordion({ label, items, onClose }: {
     label: string
     items: typeof servicesMenu
@@ -218,10 +206,6 @@ function MobileAccordion({ label, items, onClose }: {
     )
 }
 
-// ============================================================
-// DASHBOARD LINK (shows "Admin" or "My Portal" based on role)
-// ============================================================
-
 function DashboardLink() {
     const [href, setHref] = useState<string | null>(null)
 
@@ -248,10 +232,6 @@ function DashboardLink() {
         </Link>
     )
 }
-
-// ============================================================
-// MAIN NAVBAR
-// ============================================================
 
 export function Navbar() {
     const pathname = usePathname()

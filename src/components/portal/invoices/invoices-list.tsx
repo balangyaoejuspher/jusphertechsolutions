@@ -1,31 +1,17 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { cn } from "@/lib/utils"
-import {
-    FileText, Download, CreditCard, AlertTriangle, CheckCircle,
-    Clock, ChevronRight, Search, X, Send, CircleDot,
-    Banknote, Eye, Calendar, ArrowLeftRight,
-} from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-// ── Types ─────────────────────────────────────────────────────
-
-type InvoiceStatus = "paid" | "unpaid" | "overdue" | "partial" | "draft"
-type Currency = "USD" | "PHP"
-
-type LineItem = { description: string; qty: number; rate: number; amount: number }
-
-type Invoice = {
-    id: string; number: string; project: string
-    issued: string; due: string
-    amount: number; paid: number
-    status: InvoiceStatus; items: LineItem[]; notes?: string
-}
-
-// ── Constants ─────────────────────────────────────────────────
-
-const PHP_RATE = 57.5 // 1 USD → PHP (update as needed)
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/helpers/format"
+import { INVOICE_STATUS_CONFIG, INVOICE_TABS } from "@/lib/helpers/constants"
+import type { Invoice, Currency } from "@/types"
+import {
+    AlertTriangle, ArrowLeftRight, Banknote, Calendar,
+    CheckCircle, ChevronRight, Clock, CreditCard,
+    Download, Eye, FileText, Search, Send, X,
+} from "lucide-react"
+import { useMemo, useState } from "react"
 
 const mockInvoices: Invoice[] = [
     {
@@ -84,88 +70,42 @@ const mockInvoices: Invoice[] = [
     },
 ]
 
-const statusConfig: Record<InvoiceStatus, { label: string; icon: React.ElementType; color: string; dot: string }> = {
-    paid: { label: "Paid", icon: CheckCircle, color: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20", dot: "bg-emerald-500" },
-    unpaid: { label: "Unpaid", icon: Clock, color: "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20", dot: "bg-amber-500" },
-    overdue: { label: "Overdue", icon: AlertTriangle, color: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20", dot: "bg-red-500" },
-    partial: { label: "Partially Paid", icon: CircleDot, color: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20", dot: "bg-blue-500" },
-    draft: { label: "Draft", icon: FileText, color: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-white/10", dot: "bg-zinc-400" },
-}
-
-const tabs = [
-    { value: "all", label: "All" },
-    { value: "unpaid", label: "Unpaid" },
-    { value: "overdue", label: "Overdue" },
-    { value: "partial", label: "Partial" },
-    { value: "paid", label: "Paid" },
-    { value: "draft", label: "Draft" },
-]
-
-// ── Currency helpers ──────────────────────────────────────────
-
-function useFmt(currency: Currency) {
-    return (usd: number) => {
-        if (currency === "PHP") {
-            return `₱${(usd * PHP_RATE).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`
-        }
-        return `$${usd.toLocaleString("en-US", { minimumFractionDigits: 2 })}`
-    }
-}
-
-// ── Skeletons ─────────────────────────────────────────────────
-
-function Sk({ className }: { className?: string }) {
-    return <div className={cn("animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800", className)} />
-}
-
-export function InvoicesPageSkeleton() {
+export function InvoicesSkeleton() {
     return (
         <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
-            {/* Header */}
             <div className="px-6 md:px-8 pt-8 pb-6 border-b border-zinc-200 dark:border-white/5 shrink-0">
                 <div className="flex items-start justify-between mb-6">
-                    <div>
-                        <Sk className="h-7 w-28 mb-2" />
-                        <Sk className="h-4 w-52" />
-                    </div>
-                    <Sk className="h-9 w-28 rounded-xl" />
+                    <div><Skeleton className="h-7 w-28 mb-2" /><Skeleton className="h-4 w-52" /></div>
+                    <Skeleton className="h-9 w-28 rounded-xl" />
                 </div>
-                {/* Stat cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                     {Array.from({ length: 4 }).map((_, i) => (
                         <div key={i} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl p-4">
-                            <Sk className="h-3 w-20 mb-3" />
-                            <Sk className="h-6 w-28" />
+                            <Skeleton className="h-3 w-20 mb-3" /><Skeleton className="h-6 w-28" />
                         </div>
                     ))}
                 </div>
-                {/* Tabs */}
                 <div className="flex gap-3">
-                    <Sk className="h-9 w-64 rounded-xl" />
-                    <Sk className="h-9 w-48 rounded-xl" />
+                    <Skeleton className="h-9 w-64 rounded-xl" /><Skeleton className="h-9 w-48 rounded-xl" />
                 </div>
             </div>
-            {/* Split panel */}
             <div className="flex flex-1 overflow-hidden">
-                <div className="w-full md:w-80 lg:w-96 border-r border-zinc-200 dark:border-white/5 flex flex-col gap-0">
+                <div className="w-full md:w-80 lg:w-96 border-r border-zinc-200 dark:border-white/5 flex flex-col">
                     {Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="flex items-start gap-4 px-5 py-4 border-b border-zinc-100 dark:border-white/5">
-                            <Sk className="w-2 h-2 rounded-full mt-2 shrink-0" />
+                            <Skeleton className="w-2 h-2 rounded-full mt-2 shrink-0" />
                             <div className="flex-1">
                                 <div className="flex justify-between mb-2">
-                                    <Sk className="h-4 w-28" />
-                                    <Sk className="h-4 w-16" />
+                                    <Skeleton className="h-4 w-28" /><Skeleton className="h-4 w-16" />
                                 </div>
-                                <Sk className="h-3 w-40 mb-2" />
-                                <Sk className="h-5 w-20 rounded-md" />
+                                <Skeleton className="h-3 w-40 mb-2" /><Skeleton className="h-5 w-20 rounded-md" />
                             </div>
                         </div>
                     ))}
                 </div>
                 <div className="hidden md:flex flex-1 items-center justify-center bg-white dark:bg-zinc-900">
                     <div className="text-center">
-                        <Sk className="w-14 h-14 rounded-2xl mx-auto mb-3" />
-                        <Sk className="h-4 w-48 mx-auto" />
+                        <Skeleton className="w-14 h-14 rounded-2xl mx-auto mb-3" /><Skeleton className="h-4 w-48 mx-auto" />
                     </div>
                 </div>
             </div>
@@ -178,34 +118,32 @@ export function InvoiceDetailSkeleton() {
         <div className="flex flex-col h-full">
             <div className="p-6 border-b border-zinc-100 dark:border-white/5">
                 <div className="flex justify-between mb-3">
-                    <div><Sk className="h-3 w-24 mb-2" /><Sk className="h-6 w-48" /></div>
-                    <Sk className="h-6 w-20 rounded-lg" />
+                    <div><Skeleton className="h-3 w-24 mb-2" /><Skeleton className="h-6 w-48" /></div>
+                    <Skeleton className="h-6 w-20 rounded-lg" />
                 </div>
                 <div className="grid grid-cols-3 gap-3 mt-4">
-                    {Array.from({ length: 3 }).map((_, i) => <Sk key={i} className="h-14 rounded-xl" />)}
+                    {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
                 </div>
             </div>
             <div className="px-6 py-4 border-b border-zinc-100 dark:border-white/5 flex flex-col gap-3">
-                <div className="flex justify-between"><Sk className="h-3 w-12" /><Sk className="h-3 w-24" /></div>
-                <div className="flex justify-between"><Sk className="h-3 w-12" /><Sk className="h-3 w-24" /></div>
+                <div className="flex justify-between"><Skeleton className="h-3 w-12" /><Skeleton className="h-3 w-24" /></div>
+                <div className="flex justify-between"><Skeleton className="h-3 w-12" /><Skeleton className="h-3 w-24" /></div>
             </div>
             <div className="px-6 py-4 flex-1">
-                <Sk className="h-3 w-20 mb-4" />
+                <Skeleton className="h-3 w-20 mb-4" />
                 <div className="border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden">
-                    <Sk className="h-9 rounded-none" />
-                    {Array.from({ length: 3 }).map((_, i) => <Sk key={i} className="h-12 rounded-none mt-px" />)}
-                    <Sk className="h-10 rounded-none mt-px" />
+                    <Skeleton className="h-9 rounded-none" />
+                    {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-none mt-px" />)}
+                    <Skeleton className="h-10 rounded-none mt-px" />
                 </div>
             </div>
             <div className="p-6 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-2">
-                <Sk className="h-11 rounded-xl" />
-                <div className="flex gap-2"><Sk className="flex-1 h-10 rounded-xl" /><Sk className="flex-1 h-10 rounded-xl" /></div>
+                <Skeleton className="h-11 rounded-xl" />
+                <div className="flex gap-2"><Skeleton className="flex-1 h-10 rounded-xl" /><Skeleton className="flex-1 h-10 rounded-xl" /></div>
             </div>
         </div>
     )
 }
-
-// ── Dispute Modal ─────────────────────────────────────────────
 
 function DisputeModal({ invoice, onClose }: { invoice: Invoice; onClose: () => void }) {
     const [reason, setReason] = useState("")
@@ -257,10 +195,13 @@ function DisputeModal({ invoice, onClose }: { invoice: Invoice; onClose: () => v
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">Additional Details</label>
+                        <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
+                            Additional Details
+                        </label>
                         <textarea rows={3} value={details} onChange={(e) => setDetails(e.target.value)}
                             placeholder="Describe the issue..."
-                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-900 dark:text-white bg-white dark:bg-white/5 outline-none focus:border-red-400 transition-all resize-none placeholder:text-zinc-300 dark:placeholder:text-zinc-600" />
+                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-900 dark:text-white bg-white dark:bg-white/5 outline-none focus:border-red-400 transition-all resize-none placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
+                        />
                     </div>
                     <div className="flex gap-3 pt-1">
                         <Button onClick={handleSubmit} disabled={!reason} className={cn(
@@ -269,15 +210,15 @@ function DisputeModal({ invoice, onClose }: { invoice: Invoice; onClose: () => v
                         )}>
                             {sent ? <><CheckCircle size={14} /> Submitted</> : <><Send size={14} /> Submit Dispute</>}
                         </Button>
-                        <Button variant="outline" onClick={onClose} className="rounded-xl border-zinc-200 dark:border-white/10 h-11 px-5">Cancel</Button>
+                        <Button variant="outline" onClick={onClose} className="rounded-xl border-zinc-200 dark:border-white/10 h-11 px-5">
+                            Cancel
+                        </Button>
                     </div>
                 </div>
             </div>
         </div>
     )
 }
-
-// ── Pay Modal ─────────────────────────────────────────────────
 
 function PayModal({ invoice, onClose, currency, fmt }: {
     invoice: Invoice; onClose: () => void; currency: Currency; fmt: (n: number) => string
@@ -312,7 +253,9 @@ function PayModal({ invoice, onClose, currency, fmt }: {
                     <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-widest mb-1">Amount Due</p>
                     <p className="text-4xl font-black text-zinc-900 dark:text-white">{fmt(balance)}</p>
                     {currency === "PHP" && (
-                        <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">≈ ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD</p>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">
+                            ≈ ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD
+                        </p>
                     )}
                     <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-0.5">{invoice.project}</p>
                 </div>
@@ -332,19 +275,21 @@ function PayModal({ invoice, onClose, currency, fmt }: {
                         </button>
                     ))}
                 </div>
-                <p className="text-xs text-zinc-400 dark:text-zinc-600 mb-4 text-center">You'll be redirected to our secure payment gateway.</p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-600 mb-4 text-center">
+                    You'll be redirected to our secure payment gateway.
+                </p>
                 <div className="flex gap-3">
                     <Button className="flex-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold h-11 gap-2">
                         <CreditCard size={14} /> Proceed to Pay
                     </Button>
-                    <Button variant="outline" onClick={onClose} className="rounded-xl border-zinc-200 dark:border-white/10 h-11 px-5">Cancel</Button>
+                    <Button variant="outline" onClick={onClose} className="rounded-xl border-zinc-200 dark:border-white/10 h-11 px-5">
+                        Cancel
+                    </Button>
                 </div>
             </div>
         </div>
     )
 }
-
-// ── Invoice Detail Panel ──────────────────────────────────────
 
 function InvoiceDetail({ invoice, onClose, onPay, onDispute, fmt, currency }: {
     invoice: Invoice
@@ -354,7 +299,7 @@ function InvoiceDetail({ invoice, onClose, onPay, onDispute, fmt, currency }: {
     fmt: (n: number) => string
     currency: Currency
 }) {
-    const cfg = statusConfig[invoice.status]
+    const cfg = INVOICE_STATUS_CONFIG[invoice.status]
     const StatusIcon = cfg.icon
     const balance = invoice.amount - invoice.paid
     const canPay = invoice.status === "unpaid" || invoice.status === "overdue" || invoice.status === "partial"
@@ -374,7 +319,6 @@ function InvoiceDetail({ invoice, onClose, onPay, onDispute, fmt, currency }: {
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold", cfg.color)}>
                             <StatusIcon size={11} />{cfg.label}
                         </span>
-                        {/* ── Close button ── */}
                         <button
                             onClick={onClose}
                             className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
@@ -391,9 +335,11 @@ function InvoiceDetail({ invoice, onClose, onPay, onDispute, fmt, currency }: {
                         { label: "Paid", value: fmt(invoice.paid), highlight: false },
                         { label: "Balance", value: fmt(balance), highlight: balance > 0 },
                     ].map((s) => (
-                        <div key={s.label} className={cn("p-3 rounded-xl text-center border", s.highlight
-                            ? "bg-amber-50 dark:bg-amber-400/5 border-amber-200 dark:border-amber-400/20"
-                            : "bg-zinc-50 dark:bg-white/5 border-zinc-100 dark:border-white/5"
+                        <div key={s.label} className={cn(
+                            "p-3 rounded-xl text-center border",
+                            s.highlight
+                                ? "bg-amber-50 dark:bg-amber-400/5 border-amber-200 dark:border-amber-400/20"
+                                : "bg-zinc-50 dark:bg-white/5 border-zinc-100 dark:border-white/5"
                         )}>
                             <p className={cn("text-sm font-black", s.highlight ? "text-amber-600 dark:text-amber-400" : "text-zinc-900 dark:text-white")}>
                                 {s.value}
@@ -403,10 +349,9 @@ function InvoiceDetail({ invoice, onClose, onPay, onDispute, fmt, currency }: {
                     ))}
                 </div>
 
-                {/* Currency note */}
                 {currency === "PHP" && (
                     <p className="text-[10px] text-zinc-400 dark:text-zinc-600 mt-2 text-right">
-                        Converted at ₱{PHP_RATE}/USD · for reference only
+                        Converted at ₱{57.5}/USD · for reference only
                     </p>
                 )}
             </div>
@@ -471,8 +416,7 @@ function InvoiceDetail({ invoice, onClose, onPay, onDispute, fmt, currency }: {
                         <Download size={13} /> Download PDF
                     </Button>
                     {canDispute && (
-                        <Button onClick={onDispute} variant="outline"
-                            className="flex-1 rounded-xl border-zinc-200 dark:border-white/10 h-10 gap-1.5 text-sm text-red-500 dark:text-red-400 hover:border-red-200 dark:hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10">
+                        <Button onClick={onDispute} variant="outline" className="flex-1 rounded-xl border-zinc-200 dark:border-white/10 h-10 gap-1.5 text-sm text-red-500 dark:text-red-400 hover:border-red-200 dark:hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10">
                             <AlertTriangle size={13} /> Dispute
                         </Button>
                     )}
@@ -482,9 +426,7 @@ function InvoiceDetail({ invoice, onClose, onPay, onDispute, fmt, currency }: {
     )
 }
 
-// ── Page ──────────────────────────────────────────────────────
-
-export default function InvoicesPage() {
+export default function InvoicesList() {
     const [activeTab, setActiveTab] = useState("all")
     const [search, setSearch] = useState("")
     const [selected, setSelected] = useState<Invoice | null>(null)
@@ -492,7 +434,7 @@ export default function InvoicesPage() {
     const [showDispute, setShowDispute] = useState(false)
     const [currency, setCurrency] = useState<Currency>("USD")
 
-    const fmt = useFmt(currency)
+    const fmt = (usd: number) => formatCurrency(usd, currency)
 
     const filtered = useMemo(() => mockInvoices
         .filter((inv) => activeTab === "all" || inv.status === activeTab)
@@ -518,15 +460,13 @@ export default function InvoicesPage() {
     return (
         <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
 
-            {/* Top header */}
+            {/* Header */}
             <div className="px-6 md:px-8 pt-8 pb-6 bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-white/5 shrink-0">
                 <div className="flex items-start justify-between gap-4 mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">Invoices</h1>
                         <p className="text-zinc-500 dark:text-zinc-400 text-sm">View, pay, and manage your invoices.</p>
                     </div>
-
-                    {/* ── Currency toggle ── */}
                     <button
                         onClick={() => setCurrency((c) => c === "USD" ? "PHP" : "USD")}
                         className="flex items-center gap-2 px-3 py-2 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:border-amber-400/40 hover:text-amber-500 dark:hover:text-amber-400 transition-all"
@@ -558,7 +498,7 @@ export default function InvoicesPage() {
                 {/* Tabs + Search */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex items-center gap-1 p-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-xl overflow-x-auto">
-                        {tabs.map((tab) => (
+                        {INVOICE_TABS.map((tab) => (
                             <button key={tab.value} onClick={() => { setActiveTab(tab.value); setSelected(null) }}
                                 className={cn(
                                     "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
@@ -568,8 +508,11 @@ export default function InvoicesPage() {
                                 )}>
                                 {tab.label}
                                 {tabCounts[tab.value] > 0 && (
-                                    <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md",
-                                        activeTab === tab.value ? "bg-white/20 text-inherit" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+                                    <span className={cn(
+                                        "text-[10px] font-bold px-1.5 py-0.5 rounded-md",
+                                        activeTab === tab.value
+                                            ? "bg-white/20 text-inherit"
+                                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                                     )}>
                                         {tabCounts[tab.value]}
                                     </span>
@@ -581,7 +524,8 @@ export default function InvoicesPage() {
                         <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                         <input value={search} onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search invoices..."
-                            className="w-full pl-8 pr-4 py-2 rounded-xl border border-zinc-200 dark:border-white/10 text-sm bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none focus:border-amber-400 transition-all" />
+                            className="w-full pl-8 pr-4 py-2 rounded-xl border border-zinc-200 dark:border-white/10 text-sm bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none focus:border-amber-400 transition-all"
+                        />
                     </div>
                 </div>
             </div>
@@ -601,7 +545,7 @@ export default function InvoicesPage() {
                         </div>
                     ) : (
                         filtered.map((inv) => {
-                            const cfg = statusConfig[inv.status]
+                            const cfg = INVOICE_STATUS_CONFIG[inv.status]
                             const isSelected = selected?.id === inv.id
                             const balance = inv.amount - inv.paid
                             return (
@@ -624,7 +568,9 @@ export default function InvoicesPage() {
                                             <span className="text-[10px] text-zinc-400 dark:text-zinc-600">Due {inv.due}</span>
                                         </div>
                                         {balance > 0 && inv.status !== "draft" && (
-                                            <p className="text-[10px] text-amber-500 dark:text-amber-400 font-semibold mt-1">{fmt(balance)} remaining</p>
+                                            <p className="text-[10px] text-amber-500 dark:text-amber-400 font-semibold mt-1">
+                                                {fmt(balance)} remaining
+                                            </p>
                                         )}
                                     </div>
                                     <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-700 shrink-0 mt-1" />
@@ -637,7 +583,6 @@ export default function InvoicesPage() {
                 {/* Detail */}
                 {selected ? (
                     <div className="flex-1 overflow-hidden flex flex-col bg-white dark:bg-zinc-900">
-                        {/* Mobile back */}
                         <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-white/5 md:hidden">
                             <button onClick={() => setSelected(null)} className="flex items-center gap-1.5 text-xs text-zinc-400 font-semibold hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
                                 <ChevronRight size={12} className="rotate-180" /> Back

@@ -28,28 +28,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-
-// ============================================================
-// CONSTANTS
-// ============================================================
-
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-const MONTHS = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
-]
-
-// Available time slots (Mon–Sat only)
-const TIME_SLOTS = [
-    "08:00 AM", "08:30 AM",
-    "09:00 AM", "09:30 AM",
-    "10:00 AM", "10:30 AM",
-    "11:00 AM", "11:30 AM",
-    "01:00 PM", "01:30 PM",
-    "02:00 PM", "02:30 PM",
-    "03:00 PM", "03:30 PM",
-    "04:00 PM", "04:30 PM",
-]
+import { MEETING_DAYS, MEETING_MONTHS, MEETING_TIME_SLOTS, MEETING_TIMEZONES } from "@/lib/helpers/constants"
+import { getDaysInMonth, getFirstDayOfMonth, formatDate, isDateInPast, isWeekend, isTimeSlotInPast } from "@/lib/helpers/format"
 
 // Static booked slots — safe for SSR, no hydration mismatch
 // Format: "YYYY-MM-DD": [slot indices]
@@ -69,61 +49,16 @@ const BOOKED_SLOTS: Record<string, number[]> = {
     "2026-03-06": [0, 5, 6, 14],
 }
 
-// Timezones
-const TIMEZONES = [
-    { value: "Asia/Manila", label: "Philippines (PHT, UTC+8)" },
-    { value: "America/New_York", label: "New York (ET, UTC-5/-4)" },
-    { value: "America/Los_Angeles", label: "Los Angeles (PT, UTC-8/-7)" },
-    { value: "America/Chicago", label: "Chicago (CT, UTC-6/-5)" },
-    { value: "Europe/London", label: "London (GMT/BST, UTC+0/+1)" },
-    { value: "Europe/Paris", label: "Paris (CET, UTC+1/+2)" },
-    { value: "Asia/Dubai", label: "Dubai (GST, UTC+4)" },
-    { value: "Asia/Singapore", label: "Singapore (SGT, UTC+8)" },
-    { value: "Asia/Tokyo", label: "Tokyo (JST, UTC+9)" },
-    { value: "Australia/Sydney", label: "Sydney (AEDT, UTC+11)" },
-]
-
 // Host info
 const HOST = {
-    name: "Juspher Balangyao",
-    title: "Founder & CEO",
+    name: "Rhea Jane Lisondra",
+    title: "Director of Business Development",
     company: siteConfig.fullName,
-    avatar: null, // set to "/team/juspher.jpg" when photo is available
-    initials: "JB",
-    bio: "Discovery call to explore how Juspher Tech Solutions can help your business grow through outsourcing and software.",
-    email: "founder@jusphertechsolution.com",
+    avatar: null,
+    initials: "RJ",
+    bio: "Discovery call to explore how Juspher & Co. Tech Solutions can help your business grow through outsourcing and software.",
+    email: "rheajane.lisondra@juspherandco.com",
 }
-
-// ============================================================
-// HELPERS
-// ============================================================
-
-function getDaysInMonth(year: number, month: number) {
-    return new Date(year, month + 1, 0).getDate()
-}
-
-function getFirstDayOfMonth(year: number, month: number) {
-    return new Date(year, month, 1).getDay()
-}
-
-function formatDate(date: Date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-}
-
-function isWeekend(date: Date) {
-    const day = date.getDay()
-    return day === 0 // only Sunday is blocked (Mon–Sat available)
-}
-
-function isPast(date: Date) {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return date < today
-}
-
-// ============================================================
-// STEP INDICATOR
-// ============================================================
 
 function StepIndicator({ step }: { step: number }) {
     const steps = ["Pick a Date", "Choose Time", "Your Details", "Confirmed"]
@@ -154,10 +89,6 @@ function StepIndicator({ step }: { step: number }) {
         </div>
     )
 }
-
-// ============================================================
-// HOST CARD
-// ============================================================
 
 function HostCard({ compact = false }: { compact?: boolean }) {
     return (
@@ -209,11 +140,7 @@ function HostCard({ compact = false }: { compact?: boolean }) {
     )
 }
 
-// ============================================================
-// MAIN PAGE
-// ============================================================
-
-export default function BookMeetingPage() {
+export default function BookMeeting() {
     const today = new Date()
     const [currentMonth, setCurrentMonth] = useState(today.getMonth())
     const [currentYear, setCurrentYear] = useState(today.getFullYear())
@@ -224,7 +151,6 @@ export default function BookMeetingPage() {
     const [form, setForm] = useState({ name: "", email: "", company: "", message: "" })
     const [submitted, setSubmitted] = useState(false)
 
-
     // Calendar grid
     const daysInMonth = getDaysInMonth(currentYear, currentMonth)
     const firstDay = getFirstDayOfMonth(currentYear, currentMonth)
@@ -233,7 +159,6 @@ export default function BookMeetingPage() {
         for (let d = 1; d <= daysInMonth; d++) {
             cells.push(new Date(currentYear, currentMonth, d))
         }
-        // pad to complete last row
         while (cells.length % 7 !== 0) cells.push(null)
         return cells
     }, [currentYear, currentMonth, daysInMonth, firstDay])
@@ -292,7 +217,7 @@ export default function BookMeetingPage() {
                                 </div>
                                 <div className="flex items-center gap-2 text-sm">
                                     <Globe size={13} className="text-amber-500 shrink-0" />
-                                    <span className="text-zinc-500 dark:text-zinc-400">{TIMEZONES.find((t) => t.value === timezone)?.label}</span>
+                                    <span className="text-zinc-500 dark:text-zinc-400">{MEETING_TIMEZONES.find((t) => t.value === timezone)?.label}</span>
                                 </div>
                             </div>
                         </div>
@@ -370,7 +295,7 @@ export default function BookMeetingPage() {
                                         <div className="flex items-center gap-2 text-sm">
                                             <Globe size={13} className="text-zinc-400 shrink-0" />
                                             <span className="text-zinc-400 dark:text-zinc-500 text-xs">
-                                                {TIMEZONES.find((t) => t.value === timezone)?.label}
+                                                {MEETING_TIMEZONES.find((t) => t.value === timezone)?.label}
                                             </span>
                                         </div>
                                     </div>
@@ -388,7 +313,7 @@ export default function BookMeetingPage() {
                                         <SelectValue placeholder="Select timezone" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {TIMEZONES.map((tz) => (
+                                        {MEETING_TIMEZONES.map((tz) => (
                                             <SelectItem key={tz.value} value={tz.value}>
                                                 {tz.label}
                                             </SelectItem>
@@ -417,7 +342,7 @@ export default function BookMeetingPage() {
                                         <ChevronLeft size={16} />
                                     </button>
                                     <h2 className="text-base font-bold text-zinc-900 dark:text-white">
-                                        {MONTHS[currentMonth]} {currentYear}
+                                        {MEETING_MONTHS[currentMonth]} {currentYear}
                                     </h2>
                                     <button
                                         onClick={nextMonth}
@@ -429,7 +354,7 @@ export default function BookMeetingPage() {
 
                                 {/* Day headers */}
                                 <div className="grid grid-cols-7 px-4 pb-2">
-                                    {DAYS.map((d) => (
+                                    {MEETING_DAYS.map((d) => (
                                         <div key={d} className={cn("text-center text-xs font-bold uppercase tracking-widest py-2", d === "Sun" ? "text-zinc-300 dark:text-zinc-700" : "text-zinc-400 dark:text-zinc-600")}>
                                             {d}
                                         </div>
@@ -440,7 +365,7 @@ export default function BookMeetingPage() {
                                 <div className="grid grid-cols-7 gap-1 px-4 pb-6">
                                     {calendarCells.map((date, i) => {
                                         if (!date) return <div key={`empty-${i}`} />
-                                        const isDisabled = isPast(date) || isWeekend(date)
+                                        const isDisabled = isDateInPast(date) || isWeekend(date)
                                         const isSunday = date.getDay() === 0
                                         const isSelected = selectedDate && formatDate(date) === formatDate(selectedDate)
                                         const isToday = formatDate(date) === formatDate(today)
@@ -515,7 +440,7 @@ export default function BookMeetingPage() {
                                             {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                                         </h2>
                                         <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-                                            All times in {TIMEZONES.find((t) => t.value === timezone)?.label}
+                                            All times in {MEETING_TIMEZONES.find((t) => t.value === timezone)?.label}
                                         </p>
                                     </div>
                                     <button onClick={() => setStep(1)} className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
@@ -528,62 +453,55 @@ export default function BookMeetingPage() {
                                         Available Slots · 30 min each
                                     </p>
 
-                                    {/* Morning */}
-                                    <div className="mb-5">
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-600 mb-2 font-semibold">Morning</p>
-                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                                            {TIME_SLOTS.filter((s) => s.includes("AM")).map((slot, i) => {
-                                                const isBooked = bookedIndices.includes(i)
-                                                const isSelected = selectedSlot === slot
-                                                return (
-                                                    <button
-                                                        key={slot}
-                                                        onClick={() => { if (!isBooked) setSelectedSlot(slot) }}
-                                                        disabled={isBooked}
-                                                        className={cn(
-                                                            "py-2.5 px-3 rounded-xl border text-sm font-semibold transition-all duration-150",
-                                                            isSelected
-                                                                ? "bg-amber-400 border-amber-400 text-zinc-950 shadow-md shadow-amber-400/20"
-                                                                : isBooked
-                                                                    ? "bg-zinc-50 dark:bg-zinc-800 border-zinc-100 dark:border-white/5 text-zinc-300 dark:text-zinc-700 cursor-not-allowed line-through"
-                                                                    : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-amber-400/50 hover:bg-amber-50 dark:hover:bg-amber-400/5 hover:text-amber-600 dark:hover:text-amber-400"
-                                                        )}
-                                                    >
-                                                        {slot}
-                                                    </button>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
+                                    {(() => {
+                                        const renderSlots = (slots: string[]) => slots.map((slot) => {
+                                            const slotIdx = MEETING_TIME_SLOTS.indexOf(slot)
+                                            const isBooked = bookedIndices.includes(slotIdx)
+                                            const isPast = isTimeSlotInPast(slot, selectedDate)
+                                            const isSelected = selectedSlot === slot
+                                            const isDisabled = isBooked || isPast
 
-                                    {/* Afternoon */}
-                                    <div>
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-600 mb-2 font-semibold">Afternoon</p>
-                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                                            {TIME_SLOTS.filter((s) => s.includes("PM")).map((slot, i) => {
-                                                const slotIdx = TIME_SLOTS.indexOf(slot)
-                                                const isBooked = bookedIndices.includes(slotIdx)
-                                                const isSelected = selectedSlot === slot
-                                                return (
-                                                    <button
-                                                        key={slot}
-                                                        onClick={() => { if (!isBooked) setSelectedSlot(slot) }}
-                                                        disabled={isBooked}
-                                                        className={cn(
-                                                            "py-2.5 px-3 rounded-xl border text-sm font-semibold transition-all duration-150",
-                                                            isSelected
-                                                                ? "bg-amber-400 border-amber-400 text-zinc-950 shadow-md shadow-amber-400/20"
-                                                                : isBooked
-                                                                    ? "bg-zinc-50 dark:bg-zinc-800 border-zinc-100 dark:border-white/5 text-zinc-300 dark:text-zinc-700 cursor-not-allowed line-through"
+                                            return (
+                                                <button
+                                                    key={slot}
+                                                    onClick={() => { if (!isDisabled) setSelectedSlot(slot) }}
+                                                    disabled={isDisabled}
+                                                    className={cn(
+                                                        "py-2.5 px-3 rounded-xl border text-sm font-semibold transition-all duration-150",
+                                                        isSelected
+                                                            ? "bg-amber-400 border-amber-400 text-zinc-950 shadow-md shadow-amber-400/20"
+                                                            : isBooked
+                                                                ? "bg-zinc-50 dark:bg-zinc-800 border-zinc-100 dark:border-white/5 text-zinc-300 dark:text-zinc-700 cursor-not-allowed line-through"
+                                                                : isPast
+                                                                    ? "bg-zinc-50 dark:bg-zinc-800 border-zinc-100 dark:border-white/5 text-zinc-300 dark:text-zinc-700 cursor-not-allowed opacity-40"
                                                                     : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-amber-400/50 hover:bg-amber-50 dark:hover:bg-amber-400/5 hover:text-amber-600 dark:hover:text-amber-400"
-                                                        )}
-                                                    >
-                                                        {slot}
-                                                    </button>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
+                                                    )}
+                                                >
+                                                    {slot}
+                                                </button>
+                                            )
+                                        })
+
+                                        return (
+                                            <>
+                                                {/* Morning */}
+                                                <div className="mb-5">
+                                                    <p className="text-xs text-zinc-400 dark:text-zinc-600 mb-2 font-semibold">Morning</p>
+                                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                                        {renderSlots(MEETING_TIME_SLOTS.filter((s) => s.includes("AM")))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Afternoon */}
+                                                <div>
+                                                    <p className="text-xs text-zinc-400 dark:text-zinc-600 mb-2 font-semibold">Afternoon</p>
+                                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                                        {renderSlots(MEETING_TIME_SLOTS.filter((s) => s.includes("PM")))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )
+                                    })()}
                                 </div>
 
                                 <div className="px-6 pb-6 flex gap-3">
@@ -620,7 +538,7 @@ export default function BookMeetingPage() {
                                         <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200 truncate">
                                             {selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })} · {selectedSlot}
                                         </p>
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-500">30 min · {TIMEZONES.find((t) => t.value === timezone)?.label}</p>
+                                        <p className="text-xs text-zinc-400 dark:text-zinc-500">30 min · {MEETING_TIMEZONES.find((t) => t.value === timezone)?.label}</p>
                                     </div>
                                     <button onClick={() => setStep(2)} className="ml-auto text-xs text-amber-500 dark:text-amber-400 font-semibold hover:underline shrink-0">
                                         Edit

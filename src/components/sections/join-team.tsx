@@ -1,14 +1,17 @@
 import Link from "next/link"
-import { ArrowRight, Code2, Headphones, PenTool, Users, Briefcase, Star, Zap, Globe } from "lucide-react"
+import { ArrowRight, Globe, Star, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ROLE_DEVELOPER, ROLE_DESIGNER, ROLE_VA, ROLE_PROJECT_MANAGER, ROLE_DATA_ANALYST, ROLES } from "@/lib/helpers/constants"
 
-const roles = [
-    { label: "Developer", icon: Code2, color: "text-blue-500 dark:text-blue-400" },
-    { label: "Designer", icon: PenTool, color: "text-violet-500 dark:text-violet-400" },
-    { label: "Virtual Assistant", icon: Headphones, color: "text-emerald-500 dark:text-emerald-400" },
-    { label: "Project Manager", icon: Briefcase, color: "text-amber-500 dark:text-amber-400" },
-    { label: "Data Analyst", icon: Users, color: "text-rose-500 dark:text-rose-400" },
+const FEATURED_ROLES = [
+    { ...ROLE_DEVELOPER, color: "text-blue-500    dark:text-blue-400" },
+    { ...ROLE_DESIGNER, color: "text-violet-500  dark:text-violet-400" },
+    { ...ROLE_VA, color: "text-emerald-500 dark:text-emerald-400" },
+    { ...ROLE_PROJECT_MANAGER, color: "text-amber-500   dark:text-amber-400" },
+    { ...ROLE_DATA_ANALYST, color: "text-rose-500    dark:text-rose-400" },
 ]
+
+const remainingCount = ROLES.filter((r) => r.value !== "all").length - FEATURED_ROLES.length
 
 const perks = [
     { icon: Globe, label: "Work with global clients" },
@@ -19,18 +22,17 @@ const perks = [
 export function JoinTeamSection() {
     return (
         <section className="relative bg-zinc-100 dark:bg-zinc-950 overflow-hidden">
-
-            {/* Grid texture */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:40px_40px]" />
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:72px_72px]" />
 
             {/* Glows */}
-            <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-400/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute -top-32    -left-32   w-96  h-96  bg-amber-400/20  rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32  w-96  h-96  bg-amber-400/15  rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-1/2    -left-20   w-72  h-72  bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/4    -right-20  w-72  h-72  bg-yellow-400/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-1/4  left-1/3  w-64  h-64  bg-amber-300/10  rounded-full blur-[80px]  pointer-events-none" />
 
             <div className="relative container mx-auto px-6 md:px-12 py-20 md:py-28">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
-                    {/* Left — Copy */}
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/20 mb-6">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -69,9 +71,9 @@ export function JoinTeamSection() {
                     {/* Right — Role cards */}
                     <div className="relative">
                         <div className="flex flex-col gap-3">
-                            {roles.map((role, i) => (
+                            {FEATURED_ROLES.map((role, i) => (
                                 <div
-                                    key={role.label}
+                                    key={role.value}
                                     className="flex items-center gap-4 px-5 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl hover:border-amber-400/30 dark:hover:border-amber-400/20 hover:shadow-sm dark:hover:bg-zinc-800/80 transition-all duration-300 group"
                                     style={{ transform: `translateX(${i % 2 === 0 ? "0px" : "24px"})` }}
                                 >
@@ -88,12 +90,13 @@ export function JoinTeamSection() {
                         </div>
 
                         {/* Bottom tag */}
-                        <div className="mt-4 ml-6 inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-xl">
-                            <span className="text-zinc-400 dark:text-zinc-500 text-xs">+7 more roles available</span>
-                            <ArrowRight size={11} className="text-zinc-400 dark:text-zinc-600" />
-                        </div>
+                        {remainingCount > 0 && (
+                            <div className="mt-4 ml-6 inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-xl">
+                                <span className="text-zinc-400 dark:text-zinc-500 text-xs">+{remainingCount} more roles available</span>
+                                <ArrowRight size={11} className="text-zinc-400 dark:text-zinc-600" />
+                            </div>
+                        )}
                     </div>
-
                 </div>
             </div>
         </section>

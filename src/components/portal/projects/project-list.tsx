@@ -170,8 +170,7 @@ const priorityConfig = {
     low: "text-zinc-500  dark:text-zinc-400  bg-zinc-100 dark:bg-zinc-800     border-zinc-200  dark:border-white/10",
 }
 
-// ── Content (async) ───────────────────────────────────────────
-async function ProjectsContent() {
+export default async function ProjectsList() {
     const client = await requireActiveClient()
     if (!client) redirect("/unauthorized")
 
@@ -294,12 +293,5 @@ async function ProjectsContent() {
                 )}
             </div>
         </div>
-    )
-}
-
-// ── Page ──────────────────────────────────────────────────────
-export default function ProjectsPage() {
-    return (
-        <ProjectsContent />
     )
 }

@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { talents } from "@/lib/talents"
-import { roles } from "@/lib/roles"
+import { ROLES } from "@/lib/helpers/constants"
 
 // ============================================================
 // TYPES & CONSTANTS
@@ -389,7 +389,7 @@ function TeamBuilder() {
                         )}
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        {roles.filter((r) => r.value !== "all").map((role) => {
+                        {ROLES.filter((r) => r.value !== "all").map((role) => {
                             const active = selectedRoles.includes(role.value)
                             const isSuggested = suggestions?.roles.includes(role.value)
                             return (
@@ -815,7 +815,7 @@ export default function TalentClient() {
                                     <div>
                                         <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-3">Role</p>
                                         <div className="flex flex-col gap-0.5">
-                                            {roles.map((role) => (
+                                            {ROLES.map((role) => (
                                                 <button key={role.value} onClick={() => handleFilterChange(() => setSelectedRole(role.value))} className={cn("text-left px-3 py-2 rounded-lg text-sm font-medium transition-all", selectedRole === role.value ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white")}>
                                                     {role.label}
                                                 </button>
@@ -940,7 +940,7 @@ export default function TalentClient() {
                             <div>
                                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">Role</p>
                                 <div className="flex flex-col gap-1">
-                                    {roles.map((role) => (
+                                    {ROLES.map((role) => (
                                         <button key={role.value} onClick={() => handleFilterChange(() => setSelectedRole(role.value))} className={cn("text-left px-3 py-2 rounded-lg text-sm font-medium transition-all", selectedRole === role.value ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950" : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900")}>{role.label}</button>
                                     ))}
                                 </div>

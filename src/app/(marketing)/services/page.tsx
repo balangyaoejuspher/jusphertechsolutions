@@ -117,7 +117,7 @@ function ServiceCard({ service }: { service: (typeof developmentServices)[0] }) 
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Full-stack development, blockchain & Web3, mobile apps, AI automation, outsourcing and more. Hire vetted talent or get a custom solution from Juspher Tech Solutions.",
+    "Full-stack development, blockchain & Web3, mobile apps, AI automation, outsourcing and more. Hire vetted talent or get a custom solution from Juspher & Co. Tech Solutions.",
 }
 
 export default function ServicesPage() {

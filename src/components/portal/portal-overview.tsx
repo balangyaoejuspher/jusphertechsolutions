@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { PROJECT_ACTIVITY_COLORS, PROJECT_STATUS_CONFIG } from "@/lib/helpers/constants"
 
 
 const mockStats = [
@@ -53,12 +54,18 @@ const mockProjects = [
 
 const mockMeetings = [
     {
-        id: "1",
-        title: "Weekly Project Sync",
-        date: "Mon, Feb 24, 2026",
-        time: "10:00 AM",
-        host: "Juspher Balangyao",
-        type: "Google Meet",
+        id: "1", title: "Sprint Review & Demo",
+        project: "E-Commerce Web App",
+        date: "Feb 25, 2026", dateISO: "2026-02-25", time: "10:00 AM", duration: 60,
+        status: "scheduled", type: "video",
+        host: { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
+        attendees: [
+            { name: "Juspher Balangyao", initials: "JB", role: "Project Manager" },
+            { name: "Ana Kim", initials: "AK", role: "Frontend Dev" },
+            { name: "Rico Mendez", initials: "RM", role: "Backend Dev" },
+        ],
+        joinUrl: "https://meet.google.com/abc-defg-hij",
+        agenda: "1. Demo of completed frontend\n2. Backend API walkthrough\n3. Q&A and feedback\n4. Next sprint planning",
     },
 ]
 
@@ -69,25 +76,7 @@ const mockActivity = [
     { id: "4", text: "Meeting scheduled for Feb 24", time: "3 days ago", icon: CalendarDays, color: "violet" },
 ]
 
-const projectStatusConfig = {
-    in_progress: { label: "In Progress", color: "bg-amber-50 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-400/20" },
-    review: { label: "In Review", color: "bg-blue-50  dark:bg-blue-400/10  text-blue-600  dark:text-blue-400  border-blue-200  dark:border-blue-400/20" },
-    completed: { label: "Completed", color: "bg-emerald-50 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-400/20" },
-    on_hold: { label: "On Hold", color: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-white/10" },
-}
-
-const colorMap: Record<string, string> = {
-    amber: "bg-amber-50  dark:bg-amber-400/10  border-amber-200  dark:border-amber-400/20  text-amber-500  dark:text-amber-400",
-    emerald: "bg-emerald-50 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20 text-emerald-500 dark:text-emerald-400",
-    blue: "bg-blue-50   dark:bg-blue-400/10   border-blue-200   dark:border-blue-400/20   text-blue-500   dark:text-blue-400",
-    violet: "bg-violet-50 dark:bg-violet-400/10 border-violet-200 dark:border-violet-400/20 text-violet-500 dark:text-violet-400",
-}
-
-// ============================================================
-// PAGE
-// ============================================================
-
-export default async function PortalPage() {
+export default async function PortalOverview() {
     const client = await requireActiveClient()
     if (!client) redirect("/unauthorized")
 
@@ -124,7 +113,7 @@ export default async function PortalPage() {
                     >
                         <div className={cn(
                             "w-9 h-9 rounded-xl border flex items-center justify-center mb-3",
-                            colorMap[stat.color]
+                            PROJECT_ACTIVITY_COLORS[stat.color]
                         )}>
                             <stat.icon size={16} />
                         </div>
@@ -156,7 +145,7 @@ export default async function PortalPage() {
 
                         <div className="divide-y divide-zinc-100 dark:divide-white/5">
                             {mockProjects.map((project) => {
-                                const statusCfg = projectStatusConfig[project.status as keyof typeof projectStatusConfig]
+                                const statusCfg = PROJECT_STATUS_CONFIG[project.status as keyof typeof PROJECT_STATUS_CONFIG]
                                 return (
                                     <div key={project.id} className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-white/2 transition-colors">
                                         <div className="flex items-start justify-between mb-3">
@@ -214,7 +203,7 @@ export default async function PortalPage() {
                                 <div key={item.id} className="flex items-start gap-4 px-6 py-4">
                                     <div className={cn(
                                         "w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 mt-0.5",
-                                        colorMap[item.color]
+                                        PROJECT_ACTIVITY_COLORS[item.color]
                                     )}>
                                         <item.icon size={13} />
                                     </div>
@@ -240,33 +229,36 @@ export default async function PortalPage() {
 
                         {mockMeetings.length > 0 ? (
                             <div className="p-6">
-                                {mockMeetings.map((meeting) => (
-                                    <div key={meeting.id}>
-                                        <div className="bg-amber-50 dark:bg-amber-400/5 border border-amber-200 dark:border-amber-400/20 rounded-2xl p-4 mb-4">
-                                            <p className="font-bold text-zinc-900 dark:text-white text-sm mb-3">{meeting.title}</p>
-                                            <div className="flex flex-col gap-1.5">
-                                                <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                                    <CalendarDays size={11} className="text-amber-500 shrink-0" />
-                                                    {meeting.date}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                                    <Clock size={11} className="text-amber-500 shrink-0" />
-                                                    {meeting.time} · 30 minutes
-                                                </div>
-                                                <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                                    <CheckCircle size={11} className="text-amber-500 shrink-0" />
-                                                    Hosted by {meeting.host}
+                                {(() => {
+                                    const meeting = mockMeetings[0]
+                                    return (
+                                        <>
+                                            <div className="bg-amber-50 dark:bg-amber-400/5 border border-amber-200 dark:border-amber-400/20 rounded-2xl p-4 mb-4">
+                                                <p className="font-bold text-zinc-900 dark:text-white text-sm mb-3">{meeting.title}</p>
+                                                <div className="flex flex-col gap-1.5">
+                                                    <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                                        <CalendarDays size={11} className="text-amber-500 shrink-0" />
+                                                        {meeting.date}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                                        <Clock size={11} className="text-amber-500 shrink-0" />
+                                                        {meeting.time} · {meeting.duration} minutes
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                                        <CheckCircle size={11} className="text-amber-500 shrink-0" />
+                                                        Hosted by {meeting.host.name}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <Link
-                                            href="/portal/meetings"
-                                            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:border-amber-400/50 hover:text-amber-500 dark:hover:text-amber-400 transition-all"
-                                        >
-                                            View all meetings <ArrowRight size={13} />
-                                        </Link>
-                                    </div>
-                                ))}
+                                            <Link
+                                                href="/portal/meetings"
+                                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:border-amber-400/50 hover:text-amber-500 dark:hover:text-amber-400 transition-all"
+                                            >
+                                                View all meetings <ArrowRight size={13} />
+                                            </Link>
+                                        </>
+                                    )
+                                })()}
                             </div>
                         ) : (
                             <div className="p-6 text-center">

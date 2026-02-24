@@ -1,10 +1,10 @@
-import InvoicesPage, { InvoicesPageSkeleton } from "@/components/portal/invoices/InvoicesPage"
+import InvoicesList, { InvoicesSkeleton } from "@/components/portal/invoices/invoices-list"
 import { Suspense } from "react"
 
 export default function Page() {
     return (
-        <Suspense fallback={<InvoicesPageSkeleton />}>
-            <InvoicesPage />
+        <Suspense fallback={<InvoicesSkeleton />}>
+            <InvoicesList />
         </Suspense>
     )
 }

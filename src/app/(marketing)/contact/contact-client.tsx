@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Mail, Clock, MessageSquare, ChevronDown, Send, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { EMAIL_REGEX, NAME_REGEX } from "@/lib/helpers/validators"
 
 const faqs = [
     {
@@ -37,7 +38,7 @@ const contactInfo = [
     {
         icon: Mail,
         label: "Email Us",
-        value: "support@jusphertechsolution.com",
+        value: "support@juspherandco.com",
         sub: "We reply within 24 hours",
     },
     {
@@ -65,18 +66,54 @@ export default function ContactPage() {
     const [loading, setLoading] = useState(false)
     const [submitted, setSubmitted] = useState(false)
     const [openFaq, setOpenFaq] = useState<number | null>(null)
+    const [userIsLoggedIn, setUserIsLoggedIn] = useState(false)
 
     const validate = () => {
         const newErrors: Record<string, string> = {}
-        if (!form.name.trim()) newErrors.name = "Name is required"
-        if (!form.email.trim()) newErrors.email = "Email is required"
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+
+        if (!form.name.trim()) {
+            newErrors.name = "Name is required"
+        } else if (!NAME_REGEX.test(form.name)) {
+            newErrors.name = "Enter a valid name"
+        }
+
+        if (!form.email.trim()) {
+            newErrors.email = "Email is required"
+        } else if (!EMAIL_REGEX.test(form.email)) {
             newErrors.email = "Enter a valid email"
-        if (!form.message.trim()) newErrors.message = "Message is required"
-        else if (form.message.trim().length < 10)
+        }
+
+        if (!form.message.trim()) {
+            newErrors.message = "Message is required"
+        } else if (form.message.trim().length < 10) {
             newErrors.message = "Message must be at least 10 characters"
+        }
+
         return newErrors
     }
+
+    useEffect(() => {
+        async function loadUser() {
+            try {
+                const res = await fetch("/api/me")
+                const { loggedIn, data } = await res.json()
+
+                if (loggedIn && data) {
+                    setUserIsLoggedIn(true)
+                    setForm((prev) => ({
+                        ...prev,
+                        name: data.name ?? "",
+                        email: data.email ?? "",
+                        company: data.company ?? ""
+                    }))
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
+        loadUser()
+    }, [])
 
     const handleSubmit = async () => {
         const newErrors = validate()
@@ -189,6 +226,7 @@ export default function ContactPage() {
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-4">
+
                                     {/* Name + Email */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
@@ -199,62 +237,95 @@ export default function ContactPage() {
                                                 type="text"
                                                 placeholder="John Smith"
                                                 value={form.name}
-                                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                                readOnly={userIsLoggedIn && form.name !== ""}
+                                                onChange={(e) => {
+                                                    const value = e.target.value
+                                                    setForm({ ...form, name: value })
+
+                                                    if (!value.trim()) {
+                                                        setErrors(prev => ({ ...prev, name: "" }))
+                                                    } else if (!NAME_REGEX.test(value)) {
+                                                        setErrors(prev => ({ ...prev, name: "Only letters, spaces, hyphens and apostrophes" }))
+                                                    } else {
+                                                        setErrors(prev => ({ ...prev, name: "" }))
+                                                    }
+                                                }}
                                                 className={cn(
-                                                    "w-full px-4 py-3 rounded-xl border text-sm text-zinc-900 dark:text-white bg-zinc-50 dark:bg-zinc-900 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none transition-all",
-                                                    errors.name
-                                                        ? "border-red-400 dark:border-red-500 focus:border-red-400"
-                                                        : "border-zinc-200 dark:border-white/10 focus:border-amber-400 dark:focus:border-amber-500"
+                                                    "w-full px-4 py-3 rounded-xl border text-sm text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all",
+                                                    form.name !== ""
+                                                        ? "bg-zinc-100 dark:bg-zinc-800 cursor-not-allowed opacity-75 border-zinc-300 dark:border-zinc-700"
+                                                        : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-white/10 focus:border-amber-400 dark:focus:border-amber-500",
+                                                    errors.name && "border-red-400 dark:border-red-500"
                                                 )}
                                             />
                                             {errors.name && (
                                                 <p className="text-red-400 text-xs mt-1">{errors.name}</p>
                                             )}
                                         </div>
+
                                         <div>
                                             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block mb-2">
                                                 Email <span className="text-red-400">*</span>
                                             </label>
+
                                             <input
                                                 type="email"
-                                                placeholder="john@company.com"
                                                 value={form.email}
-                                                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                                placeholder="john@company.com"
+                                                readOnly={userIsLoggedIn && form.email !== ""}
+                                                onChange={(e) => {
+                                                    const value = e.target.value
+                                                    setForm({ ...form, email: value })
+
+                                                    if (!value.trim()) {
+                                                        setErrors(prev => ({ ...prev, email: "" }))
+                                                    } else if (!EMAIL_REGEX.test(value)) {
+                                                        setErrors(prev => ({ ...prev, email: "Enter a valid email address" }))
+                                                    } else {
+                                                        setErrors(prev => ({ ...prev, email: "" }))
+                                                    }
+                                                }}
                                                 className={cn(
-                                                    "w-full px-4 py-3 rounded-xl border text-sm text-zinc-900 dark:text-white bg-zinc-50 dark:bg-zinc-900 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none transition-all",
-                                                    errors.email
-                                                        ? "border-red-400 dark:border-red-500 focus:border-red-400"
-                                                        : "border-zinc-200 dark:border-white/10 focus:border-amber-400 dark:focus:border-amber-500"
+                                                    "w-full px-4 py-3 rounded-xl border text-sm text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all",
+                                                    form.email !== ""
+                                                        ? "bg-zinc-100 dark:bg-zinc-800 cursor-not-allowed opacity-75 border-zinc-300 dark:border-zinc-700"
+                                                        : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-white/10 focus:border-amber-400 dark:focus:border-amber-500",
+                                                    errors.email && "border-red-400 dark:border-red-500"
                                                 )}
                                             />
+
                                             {errors.email && (
                                                 <p className="text-red-400 text-xs mt-1">{errors.email}</p>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* Company */}
                                     <div>
                                         <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block mb-2">
-                                            Company <span className="text-zinc-300 dark:text-zinc-600 font-normal normal-case tracking-normal">(optional)</span>
+                                            Company <span className="text-zinc-300 dark:text-zinc-600 font-normal normal-case">(optional)</span>
                                         </label>
                                         <input
                                             type="text"
-                                            placeholder="Acme Corp"
+                                            placeholder="Juspher Tech Solution"
                                             value={form.company}
+                                            readOnly={form.company !== ""}
                                             onChange={(e) => setForm({ ...form, company: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-900 dark:text-white bg-zinc-50 dark:bg-zinc-900 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none focus:border-amber-400 dark:focus:border-amber-500 transition-all"
+                                            className={
+                                                form.company !== ""
+                                                    ? "w-full px-4 py-3 rounded-xl border text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white cursor-not-allowed opacity-75 border-zinc-300 dark:border-zinc-700"
+                                                    : "w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-900 dark:text-white bg-zinc-50 dark:bg-zinc-900 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none focus:border-amber-400 dark:focus:border-amber-500 transition-all"
+                                            }
                                         />
                                     </div>
 
-                                    {/* Message */}
+                                    {/* Message (Editable Always) */}
                                     <div>
                                         <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block mb-2">
                                             Message <span className="text-red-400">*</span>
                                         </label>
                                         <textarea
                                             rows={5}
-                                            placeholder="Tell us about your project, what kind of talent you need, and your timeline..."
+                                            placeholder="Tell us about your project..."
                                             value={form.message}
                                             onChange={(e) => setForm({ ...form, message: e.target.value })}
                                             className={cn(

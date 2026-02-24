@@ -1,8 +1,20 @@
 import Link from "next/link"
 import { ShieldX } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getAdminSession } from "@/lib/admin-auth"
+import { getClientSession } from "@/lib/client-auth"
 
-export default function UnauthorizedPage() {
+export default async function UnauthorizedPage() {
+    const [admin, client] = await Promise.all([
+        getAdminSession(),
+        getClientSession(),
+    ])
+
+    const destination =
+        admin ? { href: "/dashboard", label: "Go to Dashboard" } :
+            client ? { href: "/portal", label: "Go to Portal" } :
+                { href: "/", label: "Back to Home" }
+
     return (
         <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
             <div className="text-center">
@@ -13,9 +25,9 @@ export default function UnauthorizedPage() {
                 <p className="text-zinc-400 text-sm max-w-sm mx-auto mb-8">
                     You don't have permission to access this area. Please contact your administrator.
                 </p>
-                <Link href="/">
+                <Link href={destination.href}>
                     <Button className="rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold">
-                        Back to Home
+                        {destination.label}
                     </Button>
                 </Link>
             </div>

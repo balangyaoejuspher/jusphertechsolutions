@@ -7,7 +7,7 @@ import { Shield, Zap, Users, Lock } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
-export default function SignInPage() {
+export default function SignInContent() {
     const { resolvedTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
 
@@ -124,7 +124,7 @@ export default function SignInPage() {
 
                         <h1 className="text-4xl font-black text-zinc-900 dark:text-white leading-[1.05] tracking-tight mb-4">
                             Welcome back to<br />
-                            <span className="text-amber-500 dark:text-amber-400">{siteConfig.name}.</span>
+                            <span className="text-amber-500 dark:text-amber-400">{siteConfig.name}</span>
                         </h1>
 
                         <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed max-w-xs">

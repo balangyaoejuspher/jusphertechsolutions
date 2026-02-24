@@ -5,13 +5,19 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
     const { userId } = await auth()
-    if (!userId) return NextResponse.json({ role: null })
+    if (!userId) {
+        return NextResponse.json({ loggedIn: false, data: null })
+    }
 
     const admin = await getAdminSession()
-    if (admin) return NextResponse.json({ role: "admin" })
+    if (admin) {
+        return NextResponse.json({ loggedIn: true, data: admin })
+    }
 
     const client = await getClientSession()
-    if (client) return NextResponse.json({ role: "client" })
+    if (client) {
+        return NextResponse.json({ loggedIn: true, data: client })
+    }
 
-    return NextResponse.json({ role: null })
+    return NextResponse.json({ loggedIn: false, data: null })
 }

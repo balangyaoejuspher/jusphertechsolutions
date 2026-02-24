@@ -1,11 +1,11 @@
 import { Suspense } from "react"
 import { PageSkeleton } from "@/components/shared/page-skeleton"
-import JoinPage from "@/components/forms/JoinPage"
+import JoinTeam from "@/components/forms/join-team"
 
 export default function Page() {
     return (
         <Suspense fallback={<PageSkeleton />}>
-            <JoinPage />
+            <JoinTeam />
         </Suspense>
     )
 }

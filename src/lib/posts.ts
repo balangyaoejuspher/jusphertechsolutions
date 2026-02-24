@@ -36,7 +36,7 @@ Cost-efficiency remains a genuine advantage, but it's important to frame it corr
 
 The companies that try Filipino developers once tend to stick around. The combination of technical skill, communication, cultural alignment with Western work culture, and genuine investment in outcomes is rare. It's not a coincidence that the Philippines has become one of the top outsourcing destinations in the world — it's the result of a workforce that consistently delivers.
 
-At Juspher Tech Solutions, we've built our entire model around this reality. We're not a staffing agency — we're a team of Filipino engineers who take ownership of the products we build. If you're considering expanding your technical team, we'd love to talk.
+At Juspher & Co. Tech Solutions, we've built our entire model around this reality. We're not a staffing agency — we're a team of Filipino engineers who take ownership of the products we build. If you're considering expanding your technical team, we'd love to talk.
     `,
     },
     {

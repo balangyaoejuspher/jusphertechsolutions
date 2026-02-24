@@ -34,7 +34,7 @@ function CategoryBadge({ category }: { category: string }) {
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Insights on outsourcing, blockchain, software development, and building remote teams — from the Juspher Tech Solutions team.",
+  description: "Insights on outsourcing, blockchain, software development, and building remote teams — from the Juspher & Co. Tech Solutions team.",
 }
 
 // ============================================================

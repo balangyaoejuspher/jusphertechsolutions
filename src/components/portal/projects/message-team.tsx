@@ -17,7 +17,7 @@ type Props = {
     projectName?: string
 }
 
-export function MessageTeamButton({ team, projectName }: Props) {
+export function MessageTeam({ team, projectName }: Props) {
     const [open, setOpen] = useState(false)
     const [selected, setSelected] = useState<string[]>(team.map((m) => m.email))
     const [subject, setSubject] = useState(projectName ? `Re: ${projectName}` : "")

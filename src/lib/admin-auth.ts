@@ -15,7 +15,12 @@ export async function getAdminSession() {
         .where(eq(admins.clerkUserId, userId))
         .limit(1)
 
-    return result[0] ?? null
+    if (!result[0]) return null
+
+    return {
+        ...result[0],
+        company: "Juspher & Co. Tech Solutions",
+    }
 }
 
 export async function requireAdmin(allowedRoles?: AdminRole[]) {

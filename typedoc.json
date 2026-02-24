@@ -1,0 +1,17 @@
+{
+  "entryPoints": [
+    "src/lib/admin-auth.ts",
+    "src/lib/client-auth.ts",
+    "src/server/db/schema.ts",
+    "src/server/db/client.ts",
+    "src/config/site.ts"
+  ],
+  "out": "docs/api",
+  "plugin": ["typedoc-plugin-markdown"],
+  "readme": "README.md",
+  "name": "Juspher & Co. — API Docs",
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "excludePrivate": true,
+  "excludeInternal": true
+}

@@ -1,19 +1,14 @@
 import Link from "next/link"
 import Image from "next/image"
 import { siteConfig } from "@/config/site"
-import { MapPin, Mail, Clock, ArrowRight } from "lucide-react"
+import { MapPin, Mail, Clock } from "lucide-react"
 import { footerServiceLinks, footerProductLinks, footerCompanyLinks } from "@/config/navigation"
-import { Button } from "../ui/button"
 
 export function Footer() {
   return (
     <footer className="relative bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-white/5 overflow-hidden">
-
-      {/* Background grid */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:72px_72px]" />
-      {/* Amber glow */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
-      {/* Top accent line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
 
       <div className="relative container mx-auto px-6 md:px-12">
@@ -54,7 +49,7 @@ export function Footer() {
               </span>
               <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-600">
                 <Mail size={14} className="shrink-0 text-amber-500/60" />
-                support@jusphertechsolution.com
+                support@juspherandco.com
               </span>
               <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-600">
                 <Clock size={14} className="shrink-0 text-amber-500/60" />
@@ -121,7 +116,7 @@ export function Footer() {
           </div>
 
         </div>
- 
+
         {/* Bottom bar */}
         <div className="border-t border-zinc-100 dark:border-white/5 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-zinc-400 dark:text-zinc-600">
