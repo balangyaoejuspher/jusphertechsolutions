@@ -80,6 +80,17 @@ export default function SignInContent() {
                 ? "bg-zinc-800 border border-white/10 text-white rounded-xl focus:border-amber-400/60"
                 : "bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl focus:border-amber-400/60",
         },
+        otpInput: isDark
+            ? "bg-zinc-800 border border-white/10 text-white placeholder-transparent rounded-xl h-12 focus:border-amber-400/60 focus:ring-amber-400/20"
+            : "bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder-transparent rounded-xl h-12 focus:border-amber-400/60 focus:ring-amber-400/20",
+
+        formFieldInput__otp: isDark
+            ? "bg-zinc-800 border border-white/10 text-white placeholder-transparent rounded-xl h-12 focus:border-amber-400/60"
+            : "bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder-transparent rounded-xl h-12 focus:border-amber-400/60",
+
+        codeInput: isDark
+            ? "bg-zinc-800 border border-white/10 text-white rounded-xl h-12 focus:border-amber-400/60"
+            : "bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-xl h-12 focus:border-amber-400/60",
     }
 
     return (

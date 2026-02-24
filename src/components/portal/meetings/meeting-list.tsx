@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { Meeting, MeetingStatus } from "@/types/meeting"
 import {
     Calendar,
     CheckCircle,
@@ -21,31 +22,6 @@ import {
     XCircle
 } from "lucide-react"
 import { useMemo, useState } from "react"
-
-// ── Types ─────────────────────────────────────────────────────
-
-type MeetingStatus = "scheduled" | "completed" | "cancelled" | "pending" | "rescheduled"
-
-type Meeting = {
-    id: string
-    title: string
-    project: string
-    date: string          // "Feb 25, 2026"
-    dateISO: string       // "2026-02-25" for calendar
-    time: string          // "10:00 AM"
-    duration: number      // minutes
-    status: MeetingStatus
-    host: { name: string; initials: string; role: string }
-    type: "video" | "call" | "in_person"
-    attendees: { name: string; initials: string; role: string }[]
-    joinUrl?: string
-    location?: string
-    agenda?: string
-    notes?: string
-    cancelReason?: string
-}
-
-// ── Mock Data ─────────────────────────────────────────────────
 
 const mockMeetings: Meeting[] = [
     {
@@ -144,8 +120,6 @@ const mockMeetings: Meeting[] = [
         agenda: "Monthly progress review and upcoming milestone planning.",
     },
 ]
-
-// ── Status Config ─────────────────────────────────────────────
 
 const statusConfig: Record<MeetingStatus, { label: string; icon: React.ElementType; color: string; dot: string }> = {
     scheduled: { label: "Scheduled", icon: Calendar, color: "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20", dot: "bg-amber-500" },

@@ -18,6 +18,9 @@ import {
   NotebookPen,
   Package,
   Building2,
+  Send,
+  UserPlus,
+  Calendar,
 } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
@@ -50,6 +53,9 @@ const navGroups = [
       { label: "Talent", href: "/dashboard/talent", icon: Users },
       { label: "Clients", href: "/dashboard/clients", icon: Building2 },
       { label: "Inquiries", href: "/dashboard/inquiries", icon: FileText },
+      { label: "Invoices", href: "/dashboard/invoices", icon: Send },
+      { label: "Applicants", href: "/dashboard/applicants", icon: UserPlus },
+      { label: "Meetings", href: "/dashboard/meetings", icon: Calendar },
     ],
   },
   {

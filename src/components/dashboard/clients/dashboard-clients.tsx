@@ -10,7 +10,7 @@ import {
 import { seedClients } from "@/lib/clients"
 import { CLIENT_AVAILABLE_SERVICES, CLIENT_STATUS_CONFIG } from "@/lib/helpers/constants"
 import { cn } from "@/lib/utils"
-import { ClientStatus, Client, ClientType } from "@/types"
+import { Client, ClientStatus, ClientType } from "@/types"
 import {
     Building2,
     Check,
@@ -360,6 +360,10 @@ export default function DashboardClients() {
     const [modalOpen, setModalOpen] = useState(false)
     const [editingClient, setEditingClient] = useState<Client | undefined>()
 
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [clientToDelete, setClientToDelete] = useState<Client | null>(null)
+    const [confirmName, setConfirmName] = useState("")
+
     const filtered = clients.filter((c) => {
         const matchSearch =
             c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -387,12 +391,22 @@ export default function DashboardClients() {
         )
     }
 
-    const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this client?")) {
-            setClients((prev) => prev.filter((c) => c.id !== id))
-        }
+    const handleDeleteClick = (client: Client) => {
+        setClientToDelete(client)
+        setConfirmName("")
+        setDeleteModalOpen(true)
     }
 
+    const confirmDelete = () => {
+        if (clientToDelete && confirmName === clientToDelete.name) {
+            setClients((prev) => prev.filter((c) => c.id !== clientToDelete.id))
+            setDeleteModalOpen(false)
+            setClientToDelete(null)
+            setConfirmName("")
+        } else {
+            alert("Client name does not match. Please type the exact name to confirm.")
+        }
+    }
     return (
         <div className="flex flex-col gap-6 p-6 md:p-8">
 
@@ -492,19 +506,79 @@ export default function DashboardClients() {
                             key={client.id}
                             client={client}
                             onEdit={() => { setEditingClient(client); setModalOpen(true) }}
-                            onDelete={() => handleDelete(client.id)}
+                            onDelete={() => handleDeleteClick(client)}
                         />
                     ))}
                 </div>
             )}
 
-            {/* Modal */}
             {modalOpen && (
                 <ClientModal
                     client={editingClient}
                     onClose={() => { setModalOpen(false); setEditingClient(undefined) }}
                     onSave={handleSave}
                 />
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md p-6">
+                        <div className="flex flex-col gap-6">
+                            {/* Header */}
+                            <div>
+                                <h3 className="flex items-center gap-2 text-red-600 font-bold text-lg">
+                                    <Trash2 size={20} /> Confirm Delete
+                                </h3>
+                                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                                    Type <strong>{clientToDelete?.name}</strong> to confirm deletion.
+                                </p>
+                            </div>
+
+                            {/* Input */}
+                            <input
+                                type="text"
+                                value={confirmName}
+                                onChange={(e) => setConfirmName(e.target.value)}
+                                placeholder={`Type "${clientToDelete?.name}" here`}
+                                className={cn(
+                                    "w-full px-4 py-3 rounded-xl border text-sm transition outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600",
+                                    confirmName && confirmName !== clientToDelete?.name
+                                        ? "border-red-400 dark:border-red-500"
+                                        : "border-zinc-300 dark:border-zinc-700 focus:ring-2 focus:ring-amber-400",
+                                    "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                                )}
+                            />
+                            {confirmName && confirmName !== clientToDelete?.name && (
+                                <p className="text-xs text-red-500">Name does not match.</p>
+                            )}
+
+                            {/* Footer Buttons */}
+                            <div className="flex justify-end gap-3 mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteModalOpen(false)}
+                                    className="px-4 py-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={confirmDelete}
+                                    disabled={confirmName !== clientToDelete?.name}
+                                    className={cn(
+                                        "px-5 py-2 rounded-md font-semibold text-white transition",
+                                        confirmName === clientToDelete?.name
+                                            ? "bg-red-600 hover:bg-red-700"
+                                            : "bg-red-600/50 cursor-not-allowed"
+                                    )}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     )

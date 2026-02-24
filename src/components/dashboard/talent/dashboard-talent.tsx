@@ -363,20 +363,43 @@ export default function DashboardTalent() {
                         >
                             <ChevronLeft size={15} />
                         </button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <button
-                                key={page}
-                                onClick={() => setCurrentPage(page)}
-                                className={cn(
-                                    "w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors",
-                                    currentPage === page
-                                        ? "bg-amber-400 text-zinc-950"
-                                        : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5"
-                                )}
-                            >
-                                {page}
-                            </button>
-                        ))}
+
+                        {(() => {
+                            const pages: (number | string)[] = [];
+                            if (totalPages <= 5) {
+                                for (let i = 1; i <= totalPages; i++) pages.push(i);
+                            } else {
+                                pages.push(1);
+                                if (currentPage > 3) pages.push('...');
+                                for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                                    pages.push(i);
+                                }
+                                if (currentPage < totalPages - 2) pages.push('...');
+                                pages.push(totalPages);
+                            }
+
+                            return pages.map((page, idx) =>
+                                page === '...' ? (
+                                    <span key={`ellipsis-${idx}`} className="w-8 h-8 flex items-center justify-center text-zinc-400 text-sm">
+                                        …
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page as number)}
+                                        className={cn(
+                                            "w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors",
+                                            currentPage === page
+                                                ? "bg-amber-400 text-zinc-950"
+                                                : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5"
+                                        )}
+                                    >
+                                        {page}
+                                    </button>
+                                )
+                            );
+                        })()}
+
                         <button
                             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}

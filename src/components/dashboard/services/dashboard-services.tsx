@@ -26,6 +26,8 @@ import {
     Pencil,
     Plus,
     X,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { allServices } from "@/lib/services"
@@ -76,6 +78,15 @@ export default function DashboardServices() {
     const [editService, setEditService] = useState<ServiceVM | null>(null)
     const [form, setForm] = useState(emptyForm)
     const [menuOpen, setMenuOpen] = useState<string | null>(null)
+
+    const [currentPage, setCurrentPage] = useState(1)
+    const servicesPerPage = 3
+    const totalPages = Math.ceil(services.length / servicesPerPage)
+
+    const paginatedServices = services.slice(
+        (currentPage - 1) * servicesPerPage,
+        currentPage * servicesPerPage
+    )
 
     const openAdd = () => {
         setEditService(null)
@@ -183,7 +194,7 @@ export default function DashboardServices() {
 
             {/* Services Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {services.map((service) => {
+                {paginatedServices.map((service) => {
                     const Icon = iconMap[service.icon] ?? Code2
                     return (
                         <div
@@ -288,6 +299,73 @@ export default function DashboardServices() {
                     <span className="text-sm font-medium">Add New Service</span>
                 </button>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                        Showing {(currentPage - 1) * servicesPerPage + 1}–{Math.min(currentPage * servicesPerPage, services.length)} of {services.length}
+                    </p>
+
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft size={15} />
+                        </button>
+
+                        {(() => {
+                            const pages: (number | string)[] = []
+
+                            if (totalPages <= 5) {
+                                for (let i = 1; i <= totalPages; i++) pages.push(i)
+                            } else {
+                                pages.push(1)
+                                if (currentPage > 3) pages.push('...')
+                                for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                                    pages.push(i)
+                                }
+                                if (currentPage < totalPages - 2) pages.push('...')
+                                pages.push(totalPages)
+                            }
+
+                            return pages.map((page, idx) =>
+                                page === '...' ? (
+                                    <span
+                                        key={`ellipsis-${idx}`}
+                                        className="w-8 h-8 flex items-center justify-center text-zinc-400 text-sm"
+                                    >
+                                        …
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page as number)}
+                                        className={cn(
+                                            "w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors",
+                                            currentPage === page
+                                                ? "bg-amber-400 text-zinc-950"
+                                                : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5"
+                                        )}
+                                    >
+                                        {page}
+                                    </button>
+                                )
+                            )
+                        })()}
+
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight size={15} />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Modal */}
             {showModal && (

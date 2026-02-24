@@ -7,8 +7,11 @@ import {
   integer,
   decimal,
   boolean,
+  numeric,
+  jsonb,
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
+import { LineItem } from "@/types/invoice"
 
 // ============================================================
 // ENUMS
@@ -62,6 +65,11 @@ export const clientStatusEnum = pgEnum("client_status", [
   "prospect",
   "inactive",
 ])
+
+export const invoiceStatusEnum = pgEnum("invoice_status", [
+  "paid", "unpaid", "overdue", "partial", "draft"
+])
+
 
 // ============================================================
 // ADMINS
@@ -139,32 +147,19 @@ export const inquiries = pgTable("inquiries", {
 
 export const clients = pgTable("clients", {
   id: uuid("id").defaultRandom().primaryKey(),
-
-  // Nullable — only set once the client registers via Clerk
   clerkUserId: text("clerk_user_id").unique(),
-
-  // Identity
   type: clientTypeEnum("type").notNull(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone"),
   website: text("website"),
   location: text("location"),
-
-  // Individual-specific (null when type = "company")
   company: text("company"),
   position: text("position"),
-
-  // Status
   status: clientStatusEnum("status").default("prospect").notNull(),
 
-  // Services subscribed to — stored as string tags matching your service labels
   services: text("services").array().default([]).notNull(),
-
-  // Internal admin notes
   notes: text("notes"),
-
-  // Timestamps
   joinedDate: timestamp("joined_date").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
@@ -179,6 +174,26 @@ export const siteSettings = pgTable("site_settings", {
   value: text("value"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+// ============================================================
+// INVOICES
+// ============================================================
+
+export const invoices = pgTable("invoices", {
+  id:        text("id").primaryKey().notNull(),
+  number:    text("number").notNull().unique(),
+  project:   text("project").notNull(),
+  clientId:  text("client_id").notNull().references(() => clients.id),
+  issued:    text("issued").notNull(),
+  due:       text("due").notNull(),
+  amount:    numeric("amount").notNull(),
+  paid:      numeric("paid").notNull().default("0"),
+  status:    invoiceStatusEnum("status").notNull().default("unpaid"),
+  items:     jsonb("items").notNull().$type<LineItem[]>(),
+  notes:     text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 })
 
 // ============================================================

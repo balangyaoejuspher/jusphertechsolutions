@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { INQUIRY_STATUS_CONFIG, INQUIRY_STATUSES } from "@/lib/helpers/constants"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const initialInquiries = [
     {
@@ -75,6 +76,7 @@ export default function DashboardInquiries() {
     const [filterStatus, setFilterStatus] = useState("all")
     const [selected, setSelected] = useState<Inquiry | null>(null)
     const [statusDropdown, setStatusDropdown] = useState<string | null>(null)
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
     const filtered = inquiries
         .filter((i) => filterStatus === "all" || i.status === filterStatus)
@@ -95,6 +97,8 @@ export default function DashboardInquiries() {
         setInquiries(inquiries.filter((i) => i.id !== id))
         if (selected?.id === id) setSelected(null)
     }
+
+    const handleDelete = () => selected && (deleteInquiry(selected.id), setDeleteModalOpen(false))
 
     const formatDate = (date: string) =>
         new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
@@ -122,19 +126,21 @@ export default function DashboardInquiries() {
                         key={s.value}
                         onClick={() => setFilterStatus(s.value)}
                         className={cn(
-                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
+                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors",
                             filterStatus === s.value
                                 ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
-                                : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20"
+                                : "bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20"
                         )}
                     >
                         {s.label}
-                        <span className={cn(
-                            "text-xs px-1.5 py-0.5 rounded-md font-semibold",
-                            filterStatus === s.value
-                                ? "bg-white/20 text-white dark:text-zinc-950"
-                                : "bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400"
-                        )}>
+                        <span
+                            className={cn(
+                                "text-xs px-1.5 py-0.5 rounded-md font-semibold",
+                                filterStatus === s.value
+                                    ? "bg-white/20 text-white dark:text-zinc-950"
+                                    : "bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400"
+                            )}
+                        >
                             {counts[s.value as keyof typeof counts]}
                         </span>
                     </Button>
@@ -264,51 +270,100 @@ export default function DashboardInquiries() {
 
                             {/* Status */}
                             <div className="mb-6">
-                                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">Status</p>
-                                <div className="relative">
-                                    <Button
-                                        onClick={() => setStatusDropdown(statusDropdown === selected.id ? null : selected.id)}
-                                        className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-white/20 transition-all"
-                                    >
-                                        <span className={cn("px-2.5 py-1 rounded-lg text-xs font-medium", INQUIRY_STATUS_CONFIG[selected.status]?.className || "bg-zinc-100 text-zinc-500")}>
-                                            {INQUIRY_STATUS_CONFIG[selected.status]?.label || selected.status}
-                                        </span>
-                                        <ChevronDown size={15} className="text-zinc-400" />
-                                    </Button>
-                                    {statusDropdown === selected.id && (
-                                        <div className="absolute top-12 left-0 right-0 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg py-1 z-10">
-                                            {["new", "in_progress", "resolved"].map((s) => (
-                                                <Button
-                                                    key={s}
-                                                    onClick={() => updateStatus(selected.id, s)}
-                                                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-white/5 flex items-center gap-2"
+                                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">
+                                    Status
+                                </p>
+
+                                <Select
+                                    value={selected?.status || "new"}
+                                    onValueChange={(value) => selected && updateStatus(selected.id, value)}
+                                >
+                                    <SelectTrigger className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                        <SelectValue>
+                                            <span
+                                                className={cn(
+                                                    "px-2.5 py-1 rounded-lg text-xs font-medium",
+                                                    INQUIRY_STATUS_CONFIG[selected?.status || "new"]?.className ||
+                                                    "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-300"
+                                                )}
+                                            >
+                                                {INQUIRY_STATUS_CONFIG[selected?.status || "new"]?.label || selected?.status}
+                                            </span>
+                                        </SelectValue>
+                                    </SelectTrigger>
+
+                                    <SelectContent>
+                                        {["new", "in_progress", "resolved"].map((s) => (
+                                            <SelectItem key={s} value={s}>
+                                                <span
+                                                    className={cn(
+                                                        "px-2.5 py-1 rounded-lg text-xs font-medium",
+                                                        INQUIRY_STATUS_CONFIG[s]?.className ||
+                                                        "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-300"
+                                                    )}
                                                 >
-                                                    <span className={cn("px-2.5 py-1 rounded-lg text-xs font-medium", INQUIRY_STATUS_CONFIG[s]?.className || "bg-zinc-100 text-zinc-500")}>
-                                                        {INQUIRY_STATUS_CONFIG[s]?.label || s}
-                                                    </span>
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                                                    {INQUIRY_STATUS_CONFIG[s]?.label || s}
+                                                </span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* Actions */}
                             <div className="flex flex-col gap-2">
                                 <a
-                                    href={`mailto:${selected.email}`}
+                                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${selected.email}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="flex items-center justify-center gap-2 h-11 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-sm transition-all"
                                 >
                                     <Mail size={15} />
                                     Reply via Email
                                 </a>
+
                                 <Button
-                                    onClick={() => deleteInquiry(selected.id)}
-                                    className="flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-200 dark:border-white/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/20 font-medium text-sm transition-all"
+                                    onClick={() => setDeleteModalOpen(true)}
+                                    className={cn(
+                                        "flex items-center justify-center gap-2 h-11 rounded-xl border font-medium text-sm transition-colors",
+                                        "bg-red-50 dark:bg-red-900/10 border-red-300 dark:border-red-500 text-red-600",
+                                        "hover:bg-red-100 dark:hover:bg-red-600/20 hover:border-red-400 dark:hover:border-red-400"
+                                    )}
                                 >
                                     <X size={15} />
                                     Delete Inquiry
                                 </Button>
+
+                                {/* Delete Modal */}
+                                {deleteModalOpen && (
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                                        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-lg w-full max-w-md p-6">
+                                            <div className="flex flex-col gap-4">
+                                                <div className="flex items-center gap-2">
+                                                    <X size={20} className="text-red-500" />
+                                                    <h2 className="text-lg font-bold text-red-500">Confirm Delete</h2>
+                                                </div>
+                                                <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                                                    Are you sure you want to delete this inquiry? This action cannot be undone.
+                                                </p>
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => setDeleteModalOpen(false)}
+                                                        className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={handleDelete}
+                                                        className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white text-sm font-medium transition-all"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

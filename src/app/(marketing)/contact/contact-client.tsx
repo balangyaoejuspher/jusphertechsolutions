@@ -95,7 +95,7 @@ export default function ContactPage() {
     useEffect(() => {
         async function loadUser() {
             try {
-                const res = await fetch("/api/me")
+                const res = await fetch("/api/auth/me")
                 const { loggedIn, data } = await res.json()
 
                 if (loggedIn && data) {
@@ -125,7 +125,7 @@ export default function ContactPage() {
         setLoading(true)
 
         try {
-            const res = await fetch("/api/send-inquiry", {
+            const res = await fetch("/api/public/send-inquiry", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),

@@ -316,6 +316,17 @@ export const INQUIRY_STATUS_CONFIG: Record<string, { label: string; className: s
     resolved: { label: "Resolved", className: "bg-green-50 text-green-700" },
 }
 
+// ── Dashboard · Applicants ─────────────────────────────────────
+
+export const APPLICANTS_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  new: { label: "New", className: "bg-blue-100 text-blue-600" },
+  screening: { label: "Screening", className: "bg-orange-100 text-orange-600" },
+  interviewing: { label: "Interviewing", className: "bg-yellow-100 text-yellow-600" },
+  reviewing: { label: "Reviewing", className: "bg-purple-100 text-purple-600" },
+  approved: { label: "Approved", className: "bg-emerald-100 text-emerald-600" },
+  rejected: { label: "Rejected", className: "bg-red-100 text-red-600" },
+};
+
 // ── Dashboard · Products ──────────────────────────────────────
 
 export const PRODUCT_ACCENT_MAP: Record<string, { badge: string; icon: string; ring: string; dot: string; bar: string }> = {

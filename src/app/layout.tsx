@@ -6,6 +6,8 @@ import { ClerkProvider } from "@clerk/nextjs"
 import { TRPCProvider } from "@/components/shared/trpc-provider"
 import { ThemeProvider } from "@/components/shared/theme-provider"
 import { MouseFlashlight } from "@/components/shared/mouse-flashlight"
+import { Toaster } from "@/components/ui/sonner"
+import { AlertCircle, Check, Info, Loader2, X } from "lucide-react"
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -69,8 +71,19 @@ export default function RootLayout({
         <body className={`${playfair.variable} ${dmSans.variable} font-sans antialiased`}>
           <ThemeProvider>
             <TRPCProvider>
-              <MouseFlashlight /> 
+              <MouseFlashlight />
               {children}
+              <Toaster
+                richColors
+                closeButton
+                icons={{
+                  success: <Check className="w-4 h-4" />,
+                  info: <Info className="w-4 h-4" />,
+                  warning: <AlertCircle className="w-4 h-4" />,
+                  error: <X className="w-4 h-4" />,
+                  loading: <Loader2 className="w-4 h-4 animate-spin" />,
+                }}
+              />
             </TRPCProvider>
           </ThemeProvider>
         </body>

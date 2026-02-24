@@ -24,37 +24,7 @@ import { useState } from "react"
 import { Field } from "@/components/ui/field"
 import { Input } from "../ui/input"
 import { NAME_REGEX, EMAIL_REGEX, PHONE_REGEX } from "@/lib/helpers/validators"
-
-type Experience = {
-    id: string
-    company: string
-    role: string
-    duration: string
-    description: string
-}
-
-type FormData = {
-    firstName: string
-    lastName: string
-    email: string
-    phone: string
-    role: string
-    customRole: string
-    experienceLevel: string
-    availability: string
-    rateMin: string
-    rateMax: string
-    bio: string
-    skills: string[]
-    experiences: Experience[]
-    resumeFile: File | null
-    certificateFiles: File[]
-    portfolioUrl: string
-    githubUrl: string
-    linkedinUrl: string
-    country: string
-    city: string
-}
+import { Experience, FormData } from "@/types/applicant"
 
 const emptyExperience = (): Experience => ({
     id: Date.now().toString(),
@@ -68,9 +38,9 @@ const initialForm: FormData = {
     firstName: "", lastName: "", email: "", phone: "",
     role: "", customRole: "", experienceLevel: "", availability: "", rateMin: "", rateMax: "", bio: "",
     skills: [],
-    experiences: [emptyExperience()],
+    experiences: [emptyExperience()], status: "",
     resumeFile: null, certificateFiles: [], portfolioUrl: "", githubUrl: "", linkedinUrl: "",
-    country: "", city: "",
+    country: "", city: "", notes: [],
 }
 
 const inputCls = "w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-900 dark:text-white bg-white dark:bg-white/5 outline-none focus:border-amber-400 dark:focus:border-amber-400 transition-all placeholder:text-zinc-300 dark:placeholder:text-zinc-600"

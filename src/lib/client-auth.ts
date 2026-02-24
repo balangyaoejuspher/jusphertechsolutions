@@ -3,7 +3,6 @@ import { db } from "@/server/db/client"
 import { clients } from "@/server/db/schema"
 import { eq } from "drizzle-orm"
 
-
 export async function getClientSession() {
     const { userId } = await auth()
     if (!userId) return null
