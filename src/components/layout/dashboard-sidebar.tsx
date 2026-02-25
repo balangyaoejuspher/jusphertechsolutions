@@ -21,6 +21,7 @@ import {
   Send,
   UserPlus,
   Calendar,
+  Briefcase,
 } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
@@ -53,6 +54,7 @@ const navGroups = [
       { label: "Talent", href: "/dashboard/talent", icon: Users },
       { label: "Clients", href: "/dashboard/clients", icon: Building2 },
       { label: "Inquiries", href: "/dashboard/inquiries", icon: FileText },
+      { label: "Placements", href: "/dashboard/placements", icon: Briefcase },
       { label: "Invoices", href: "/dashboard/invoices", icon: Send },
       { label: "Applicants", href: "/dashboard/applicants", icon: UserPlus },
       { label: "Meetings", href: "/dashboard/meetings", icon: Calendar },

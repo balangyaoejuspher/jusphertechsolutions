@@ -65,3 +65,9 @@ export function isTimeSlotInPast(slot: string, selectedDate: Date) {
     slotDate.setHours(h, minutes, 0, 0)
     return slotDate <= now
 }
+
+export const parseBudget = (val?: string | null): string | null => {
+    if (!val) return null
+    const match = val.replace(/,/g, "").match(/[\d.]+/)
+    return match ? match[0] : null
+}

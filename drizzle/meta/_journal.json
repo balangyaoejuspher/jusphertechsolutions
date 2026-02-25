@@ -5,36 +5,43 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1771639572525,
-      "tag": "0000_worried_nekra",
+      "when": 1771988748637,
+      "tag": "0000_fine_paladin",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1771656645503,
-      "tag": "0001_glossy_the_hood",
+      "when": 1772001605095,
+      "tag": "0001_breezy_mariko_yashida",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1771660813784,
-      "tag": "0002_loose_glorian",
+      "when": 1772006833022,
+      "tag": "0002_unknown_jackal",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1771661509001,
-      "tag": "0003_stale_roland_deschain",
+      "when": 1772014736865,
+      "tag": "0003_chunky_the_hood",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1771842539472,
-      "tag": "0004_high_hellcat",
+      "when": 1772018500162,
+      "tag": "0004_legal_the_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772022378983,
+      "tag": "0005_crazy_purifiers",
       "breakpoints": true
     }
   ]

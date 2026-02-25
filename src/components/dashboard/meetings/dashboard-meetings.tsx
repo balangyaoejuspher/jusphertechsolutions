@@ -1,7 +1,10 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/ui/date-picker"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TimePicker } from "@/components/ui/time-picker"
 import { cn } from "@/lib/utils"
 import { Meeting, MeetingStatus, MeetingType } from "@/types/meeting"
 import {
@@ -435,7 +438,7 @@ function MeetingFormModal({
                     <div className="flex flex-col gap-4">
                         <div>
                             <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
-                                MeetingsWithClient Title <span className="text-amber-500">*</span>
+                                Meeting Title <span className="text-amber-500">*</span>
                             </label>
                             <input
                                 className={inputCls}
@@ -450,27 +453,27 @@ function MeetingFormModal({
                                 <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
                                     Project <span className="text-amber-500">*</span>
                                 </label>
-                                <select
-                                    className={`${inputCls} appearance-none`}
-                                    value={formData.project}
-                                    onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-                                >
-                                    <option value="">Select project</option>
-                                    {projects.map((p) => <option key={p} value={p}>{p}</option>)}
-                                </select>
+                                <Select value={formData.project} onValueChange={(v) => setFormData({ ...formData, project: v })}>
+                                    <SelectTrigger className="rounded-xl border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-sm text-zinc-900 dark:text-white">
+                                        <SelectValue placeholder="Select project" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl dark:bg-zinc-900 dark:border-white/10">
+                                        {projects.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div>
                                 <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
                                     Client <span className="text-amber-500">*</span>
                                 </label>
-                                <select
-                                    className={`${inputCls} appearance-none`}
-                                    value={formData.client}
-                                    onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                                >
-                                    <option value="">Select client</option>
-                                    {clients.map((c) => <option key={c} value={c}>{c}</option>)}
-                                </select>
+                                <Select value={formData.client} onValueChange={(v) => setFormData({ ...formData, client: v })}>
+                                    <SelectTrigger className="rounded-xl border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-sm text-zinc-900 dark:text-white">
+                                        <SelectValue placeholder="Select client" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl dark:bg-zinc-900 dark:border-white/10">
+                                        {clients.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 
@@ -479,41 +482,40 @@ function MeetingFormModal({
                                 <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
                                     Date <span className="text-amber-500">*</span>
                                 </label>
-                                <input
-                                    type="date"
-                                    className={inputCls}
+                                <DatePicker
                                     value={formData.dateISO}
-                                    onChange={(e) => handleDateChange(e.target.value)}
+                                    onChange={(val) => handleDateChange(val)}
+                                    placeholder="Select date"
                                 />
                             </div>
                             <div>
                                 <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
                                     Time <span className="text-amber-500">*</span>
                                 </label>
-                                <input
-                                    type="time"
-                                    className={inputCls}
+                                <TimePicker
                                     value={formData.time}
-                                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                    onChange={(val) => setFormData({ ...formData, time: val })}
+                                    placeholder="Pick a time"
                                 />
                             </div>
                             <div>
                                 <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
                                     Duration
                                 </label>
-                                <select
-                                    className={`${inputCls} appearance-none`}
-                                    value={formData.duration}
-                                    onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                                >
-                                    {durations.map((d) => <option key={d} value={d}>{d} min</option>)}
-                                </select>
+                                <Select value={String(formData.duration)} onValueChange={(v) => setFormData({ ...formData, duration: parseInt(v) })}>
+                                    <SelectTrigger className="rounded-xl border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-sm text-zinc-900 dark:text-white">
+                                        <SelectValue placeholder="Duration" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl dark:bg-zinc-900 dark:border-white/10">
+                                        {durations.map((d) => <SelectItem key={d} value={String(d)}>{d} min</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 
                         <div>
                             <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
-                                MeetingsWithClient Type
+                                Meeting Type
                             </label>
                             <div className="flex gap-2">
                                 {types.map((t) => {
@@ -921,22 +923,20 @@ function CancelRescheduleModal({
                                 <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
                                     New Date
                                 </label>
-                                <input
-                                    type="date"
-                                    className={inputCls}
+                                <DatePicker
                                     value={newDate}
-                                    onChange={(e) => setNewDate(e.target.value)}
+                                    onChange={(val) => setNewDate(val)}
+                                    placeholder="Select date"
                                 />
                             </div>
                             <div>
                                 <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest block mb-2">
                                     New Time
                                 </label>
-                                <input
-                                    type="time"
-                                    className={inputCls}
+                                <TimePicker
                                     value={newTime}
-                                    onChange={(e) => setNewTime(e.target.value)}
+                                    onChange={(val) => setNewTime(val)}
+                                    placeholder="Pick a time"
                                 />
                             </div>
                         </div>

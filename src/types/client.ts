@@ -1,18 +1,7 @@
-export type ClientType = "company" | "individual"
-export type ClientStatus = "active" | "inactive" | "prospect"
-
-export type Client = {
-    id: string
-    type: ClientType
-    name: string
-    email: string
-    phone?: string
-    website?: string
-    location?: string
-    company?: string
-    position?: string
-    status: ClientStatus
-    services: string[]
-    notes?: string
-    joinedDate: string
+import type { ClientRow } from "@/server/db/schema"
+export type Client = ClientRow
+export type ClientType = Client["type"]
+export type ClientStatus = Client["status"]
+export type ClientFormState = Partial<Omit<Client, "id" | "createdAt" | "updatedAt">> & {
+  password?: string
 }

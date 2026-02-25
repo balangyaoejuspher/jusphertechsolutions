@@ -206,16 +206,34 @@ function MobileAccordion({ label, items, onClose }: {
     )
 }
 
+type Role = "admin" | "super_admin" | "client"
+
+const ROLE_REDIRECT: Record<Role, string> = {
+    admin: "/dashboard",
+    super_admin: "/dashboard",
+    client: "/portal",
+}
+
+const ROLE_LABEL: Record<string, string> = {
+    "/dashboard": "ADMIN",
+    "/portal": "MY PORTAL",
+}
+
 function DashboardLink() {
     const [href, setHref] = useState<string | null>(null)
 
     useEffect(() => {
-        fetch("/api/me")
-            .then((r) => r.json())
-            .then((data) => {
-                if (data.role === "admin") setHref("/dashboard")
-                if (data.role === "client") setHref("/portal")
+        fetch("/api/auth/me")
+            .then((r) => {
+                if (!r.ok) throw new Error(`Auth check failed: ${r.status}`)
+                return r.json()
             })
+            .then((data) => {
+                const role = data.data?.role as Role | undefined
+                const redirect = role ? ROLE_REDIRECT[role] ?? null : null
+                setHref(redirect)
+            })
+            .catch(() => setHref(null))
     }, [])
 
     if (!href) return null
@@ -227,7 +245,7 @@ function DashboardLink() {
                 size="sm"
                 className="h-9 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-xs"
             >
-                {href === "/dashboard" ? "Admin" : "My Portal"}
+                {ROLE_LABEL[href] ?? "Dashboard"}
             </Button>
         </Link>
     )
@@ -479,7 +497,7 @@ export function Navbar() {
                                 </Button>
                             </Link>
                             <div className="flex items-center gap-3 px-1">
-                                <UserButton afterSignOutUrl="/" />
+                                <UserButton />
                                 <span className="text-sm text-zinc-500 dark:text-zinc-400">My Account</span>
                             </div>
                         </SignedIn>

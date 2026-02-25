@@ -1,30 +1,17 @@
-export type Talent = {
-    id: string
+import type { TalentRow } from "@/server/db/schema"
+export type Talent = TalentRow
+export type TalentStatus = Talent["status"]
+export type TalentFormState = {
     name: string
-    role:
-    | "developer"
-    | "va"
-    | "project_manager"
-    | "designer"
-    | "ui_ux"
-    | "data_analyst"
-    | "content_writer"
-    | "marketing"
-    | "customer_support"
-    | "accountant"
-    | "video_editor"
-    | "seo_specialist"
-    | "qa"
-    | "devops"
+    email: string
+    password?: string
     title: string
-    rate: number
-    skills: string[]
-    status: "available" | "busy" | "resigned" | "unavailable"
-    rating: number
-    projects: number
+    role: Talent["role"]
+    hourlyRate: string
+    skills: string
+    status: TalentStatus
+    rating: string
+    projectsCompleted: number
     bio: string
     gradient: string
-    companyId?: number
-    companyName?: string
-    isResigned?: boolean
 }

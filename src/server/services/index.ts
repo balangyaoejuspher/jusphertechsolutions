@@ -1,0 +1,7 @@
+export { clientService, ClientService } from "./client.service"
+export { talentService, TalentService } from "./talent.service"
+export { inquiryService, InquiryService } from "./inquiry.service"
+export { activityService, ActivityService } from "./activity.service"
+export { placementService, PlacementService } from "./placement.service"
+export { projectService, ProjectService } from "./project.service"
+export { BaseService } from "./base.service"

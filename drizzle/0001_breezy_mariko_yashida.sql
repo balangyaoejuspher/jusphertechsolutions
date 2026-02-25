@@ -1,0 +1,1 @@
+ALTER TYPE "public"."activity_type" ADD VALUE 'client_deleted' BEFORE 'client_status_changed';
