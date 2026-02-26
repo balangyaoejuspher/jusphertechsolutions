@@ -46,19 +46,14 @@ export function Partners() {
 
     return (
         <section className="py-16 bg-white dark:bg-zinc-950 border-y border-zinc-100 dark:border-white/5 overflow-hidden">
-            {/* ── Divider ── */}
             <div className="container mx-auto px-6 md:px-12">
                 <div className="border-t border-zinc-100 dark:border-white/5 mb-12" />
             </div>
-
-            {/* ── Tech Stack ── */}
             <div className="container mx-auto px-6 md:px-12 mb-10 text-center">
                 <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-[0.2em]">
                     Our technology expertise
                 </p>
             </div>
-
-            {/* Legend */}
             <div className="container mx-auto px-6 md:px-12 mb-8 flex flex-wrap justify-center gap-4">
                 {[
                     { label: "Language / Runtime", icon: <Code2 size={12} />, color: "text-sky-400" },
@@ -76,7 +71,6 @@ export function Partners() {
                 <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
 
-                {/* Reverse direction for visual variety */}
                 <div className="flex gap-4 whitespace-nowrap animate-marquee hover:pause-animation">
                     {doubledTech.map((tech, i) => (
                         <div

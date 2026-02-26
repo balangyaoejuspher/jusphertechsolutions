@@ -1,0 +1,30 @@
+CREATE TYPE "public"."product_category" AS ENUM('developer_tools', 'productivity', 'analytics', 'communication', 'security', 'other');--> statement-breakpoint
+CREATE TYPE "public"."product_status" AS ENUM('available', 'coming_soon', 'beta', 'deprecated', 'maintenance');--> statement-breakpoint
+CREATE TABLE "products" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"slug" text NOT NULL,
+	"label" text NOT NULL,
+	"tagline" text NOT NULL,
+	"description" text NOT NULL,
+	"icon" text DEFAULT 'Package' NOT NULL,
+	"accent_color" text DEFAULT '#f59e0b' NOT NULL,
+	"bg_color" text DEFAULT 'bg-amber-50' NOT NULL,
+	"border_color" text DEFAULT 'border-amber-200' NOT NULL,
+	"text_color" text DEFAULT 'text-amber-600' NOT NULL,
+	"category" "product_category" DEFAULT 'other' NOT NULL,
+	"features" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"pricing" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"use_cases" text[] DEFAULT '{}',
+	"tech_highlights" text[] DEFAULT '{}',
+	"status" "product_status" DEFAULT 'available' NOT NULL,
+	"is_visible" boolean DEFAULT true NOT NULL,
+	"is_featured" boolean DEFAULT false NOT NULL,
+	"is_new" boolean DEFAULT false NOT NULL,
+	"badge" text,
+	"order" integer DEFAULT 0,
+	"launched_at" timestamp,
+	"deprecated_at" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "products_slug_unique" UNIQUE("slug")
+);

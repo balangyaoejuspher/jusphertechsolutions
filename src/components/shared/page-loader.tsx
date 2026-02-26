@@ -10,18 +10,54 @@ const loadingMessages = [
     "Loading your dashboard...",
     "Almost there...",
     "Preparing your portal...",
+    "Fetching your data...",
+    "Syncing your account...",
+    "Verifying permissions...",
+    "Connecting to services...",
+    "Organizing your content...",
+    "Loading team members...",
+    "Retrieving recent activity...",
+    "Applying your preferences...",
+    "Initializing modules...",
+    "Just a moment...",
 ]
 
-export function PageLoader({ message }: { message?: string }) {
+export function PageLoader({ message, ready = false }: { message?: string; ready?: boolean }) {
     const [msgIndex, setMsgIndex] = useState(0)
+    const [fade, setFade] = useState(true)
+    const [progress, setProgress] = useState(0)
 
     useEffect(() => {
-        if (message) return // don't cycle if custom message provided
+        if (message) return
         const interval = setInterval(() => {
-            setMsgIndex((i) => (i + 1) % loadingMessages.length)
-        }, 1800)
+            setFade(false)
+            setTimeout(() => {
+                setMsgIndex((i) => (i + 1) % loadingMessages.length)
+                setFade(true)
+            }, 300)
+        }, 2200)
         return () => clearInterval(interval)
     }, [message])
+
+    useEffect(() => {
+        const steps = [15, 28, 42, 55, 67, 74, 83, 90]
+        let i = 0
+        const interval = setInterval(() => {
+            if (i < steps.length) {
+                setProgress(steps[i])
+                i++
+            } else {
+                clearInterval(interval)
+            }
+        }, 600)
+        return () => clearInterval(interval)
+    }, [])
+
+    useEffect(() => {
+        if (ready) setProgress(100)
+    }, [ready])
+
+    const displayMessage = message ?? loadingMessages[msgIndex]
 
     return (
         <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-zinc-950">
@@ -33,7 +69,7 @@ export function PageLoader({ message }: { message?: string }) {
             {/* Amber glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-400/5 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="relative flex flex-col items-center gap-6">
+            <div className="relative flex flex-col items-center gap-6 px-6 max-w-sm w-full">
 
                 {/* Logo with pulse ring */}
                 <div className="relative">
@@ -73,28 +109,46 @@ export function PageLoader({ message }: { message?: string }) {
                     ))}
                 </div>
 
-                {/* Cycling message */}
-                <p
-                    key={msgIndex}
-                    className="text-xs text-zinc-400 dark:text-zinc-600 font-medium animate-fade-in"
-                >
-                    {message ?? loadingMessages[msgIndex]}
-                </p>
+                {/* Message */}
+                <div className="text-center min-h-[48px] flex flex-col items-center justify-center gap-1.5">
+                    <p
+                        className="text-sm font-medium text-zinc-600 dark:text-zinc-400 transition-opacity duration-300"
+                        style={{ opacity: fade ? 1 : 0 }}
+                    >
+                        {displayMessage}
+                    </p>
+                    <p className="text-xs text-zinc-400 dark:text-zinc-600">
+                        This will only take a moment
+                    </p>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full">
+                    <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-gradient-to-r from-amber-400 to-amber-300 rounded-full transition-all duration-700 ease-out"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                    <p className="text-right text-[10px] text-zinc-400 dark:text-zinc-600 mt-1.5 tabular-nums">
+                        {progress}%
+                    </p>
+                </div>
             </div>
 
             <style jsx>{`
-        @keyframes bounce {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-          30%            { transform: translateY(-6px); opacity: 1; }
-        }
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(4px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.4s ease-out forwards;
-        }
-      `}</style>
+                @keyframes bounce {
+                    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+                    30%            { transform: translateY(-6px); opacity: 1; }
+                }
+                @keyframes fade-in {
+                    from { opacity: 0; transform: translateY(4px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in {
+                    animation: fade-in 0.4s ease-out forwards;
+                }
+            `}</style>
         </div>
     )
 }

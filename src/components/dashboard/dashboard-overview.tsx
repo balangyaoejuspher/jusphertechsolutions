@@ -295,12 +295,7 @@ export function DashboardOverviewClient({
                             { label: "Add New Talent", href: "/dashboard/talent", color: "bg-amber-400 text-zinc-950 hover:bg-amber-300" },
                             { label: "View Inquiries", href: "/dashboard/inquiries", color: "bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-700 dark:hover:bg-zinc-100" },
                             { label: "Manage Clients", href: "/dashboard/clients", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
-                            { label: "Manage Invoices", href: "/dashboard/invoices", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
-                            { label: "Applicants", href: "/dashboard/applicants", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
                             { label: "Meetings", href: "/dashboard/meetings", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
-                            { label: "Manage Services", href: "/dashboard/services", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
-                            { label: "Manage Blog", href: "/dashboard/blog", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
-                            { label: "Manage Products", href: "/dashboard/products", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
                             { label: "Settings", href: "/dashboard/settings", color: "bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10" },
                         ].map((action) => (
                             <Link

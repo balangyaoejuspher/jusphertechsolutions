@@ -1,14 +1,8 @@
 "use client"
 
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { CustomSelect } from "@/components/ui/custom-select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { portalFetch } from "@/lib/api/fetcher"
+import { portalFetch } from "@/lib/api/private-fetcher"
 import { CLIENT_AVAILABLE_SERVICES, CLIENT_STATUS_CONFIG } from "@/lib/helpers/constants"
 import { formatDate } from "@/lib/helpers/format"
 import { cn } from "@/lib/utils"
@@ -21,6 +15,19 @@ import {
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
+
+const STATUS_OPTIONS = [
+    { value: "all", label: "All Status" },
+    { value: "active", label: "Active" },
+    { value: "prospect", label: "Prospect" },
+    { value: "inactive", label: "Inactive" },
+] as const
+
+const TYPE_OPTIONS = [
+    { value: "all", label: "All Types" },
+    { value: "company", label: "Company" },
+    { value: "individual", label: "Individual" },
+] as const
 
 export function DashboardClientsSkeleton() {
     return (
@@ -528,27 +535,18 @@ export default function DashboardClients() {
                         className="w-full pl-10 pr-4 h-11 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 text-sm focus:outline-none focus:border-amber-400 transition-colors"
                     />
                 </div>
-                <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as ClientStatus | "all")}>
-                    <SelectTrigger className="h-11 w-[140px] rounded-xl border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400">
-                        <SelectValue placeholder="All Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="prospect">Prospect</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={filterType} onValueChange={(v) => setFilterType(v as ClientType | "all")}>
-                    <SelectTrigger className="h-11 w-[140px] rounded-xl border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400">
-                        <SelectValue placeholder="All Types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="company">Company</SelectItem>
-                        <SelectItem value="individual">Individual</SelectItem>
-                    </SelectContent>
-                </Select>
+                <CustomSelect
+                    value={filterStatus}
+                    options={STATUS_OPTIONS}
+                    onChange={(v) => setFilterStatus(v as ClientStatus | "all")}
+                    className="w-[140px] [&>button]:h-11 [&>button]:bg-white [&>button]:dark:bg-zinc-900"
+                />
+                <CustomSelect
+                    value={filterType}
+                    options={TYPE_OPTIONS}
+                    onChange={(v) => setFilterType(v as ClientType | "all")}
+                    className="w-[140px] [&>button]:h-11 [&>button]:bg-white [&>button]:dark:bg-zinc-900"
+                />
             </div>
 
             <p className="text-xs text-zinc-400 dark:text-zinc-600 -mt-2">

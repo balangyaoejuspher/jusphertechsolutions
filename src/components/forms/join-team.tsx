@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { JOIN_AVAILABILITY, JOIN_COUNTRIES, JOIN_EXPERIENCE_LEVELS, JOIN_ROLES, JOIN_SKILL_GROUPS, JOIN_STEPS, ROLE_SKILL_MAP, ROLE_SKILL_PLACEHOLDER } from "@/lib/helpers/constants"
 import { cn } from "@/lib/utils"
 import {
@@ -25,6 +24,7 @@ import { Field } from "@/components/ui/field"
 import { Input } from "../ui/input"
 import { NAME_REGEX, EMAIL_REGEX, PHONE_REGEX } from "@/lib/helpers/validators"
 import { Experience, FormData } from "@/types/applicant"
+import { CustomSelect } from "@/components/ui/custom-select"
 
 const emptyExperience = (): Experience => ({
     id: Date.now().toString(),
@@ -119,16 +119,13 @@ function StepPersonal({ form, setForm }: { form: FormData; setForm: (f: FormData
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Field label="Country" required>
-                    <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v })}>
-                        <SelectTrigger className="w-full h-10">
-                            <SelectValue placeholder="Select country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {JOIN_COUNTRIES.map((c) => (
-                                <SelectItem key={c} value={c}>{c}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <CustomSelect
+                        value={form.country}
+                        onChange={(v) => setForm({ ...form, country: v })}
+                        options={JOIN_COUNTRIES.map((c) => ({ value: c, label: c }))}
+                        placeholder="Select country"
+                        buttonClassName="h-10"
+                    />
                 </Field>
                 <Field label="City" error={errors.city}>
                     <input
@@ -148,20 +145,19 @@ function StepProfessional({ form, setForm }: { form: FormData; setForm: (f: Form
         <div className="flex flex-col gap-5">
             <Field label="Role Applying For" required>
                 <div className="flex flex-col gap-3">
-                    <Select
+                    <CustomSelect
                         value={form.role}
-                        onValueChange={(v) => setForm({ ...form, role: v, customRole: "" })}
-                    >
-                        <SelectTrigger className="w-1/2">
-                            <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {JOIN_ROLES.map((r) => (
-                                <SelectItem key={r} value={r}>{r}</SelectItem>
-                            ))}
-                            <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                    </Select>
+                        onChange={(v) => setForm({ ...form, role: v, customRole: "" })}
+                        options={[
+                            ...JOIN_ROLES.map((r) => ({
+                                value: r,
+                                label: r
+                            })),
+                            { value: "Other", label: "Other" }
+                        ]}
+                        placeholder="Select a role"
+                        className="w-1/2"
+                    />
 
                     {form.role === "Other" && (
                         <input
@@ -177,28 +173,29 @@ function StepProfessional({ form, setForm }: { form: FormData; setForm: (f: Form
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Field label="Experience Level" required>
-                    <Select value={form.experienceLevel} onValueChange={(v) => setForm({ ...form, experienceLevel: v })}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {JOIN_EXPERIENCE_LEVELS.map((l) => (
-                                <SelectItem key={l} value={l}>{l}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <CustomSelect
+                        value={form.experienceLevel}
+                        onChange={(v) => setForm({ ...form, experienceLevel: v })}
+                        options={JOIN_EXPERIENCE_LEVELS.map((l) => ({
+                            value: l,
+                            label: l,
+                        }))}
+                        placeholder="Select level"
+                        className="w-full"
+                    />
                 </Field>
+
                 <Field label="Availability" required>
-                    <Select value={form.availability} onValueChange={(v) => setForm({ ...form, availability: v })}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {JOIN_AVAILABILITY.map((a) => (
-                                <SelectItem key={a} value={a}>{a}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <CustomSelect
+                        value={form.availability}
+                        onChange={(v) => setForm({ ...form, availability: v })}
+                        options={JOIN_AVAILABILITY.map((a) => ({
+                            value: a,
+                            label: a,
+                        }))}
+                        placeholder="Select type"
+                        className="w-full"
+                    />
                 </Field>
             </div>
 

@@ -1,35 +1,42 @@
 import { Button } from "@/components/ui/button"
-import { createMetadata, createStaticParams } from "@/lib/metadata"
+import { serviceService } from "@/server/services"
 import {
     ArrowRight,
     Blocks,
     CheckCircle,
-    ChevronRight
+    ChevronRight,
+    Code2,
 } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { allServices } from "@/lib/services"
+import type { Metadata } from "next"
+import { SERVICE_ICONS } from "@/lib/helpers/service-icons"
 
-export function generateStaticParams() {
-    return createStaticParams({ items: allServices, slugField: "id" })
+export async function generateStaticParams() {
+    const all = await serviceService.getAll({ visible: true })
+    return all.map((s) => ({ slug: String(s.slug) }))
 }
 
-export const generateMetadata = createMetadata({
-    items: allServices,
-    slugField: "id",
-    notFoundTitle: "Service Not Found",
-})
-
-export default async function ServiceSlugPage({
-    params,
-}: {
-    params: Promise<{ slug: string }>
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params
-    const service = allServices.find((s) => s.id === slug)
+    const service = await serviceService.getBySlug(slug)
+    if (!service) return { title: "Service Not Found" }
+    return { title: service.title, description: service.description }
+}
+
+export default async function ServiceSlugPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params
+
+    const [service, allServices] = await Promise.all([
+        serviceService.getBySlug(slug),
+        serviceService.getAll({ visible: true }),
+    ])
+
     if (!service) notFound()
 
+    const Icon = SERVICE_ICONS[service.icon] ?? Code2
     const isFeatured = service.featured
+
     const relatedServices = allServices
         .filter((s) => s.id !== service.id && s.category === service.category)
         .slice(0, 3)
@@ -75,7 +82,7 @@ export default async function ServiceSlugPage({
                         </p>
 
                         <p className={`text-base leading-relaxed mb-10 max-w-2xl ${isFeatured ? "text-zinc-400" : "text-zinc-500 dark:text-zinc-400"}`}>
-                            {service.longDescription}
+                            {service.longDescription ?? service.description}
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -89,8 +96,8 @@ export default async function ServiceSlugPage({
                                 <Button
                                     variant="outline"
                                     className={`h-12 px-8 rounded-2xl ${isFeatured
-                                            ? "border-zinc-300 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5"
-                                            : "border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400"
+                                        ? "border-zinc-300 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5"
+                                        : "border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400"
                                         }`}
                                 >
                                     All Services
@@ -112,7 +119,7 @@ export default async function ServiceSlugPage({
                                 What's Included
                             </p>
                             <ul className="flex flex-col gap-4">
-                                {service.features.map((feature) => (
+                                {(service.features ?? []).map((feature) => (
                                     <li key={feature} className="flex items-start gap-3">
                                         <CheckCircle size={17} className="text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
                                         <span className="text-zinc-700 dark:text-zinc-300 text-sm leading-relaxed">{feature}</span>
@@ -127,7 +134,7 @@ export default async function ServiceSlugPage({
                                 Tools & Technologies
                             </p>
                             <div className="flex flex-wrap gap-2">
-                                {service.stack.map((tool) => (
+                                {(service.stack ?? []).map((tool) => (
                                     <span
                                         key={tool}
                                         className="px-4 py-2 rounded-xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 text-sm hover:border-amber-400/40 hover:text-amber-500 dark:hover:text-amber-400 transition-all cursor-default"
@@ -137,7 +144,6 @@ export default async function ServiceSlugPage({
                                 ))}
                             </div>
 
-                            {/* CTA card */}
                             <div className="mt-8 p-5 rounded-2xl bg-amber-50 dark:bg-amber-400/5 border border-amber-200 dark:border-amber-400/20">
                                 <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
                                     Need a specific tool or stack?
@@ -168,22 +174,25 @@ export default async function ServiceSlugPage({
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            {relatedServices.map((related) => (
-                                <Link
-                                    key={related.id}
-                                    href={`/services/${related.id}`}
-                                    className="group flex items-center gap-4 p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl hover:border-amber-400/40 dark:hover:border-amber-500/20 transition-all"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 group-hover:bg-amber-50 dark:group-hover:bg-amber-400/10 transition-colors">
-                                        <related.icon size={17} className="text-zinc-500 dark:text-zinc-400 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{related.title}</p>
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-600 truncate">{related.tagline}</p>
-                                    </div>
-                                    <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-700 shrink-0 ml-auto group-hover:text-amber-400 transition-colors" />
-                                </Link>
-                            ))}
+                            {relatedServices.map((related) => {
+                                const RelatedIcon = SERVICE_ICONS[related.icon] ?? Code2
+                                return (
+                                    <Link
+                                        key={related.id}
+                                        href={`/services/${service.slug}`}
+                                        className="group flex items-center gap-4 p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl hover:border-amber-400/40 dark:hover:border-amber-500/20 transition-all"
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 group-hover:bg-amber-50 dark:group-hover:bg-amber-400/10 transition-colors">
+                                            <RelatedIcon size={17} className="text-zinc-500 dark:text-zinc-400 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{related.title}</p>
+                                            <p className="text-xs text-zinc-400 dark:text-zinc-600 truncate">{related.tagline}</p>
+                                        </div>
+                                        <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-700 shrink-0 ml-auto group-hover:text-amber-400 transition-colors" />
+                                    </Link>
+                                )
+                            })}
                         </div>
                     </div>
                 </section>

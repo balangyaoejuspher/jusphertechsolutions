@@ -1,39 +1,126 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import {
     Search, Eye, EyeOff, ExternalLink,
     CheckCircle, DollarSign, Users, Zap,
+    Package, Loader2,
+    Plus,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { allProducts } from "@/lib/products"
 import { PRODUCT_ACCENT_MAP } from "@/lib/helpers/constants"
+import { PRODUCT_ICONS } from "@/lib/helpers/product-icons"
+import { portalFetch } from "@/lib/api/private-fetcher"
+import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { Product } from "@/server/db/schema"
+import type { ProductFeature, ProductPricing } from "@/types"
+import { CreateProductModal } from "@/components/dashboard/products/create-product-modal"
 
-
-const stats = [
-    { label: "Total Products", value: "6", icon: Zap, desc: "Active in catalog" },
-    { label: "Starting From", value: "₱900", icon: DollarSign, desc: "Lowest monthly plan" },
-    { label: "Total Features", value: "36", icon: CheckCircle, desc: "Across all products" },
-    { label: "Use Cases", value: "24", icon: Users, desc: "Industries covered" },
-]
+function DashboardProductsSkeleton() {
+    return (
+        <div className="flex flex-col gap-8 p-6 md:p-8">
+            <div className="flex justify-between">
+                <div><Skeleton className="h-7 w-24 mb-2" /><Skeleton className="h-4 w-56" /></div>
+                <Skeleton className="h-10 w-36 rounded-xl" />
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl p-5">
+                        <Skeleton className="h-4 w-24 mb-3" />
+                        <Skeleton className="h-8 w-12 mb-1" />
+                        <Skeleton className="h-3 w-28" />
+                    </div>
+                ))}
+            </div>
+            <Skeleton className="h-11 w-full rounded-xl" />
+            <div className="flex flex-col gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl p-5">
+                        <div className="flex items-center gap-4">
+                            <Skeleton className="w-11 h-11 rounded-xl shrink-0" />
+                            <div className="flex-1"><Skeleton className="h-4 w-32 mb-2" /><Skeleton className="h-3 w-48" /></div>
+                            <div className="hidden md:flex gap-2">
+                                <Skeleton className="h-8 w-16 rounded-lg" />
+                                <Skeleton className="h-8 w-16 rounded-lg" />
+                            </div>
+                            <div className="flex gap-2">
+                                <Skeleton className="w-9 h-9 rounded-xl" />
+                                <Skeleton className="w-9 h-9 rounded-xl" />
+                                <Skeleton className="h-9 w-20 rounded-xl" />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
 
 export default function DashboardProducts() {
+    const [products, setProducts] = useState<Product[]>([])
+    const [loading, setLoading] = useState(true)
+    const [togglingId, setTogglingId] = useState<string | null>(null)
     const [search, setSearch] = useState("")
-    const [visibility, setVisibility] = useState<Record<string, boolean>>(
-        Object.fromEntries(allProducts.map((p) => [p.slug, true]))
-    )
     const [expandedProduct, setExpandedProduct] = useState<string | null>(null)
+    const [showAddModal, setShowAddModal] = useState(false)
 
-    const filtered = allProducts.filter((p) =>
-        p.label.toLowerCase().includes(search.toLowerCase()) ||
-        p.tagline.toLowerCase().includes(search.toLowerCase()) ||
-        p.description.toLowerCase().includes(search.toLowerCase())
+    useEffect(() => {
+        portalFetch.get<Product[]>("/admin/products")
+            .then(setProducts)
+            .catch(() => toast.error("Failed to load products"))
+            .finally(() => setLoading(false))
+    }, [])
+
+    const stats = useMemo(() => {
+        const available = products.filter((p) => p.status === "available" || p.status === "beta").length
+        const pricingAll = products.flatMap((p) => (p.pricing as ProductPricing[] ?? []))
+        const prices = pricingAll
+            .map((t) => parseFloat(t.price.replace(/[^0-9.]/g, "")))
+            .filter((n) => !isNaN(n) && n > 0)
+        const minPrice = prices.length > 0 ? Math.min(...prices) : 0
+        const totalFeatures = products.reduce((sum, p) => sum + ((p.features as ProductFeature[])?.length ?? 0), 0)
+        const totalUseCases = products.reduce((sum, p) => sum + (p.useCases?.length ?? 0), 0)
+
+        return [
+            { label: "Total Products", value: String(products.length), icon: Zap, desc: "In catalog" },
+            { label: "Available", value: String(available), icon: DollarSign, desc: "Live or in beta" },
+            { label: "Total Features", value: String(totalFeatures), icon: CheckCircle, desc: "Across all products" },
+            { label: "Use Cases", value: String(totalUseCases), icon: Users, desc: "Industries covered" },
+        ]
+    }, [products])
+
+    const filtered = useMemo(() =>
+        products.filter((p) =>
+            p.label.toLowerCase().includes(search.toLowerCase()) ||
+            p.tagline.toLowerCase().includes(search.toLowerCase()) ||
+            (p.description ?? "").toLowerCase().includes(search.toLowerCase())
+        ),
+        [products, search]
     )
 
-    const toggleVisibility = (slug: string) => {
-        setVisibility((prev) => ({ ...prev, [slug]: !prev[slug] }))
+    const toggleVisibility = async (id: string) => {
+        const product = products.find((p) => p.id === id)
+        if (!product) return
+
+        setTogglingId(id)
+        try {
+            const updated = await portalFetch.patch<Product>(`/admin/products/${id}/visibility`, {})
+            setProducts((prev) => prev.map((p) => p.id === id ? updated : p))
+            toast.success(`${product.label} is now ${updated.isVisible ? "visible" : "hidden"}.`)
+        } catch (err: any) {
+            toast.error(err.message ?? "Failed to update visibility")
+        } finally {
+            setTogglingId(null)
+        }
     }
+
+    const handleCreated = (product: Product) => {
+        setProducts((prev) => [product, ...prev])
+    }
+
+    if (loading) return <DashboardProductsSkeleton />
 
     return (
         <div className="flex flex-col gap-8 p-6 md:p-8">
@@ -46,14 +133,25 @@ export default function DashboardProducts() {
                         Manage your software product catalog and pricing
                     </p>
                 </div>
-                <Link
-                    href="/products"
-                    target="_blank"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 text-sm font-bold transition-colors shrink-0"
-                >
-                    <ExternalLink size={14} />
-                    View Public Page
-                </Link>
+
+                <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                        href="/products"
+                        target="_blank"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-600 dark:text-zinc-400 text-sm font-semibold transition-colors"
+                    >
+                        <ExternalLink size={14} />
+                        View Public Page
+                    </Link>
+
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 text-sm font-bold transition-colors"
+                    >
+                        <Plus size={14} />
+                        Add Product
+                    </button>
+                </div>
             </div>
 
             {/* Stats */}
@@ -93,18 +191,30 @@ export default function DashboardProducts() {
             <div className="flex flex-col gap-4">
                 {filtered.length === 0 && (
                     <div className="text-center py-16 text-zinc-400 dark:text-zinc-600 text-sm">
-                        No products found matching "{search}"
+                        {search
+                            ? `No products found matching "${search}"`
+                            : (
+                                <div className="flex flex-col items-center gap-3">
+                                    <Package size={32} className="text-zinc-300 dark:text-zinc-700" />
+                                    <p>No products yet</p>
+                                </div>
+                            )
+                        }
                     </div>
                 )}
 
                 {filtered.map((product) => {
-                    const accent = PRODUCT_ACCENT_MAP[product.accentColor] ?? PRODUCT_ACCENT_MAP.amber
-                    const isVisible = visibility[product.slug]
-                    const isExpanded = expandedProduct === product.slug
+                    const accent = PRODUCT_ACCENT_MAP[product.accentColor ?? "amber"] ?? PRODUCT_ACCENT_MAP.amber
+                    const Icon = PRODUCT_ICONS[product.icon ?? "Package"] ?? Package
+                    const features = (product.features as ProductFeature[]) ?? []
+                    const pricing = (product.pricing as ProductPricing[]) ?? []
+                    const isVisible = product.isVisible ?? true
+                    const isExpanded = expandedProduct === product.id
+                    const isToggling = togglingId === product.id
 
                     return (
                         <div
-                            key={product.slug}
+                            key={product.id}
                             className={cn(
                                 "bg-white dark:bg-zinc-900 border rounded-2xl overflow-hidden transition-all duration-200",
                                 isVisible
@@ -120,7 +230,7 @@ export default function DashboardProducts() {
 
                                 {/* Icon */}
                                 <div className={cn("w-11 h-11 rounded-xl border flex items-center justify-center shrink-0", accent.icon)}>
-                                    <product.icon size={20} />
+                                    <Icon size={20} />
                                 </div>
 
                                 {/* Info */}
@@ -129,9 +239,16 @@ export default function DashboardProducts() {
                                         <h3 className="text-base font-bold text-zinc-900 dark:text-white">
                                             {product.label}
                                         </h3>
-                                        <span className={cn("px-2 py-0.5 rounded-md border text-xs font-semibold", accent.badge)}>
-                                            {product.category}
-                                        </span>
+                                        {product.category && (
+                                            <span className={cn("px-2 py-0.5 rounded-md border text-xs font-semibold", accent.badge)}>
+                                                {product.category.replace("_", " ")}
+                                            </span>
+                                        )}
+                                        {product.status !== "available" && (
+                                            <span className="px-2 py-0.5 rounded-md border text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-white/10 capitalize">
+                                                {product.status?.replace("_", " ")}
+                                            </span>
+                                        )}
                                         {!isVisible && (
                                             <span className="px-2 py-0.5 rounded-md border text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 border-zinc-200 dark:border-white/10">
                                                 Hidden
@@ -145,7 +262,7 @@ export default function DashboardProducts() {
 
                                 {/* Pricing summary */}
                                 <div className="hidden md:flex items-center gap-1 shrink-0">
-                                    {product.pricing.map((tier) => (
+                                    {pricing.map((tier) => (
                                         <div
                                             key={tier.label}
                                             className={cn(
@@ -163,11 +280,17 @@ export default function DashboardProducts() {
                                 {/* Actions */}
                                 <div className="flex items-center gap-2 shrink-0">
                                     <button
-                                        onClick={() => toggleVisibility(product.slug)}
+                                        onClick={() => toggleVisibility(product.id)}
+                                        disabled={isToggling}
                                         title={isVisible ? "Hide from public" : "Show on public"}
-                                        className="w-9 h-9 rounded-xl border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-white/20 transition-all"
+                                        className="w-9 h-9 rounded-xl border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-white/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
-                                        {isVisible ? <Eye size={15} /> : <EyeOff size={15} />}
+                                        {isToggling
+                                            ? <Loader2 size={15} className="animate-spin" />
+                                            : isVisible
+                                                ? <Eye size={15} />
+                                                : <EyeOff size={15} />
+                                        }
                                     </button>
 
                                     <Link
@@ -180,7 +303,7 @@ export default function DashboardProducts() {
                                     </Link>
 
                                     <button
-                                        onClick={() => setExpandedProduct(isExpanded ? null : product.slug)}
+                                        onClick={() => setExpandedProduct(isExpanded ? null : product.id)}
                                         className={cn(
                                             "px-4 h-9 rounded-xl border text-xs font-semibold transition-all",
                                             isExpanded
@@ -200,10 +323,10 @@ export default function DashboardProducts() {
                                     {/* Features */}
                                     <div>
                                         <p className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-3">
-                                            Features ({product.features.length})
+                                            Features ({features.length})
                                         </p>
                                         <div className="flex flex-col gap-2">
-                                            {product.features.map((f) => (
+                                            {features.map((f) => (
                                                 <div key={f.title} className="flex items-start gap-2">
                                                     <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", accent.dot)} />
                                                     <div>
@@ -221,7 +344,7 @@ export default function DashboardProducts() {
                                             Pricing Tiers
                                         </p>
                                         <div className="flex flex-col gap-3">
-                                            {product.pricing.map((tier) => (
+                                            {pricing.map((tier) => (
                                                 <div
                                                     key={tier.label}
                                                     className={cn(
@@ -245,7 +368,7 @@ export default function DashboardProducts() {
                                                     <ul className="flex flex-col gap-1">
                                                         {tier.features.map((f) => (
                                                             <li key={f} className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                                                                <CheckCircle size={11} className={product.textColor} />
+                                                                <CheckCircle size={11} className={product.textColor ?? "text-zinc-400"} />
                                                                 {f}
                                                             </li>
                                                         ))}
@@ -262,7 +385,7 @@ export default function DashboardProducts() {
                                                 Use Cases
                                             </p>
                                             <div className="flex flex-col gap-1.5">
-                                                {product.useCases.map((uc) => (
+                                                {(product.useCases ?? []).map((uc) => (
                                                     <div key={uc} className="flex items-start gap-2">
                                                         <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", accent.dot)} />
                                                         <p className="text-xs text-zinc-500 dark:text-zinc-400">{uc}</p>
@@ -276,7 +399,7 @@ export default function DashboardProducts() {
                                                 Tech Highlights
                                             </p>
                                             <div className="flex flex-wrap gap-2">
-                                                {product.techHighlights.map((t) => (
+                                                {(product.techHighlights ?? []).map((t) => (
                                                     <span
                                                         key={t}
                                                         className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 text-xs text-zinc-500 dark:text-zinc-400"
@@ -293,6 +416,12 @@ export default function DashboardProducts() {
                     )
                 })}
             </div>
+            {showAddModal && (
+                <CreateProductModal
+                    onClose={() => setShowAddModal(false)}
+                    onCreated={handleCreated}
+                />
+            )}
         </div>
     )
 }

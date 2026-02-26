@@ -21,8 +21,8 @@ import {
 import { Button } from "@/components/ui/button"
 import type { Experience, FormData, AdminNote } from "@/types/applicant"
 import { APPLICANTS_STATUS_CONFIG } from "@/lib/helpers/constants"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
+import { CustomSelect } from "@/components/ui/custom-select"
 
 const initialApplicants: FormData[] = [
     // NEW
@@ -245,6 +245,20 @@ const initialApplicants: FormData[] = [
         notes: [],
     },
 ]
+
+const approveReasons = [
+    { value: "Excellent skills", label: "Excellent skills" },
+    { value: "Strong portfolio", label: "Strong portfolio" },
+    { value: "Good interview performance", label: "Good interview performance" },
+    { value: "Other", label: "Other" },
+] as const
+
+const rejectReasons = [
+    { value: "Not a fit for role", label: "Not a fit for role" },
+    { value: "Missing requirements", label: "Missing requirements" },
+    { value: "Poor interview performance", label: "Poor interview performance" },
+    { value: "Other", label: "Other" },
+] as const
 
 export default function DashboardApplicants() {
     const [applicants, setApplicants] = useState(initialApplicants)
@@ -797,31 +811,12 @@ export default function DashboardApplicants() {
                                         </h3>
                                         <p className="text-sm text-zinc-500 dark:text-zinc-400">Please enter a reason:</p>
 
-                                        <Select
+                                        <CustomSelect
                                             value={actionReason}
-                                            onValueChange={(value) => setActionReason(value)}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select a reason" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {actionType === "approve" ? (
-                                                    <>
-                                                        <SelectItem value="Excellent skills">Excellent skills</SelectItem>
-                                                        <SelectItem value="Strong portfolio">Strong portfolio</SelectItem>
-                                                        <SelectItem value="Good interview performance">Good interview performance</SelectItem>
-                                                        <SelectItem value="Other">Other</SelectItem>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <SelectItem value="Not a fit for role">Not a fit for role</SelectItem>
-                                                        <SelectItem value="Missing requirements">Missing requirements</SelectItem>
-                                                        <SelectItem value="Poor interview performance">Poor interview performance</SelectItem>
-                                                        <SelectItem value="Other">Other</SelectItem>
-                                                    </>
-                                                )}
-                                            </SelectContent>
-                                        </Select>
+                                            options={actionType === "approve" ? approveReasons : rejectReasons}
+                                            onChange={setActionReason}
+                                            placeholder="Select a reason"
+                                        />
 
                                         {actionReason === "Other" && (
                                             <input

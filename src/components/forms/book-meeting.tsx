@@ -21,15 +21,9 @@ import {
     X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { MEETING_DAYS, MEETING_MONTHS, MEETING_TIME_SLOTS, MEETING_TIMEZONES } from "@/lib/helpers/constants"
 import { getDaysInMonth, getFirstDayOfMonth, formatDate, isDateInPast, isWeekend, isTimeSlotInPast } from "@/lib/helpers/format"
+import { CustomSelect } from "@/components/ui/custom-select"
 
 // Static booked slots — safe for SSR, no hydration mismatch
 // Format: "YYYY-MM-DD": [slot indices]
@@ -308,18 +302,13 @@ export default function BookMeeting() {
                                     <Globe size={11} />
                                     Your Timezone
                                 </label>
-                                <Select value={timezone} onValueChange={setTimezone}>
-                                    <SelectTrigger className="mt-2 w-full rounded-xl border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs h-10">
-                                        <SelectValue placeholder="Select timezone" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {MEETING_TIMEZONES.map((tz) => (
-                                            <SelectItem key={tz.value} value={tz.value}>
-                                                {tz.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <CustomSelect
+                                    value={timezone}
+                                    options={MEETING_TIMEZONES}
+                                    onChange={setTimezone}
+                                    placeholder="Select timezone"
+                                    className="mt-2"
+                                />
                             </div>
                         </div>
                     </div>

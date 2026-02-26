@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import TalentClient from "./talent-client"
+import TalentClient from "./talent-page"
 
 export const metadata: Metadata = {
   title: "Browse Talent",

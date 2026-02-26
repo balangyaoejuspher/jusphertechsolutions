@@ -1,7 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, Check } from "lucide-react"
-import { allProducts } from "@/lib/products"
+import { ArrowRight, Check, Package } from "lucide-react"
+import { productService } from "@/server/services/product.service"
+import { PRODUCT_ICONS } from "@/lib/helpers/product-icons"
+import type { Product } from "@/server/db/schema"
 
 export const metadata: Metadata = {
     title: "Products",
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
         "Business software built for Philippine companies — HRIS, Loan Management, Inventory, School Management, POS, and Project Management.",
 }
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+    const products = await productService.getAll()
+
     return (
         <div className="bg-white dark:bg-zinc-950 min-h-screen">
 
@@ -35,11 +39,13 @@ export default function ProductsPage() {
             {/* ── Products Grid ── */}
             <div className="container mx-auto px-6 md:px-12 py-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {allProducts.map((product) => {
-                        const Icon = product.icon
+                    {products.map((product) => {
+                        const Icon = PRODUCT_ICONS[product.icon] ?? Package
+                        const features = (product.features ?? []) as { title: string }[]
+
                         return (
                             <Link
-                                key={product.slug}
+                                key={product.id}
                                 href={`/products/${product.slug}`}
                                 className="group flex flex-col bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:border-amber-400/40 dark:hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300"
                             >
@@ -52,9 +58,13 @@ export default function ProductsPage() {
                                         <Icon size={22} className={product.textColor} />
                                     </div>
 
-                                    <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-1 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">
-                                        {product.label}
-                                    </h2>
+                                    <div className="flex items-start justify-between gap-2 mb-1">
+                                        <h2 className="text-xl font-bold text-zinc-900 dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">
+                                            {product.label}
+                                        </h2>
+                                        <Badges product={product} />
+                                    </div>
+
                                     <p className={`text-xs font-semibold mb-3 ${product.textColor}`}>
                                         {product.tagline}
                                     </p>
@@ -64,7 +74,7 @@ export default function ProductsPage() {
 
                                     {/* Feature preview */}
                                     <ul className="space-y-2 mb-6">
-                                        {product.features.slice(0, 3).map((f) => (
+                                        {features.slice(0, 3).map((f) => (
                                             <li key={f.title} className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-500">
                                                 <Check size={12} className={product.textColor} />
                                                 {f.title}
@@ -74,7 +84,7 @@ export default function ProductsPage() {
 
                                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100 dark:border-white/5">
                                         <span className="text-xs text-zinc-400 dark:text-zinc-600">
-                                            {product.features.length} features
+                                            {features.length} features
                                         </span>
                                         <span className="flex items-center gap-1 text-xs font-semibold text-amber-500 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-all translate-x-1 group-hover:translate-x-0">
                                             Learn more <ArrowRight size={11} />
@@ -112,6 +122,28 @@ export default function ProductsPage() {
                 </div>
             </div>
 
+        </div>
+    )
+}
+
+function Badges({ product }: { product: Product }) {
+    return (
+        <div className="flex items-center gap-1.5 shrink-0">
+            {product.isNew && (
+                <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                    NEW
+                </span>
+            )}
+            {product.isFeatured && (
+                <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-400/10 border border-amber-200 dark:border-amber-400/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold">
+                    ★
+                </span>
+            )}
+            {product.badge && (
+                <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 text-[10px] font-bold">
+                    {product.badge}
+                </span>
+            )}
         </div>
     )
 }

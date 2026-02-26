@@ -9,4 +9,5 @@ export type Post = {
     date: string
     readTime: string
     content: string
+    status: string
 }

@@ -1,9 +1,8 @@
-
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, Clock, Tag, Calendar } from "lucide-react"
-import { createMetadata, createStaticParams } from "@/lib/metadata"
-import { allPosts } from "@/lib/posts"
+import { postService } from "@/server/services/blog.service"
+import type { Metadata } from "next"
 
 const categoryColors: Record<string, string> = {
     Outsourcing: "bg-blue-50 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-400/20",
@@ -24,7 +23,7 @@ function CategoryBadge({ category }: { category: string }) {
     )
 }
 
-function PostBody({ content }: { content: string }) {
+export function PostBody({ content }: { content: string }) {
     const paragraphs = content.trim().split(/\n\n+/)
 
     return (
@@ -60,21 +59,28 @@ function PostBody({ content }: { content: string }) {
     )
 }
 
-export function generateStaticParams() {
-    return createStaticParams({ items: allPosts })
+type Props = { params: Promise<{ slug: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params
+    const post = await postService.getBySlug(slug)
+    if (!post) return { title: "Post Not Found" }
+    return {
+        title: post.title,
+        description: post.excerpt,
+    }
 }
 
-export const generateMetadata = createMetadata({
-    items: allPosts,
-    notFoundTitle: "Post Not Found",
-})
-
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function BlogPostPage({ params }: Props) {
     const { slug } = await params
-    const post = allPosts.find((p) => p.slug === slug)
-    if (!post) notFound()
+    const [post, allPublished] = await Promise.all([
+        postService.getBySlug(slug),
+        postService.getPublished({ limit: 100 }),
+    ])
 
-    const related = allPosts
+    if (!post || post.status !== "published") notFound()
+
+    const related = allPublished.items
         .filter((p) => p.slug !== post.slug && p.category === post.category)
         .slice(0, 2)
 
@@ -114,7 +120,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <div className="flex flex-wrap items-center gap-6 text-sm text-zinc-400 dark:text-zinc-500 pt-6 border-t border-zinc-100 dark:border-white/5">
                         <span className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-full bg-amber-400/20 border border-amber-400/30 flex items-center justify-center">
-                                <span className="text-amber-500 text-xs font-black">J</span>
+                                <span className="text-amber-500 text-xs font-black">
+                                    {post.author.charAt(0).toUpperCase()}
+                                </span>
                             </div>
                             <span>
                                 <span className="font-semibold text-zinc-700 dark:text-zinc-300">{post.author}</span>

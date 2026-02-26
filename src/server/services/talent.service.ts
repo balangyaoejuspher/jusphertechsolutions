@@ -1,11 +1,11 @@
-import { talent } from "@/server/db/schema"
-import type { Talent, NewTalent } from "@/server/db/schema"
+import { NewTalentRow, talent } from "@/server/db/schema"
 import { eq, ilike, or, and, desc } from "drizzle-orm"
 import { BaseService } from "./base.service"
 import { activityService } from "./activity.service"
+import { Talent } from "@/types"
 
-type CreateTalentInput = Omit<NewTalent, "id" | "createdAt" | "updatedAt">
-type UpdateTalentInput = Partial<Omit<NewTalent, "id" | "createdAt" | "updatedAt">>
+type CreateTalentInput = Omit<NewTalentRow, "id" | "createdAt" | "updatedAt">
+type UpdateTalentInput = Partial<Omit<NewTalentRow, "id" | "createdAt" | "updatedAt">>
 
 type ListTalentOptions = {
     search?: string
@@ -33,6 +33,10 @@ export class TalentService extends BaseService {
 
         if (visible !== undefined) {
             conditions.push(eq(talent.isVisible, visible))
+        }
+
+        if (options.visible === true) {
+            conditions.push(eq(talent.isVisible, true))
         }
 
         if (search) {

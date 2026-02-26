@@ -13,6 +13,7 @@ export const allPosts: Post[] = [
         role: "Founder & CEO",
         date: "February 10, 2025",
         readTime: "6 min read",
+        status: "published",
         content: `
 The Philippines has quietly become one of the most sought-after destinations for technical talent globally. While India and Eastern Europe often dominate the conversation around software outsourcing, Filipino developers have been steadily building a reputation that speaks for itself — through shipped products, long-term partnerships, and a work ethic that global companies keep coming back for.
 
@@ -49,6 +50,7 @@ At Juspher & Co. Tech Solutions, we've built our entire model around this realit
         role: "Founder & CEO",
         date: "January 28, 2025",
         readTime: "5 min read",
+        status: "published",
         content: `
 The word "blockchain" still makes a lot of small business owners roll their eyes — and honestly, that's fair. The space has been plagued by hype, scams, and solutions desperately looking for problems. But underneath all the noise, there are genuine, practical use cases that small businesses can benefit from today without needing to understand cryptography or run a node.
 
@@ -85,6 +87,7 @@ Blockchain is worth exploring for small businesses when the use case involves tr
         role: "Founder & CEO",
         date: "January 15, 2025",
         readTime: "7 min read",
+        status: "published",
         content: `
 Hiring a virtual assistant for the first time feels simple — post a job, interview a few people, pick the best one. But most first-time VA hires end up frustrated within 90 days, and the problem almost never lies with the VA. It lies in the hiring process.
 
@@ -123,6 +126,7 @@ The businesses that get the most from their VAs treat them as partners, not tool
         role: "Founder & CEO",
         date: "January 5, 2025",
         readTime: "4 min read",
+        status: "published",
         content: `
 Spreadsheets are remarkable tools. They're flexible, familiar, and free. It's no surprise that thousands of businesses manage their entire HR operation — payroll, attendance, leave, performance — on Excel or Google Sheets. But there's a point where the spreadsheet becomes the bottleneck, and knowing when you've hit that point can save you serious time and money.
 
@@ -157,6 +161,7 @@ At Juspher, we build HRIS solutions tailored for small and growing businesses. I
         role: "Founder & CEO",
         date: "December 20, 2024",
         readTime: "8 min read",
+        status: "published",
         content: `
 The Next.js vs Remix debate has been running for a few years now, and in 2025, both frameworks have matured significantly. Neither is objectively better — they reflect different philosophies, and the right choice depends on what you're building and how your team thinks.
 
@@ -193,6 +198,7 @@ For most client projects, we default to Next.js because of ecosystem breadth and
         role: "Founder & CEO",
         date: "December 10, 2024",
         readTime: "6 min read",
+        status: "published",
         content: `
 Outsourcing done well is one of the highest-leverage moves a growing business can make. Outsourcing done poorly is an expensive lesson. After years of building and placing remote teams, these are the five mistakes we see most often — and exactly how to avoid them.
 
@@ -227,6 +233,7 @@ One bad outsourcing experience convinces many business owners that outsourcing "
         role: "Founder & CEO",
         date: "November 28, 2024",
         readTime: "5 min read",
+        status: "published",
         content: `
 Smart contracts are one of the most misunderstood concepts in technology — both overhyped by crypto enthusiasts and dismissed by skeptics who've only heard the hype. Here's a plain-language explanation of what they actually are, what they do well, and when your business might genuinely benefit from one.
 

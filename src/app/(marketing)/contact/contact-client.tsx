@@ -5,6 +5,7 @@ import { Mail, Clock, MessageSquare, ChevronDown, Send, CheckCircle } from "luci
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { EMAIL_REGEX, NAME_REGEX } from "@/lib/helpers/validators"
+import { publicFetch } from "@/lib/api/public-fetcher"
 
 const faqs = [
     {
@@ -125,16 +126,9 @@ export default function ContactPage() {
         setLoading(true)
 
         try {
-            const res = await fetch("/api/public/send-inquiry", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            })
-
-            if (res.ok) {
-                setSubmitted(true)
-                setForm({ name: "", email: "", company: "", message: "" })
-            }
+            await publicFetch.post("/send-inquiry", form)
+            setSubmitted(true)
+            setForm({ name: "", email: "", company: "", message: "" })
         } catch (error) {
             console.error(error)
         } finally {

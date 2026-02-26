@@ -11,31 +11,6 @@ export default async function Page() {
 
     const user = await currentUser()
 
-    // ── DB queries ──────────────────────────────────────────────
-    // TODO: replace mock with real queries once schema is finalized
-    // const [talentCount]     = await db.select({ count: count() }).from(talent)
-    // const [inquiryCount]    = await db.select({ count: count() }).from(inquiries)
-    // const [placementCount]  = await db.select({ count: count() }).from(placements)
-    //
-    // const monthly = await db.execute(sql`
-    //   SELECT
-    //     TO_CHAR(created_at, 'Mon') as month,
-    //     COUNT(*) FILTER (WHERE table_name = 'inquiries')  as inquiries,
-    //     COUNT(*) FILTER (WHERE table_name = 'placements') as placements,
-    //     COUNT(*) FILTER (WHERE table_name = 'talent')     as talent
-    //   FROM (
-    //     SELECT created_at, 'inquiries'  as table_name FROM inquiries
-    //     UNION ALL
-    //     SELECT created_at, 'placements' as table_name FROM placements
-    //     UNION ALL
-    //     SELECT created_at, 'talent'     as table_name FROM talent
-    //   ) combined
-    //   WHERE created_at >= NOW() - INTERVAL '6 months'
-    //   GROUP BY TO_CHAR(created_at, 'Mon'), DATE_TRUNC('month', created_at)
-    //   ORDER BY DATE_TRUNC('month', created_at)
-    // `)
-
-    // ── Mock data — remove when DB queries above are wired ──────
     const stats: DashboardStats = {
         totalTalent: 36,
         totalInquiries: 23164,

@@ -1,0 +1,8 @@
+CREATE TYPE "public"."placement_inquiry_status" AS ENUM('draft', 'submitted', 'under_review', 'approved', 'contract_generated', 'contract_sent', 'contract_signed', 'active', 'rejected');--> statement-breakpoint
+ALTER TABLE "activity_logs" ALTER COLUMN "type" SET DATA TYPE text;--> statement-breakpoint
+DROP TYPE "public"."activity_type";--> statement-breakpoint
+CREATE TYPE "public"."activity_type" AS ENUM('admin_created', 'admin_updated', 'admin_deleted', 'talent_created', 'talent_updated', 'talent_deleted', 'inquiry_received', 'inquiry_status_changed', 'inquiry_assigned', 'inquiry_resolved', 'client_created', 'client_updated', 'client_deleted', 'client_status_changed', 'invoice_created', 'invoice_sent', 'invoice_paid', 'invoice_overdue', 'invoice_disputed', 'ticket_opened', 'ticket_replied', 'ticket_resolved', 'ticket_status_changed', 'portal_login', 'portal_invoice_viewed', 'portal_project_viewed', 'auth_sign_in', 'auth_sign_out', 'service_created', 'service_updated', 'service_deleted', 'placement_created', 'placement_updated', 'placement_completed', 'placement_terminated', 'placement_on_hold', 'placement_deleted');--> statement-breakpoint
+ALTER TABLE "activity_logs" ALTER COLUMN "type" SET DATA TYPE "public"."activity_type" USING "type"::"public"."activity_type";--> statement-breakpoint
+ALTER TABLE "placements" ADD COLUMN "inquiry_status" "placement_inquiry_status" DEFAULT 'draft' NOT NULL;--> statement-breakpoint
+ALTER TABLE "placements" ADD COLUMN "contract_sent_at" timestamp;--> statement-breakpoint
+ALTER TABLE "placements" ADD COLUMN "contract_generated_at" timestamp;

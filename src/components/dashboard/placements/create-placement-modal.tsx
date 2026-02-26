@@ -6,11 +6,11 @@ import { X, Loader2, Plus, User, Building2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
-import { portalFetch } from "@/lib/api/fetcher"
+import { portalFetch } from "@/lib/api/private-fetcher"
 import { toast } from "sonner"
 import type { TalentRow, ClientRow, Project } from "@/server/db/schema"
+import { CustomSelect } from "@/components/ui/custom-select"
 
 type Props = {
     onClose: () => void
@@ -145,69 +145,62 @@ export default function CreatePlacementModal({ onClose, onCreated }: Props) {
                                     <Label className="flex items-center gap-1.5">
                                         <User size={13} /> Talent *
                                     </Label>
-                                    <Select
+                                    <CustomSelect
                                         value={form.talentId}
-                                        onValueChange={(v) => setForm({ ...form, talentId: v })}
-                                    >
-                                        <SelectTrigger className={inputCls}>
-                                            <SelectValue placeholder="Select talent..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl dark:bg-zinc-900 dark:border-white/10">
-                                            {talents.length === 0 && (
-                                                <SelectItem value="__none" disabled>No talents available</SelectItem>
-                                            )}
-                                            {talents.map((t) => (
-                                                <SelectItem key={t.id} value={t.id}>
-                                                    {t.name} - {t.title}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        options={
+                                            talents.length === 0
+                                                ? [{ value: "__none", label: "No talents available" }]
+                                                : talents.map((t) => ({ value: t.id, label: `${t.name} - ${t.title}` }))
+                                        }
+                                        onChange={(v) => {
+                                            if (v === "__none") return
+                                            setForm({ ...form, talentId: v })
+                                        }}
+                                        placeholder="Select talent..."
+                                        buttonClassName={inputCls}
+                                    />
                                 </div>
 
                                 <div className="flex flex-col gap-2">
                                     <Label className="flex items-center gap-1.5">
                                         <Building2 size={13} /> Client *
                                     </Label>
-                                    <Select
+                                    <CustomSelect
                                         value={form.clientId}
-                                        onValueChange={(v) => setForm({ ...form, clientId: v, projectId: "" })}
-                                    >
-                                        <SelectTrigger className={inputCls}>
-                                            <SelectValue placeholder="Select client..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl dark:bg-zinc-900 dark:border-white/10">
-                                            {clients.length === 0 && (
-                                                <SelectItem value="__none" disabled>No clients available</SelectItem>
-                                            )}
-                                            {clients.map((c) => (
-                                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        options={
+                                            clients.length === 0
+                                                ? [{ value: "__none", label: "No clients available" }]
+                                                : clients.map((c) => ({ value: c.id, label: c.name }))
+                                        }
+                                        onChange={(v) => {
+                                            if (v === "__none") return
+                                            setForm({ ...form, clientId: v, projectId: "" })
+                                        }}
+                                        placeholder="Select client..."
+                                        buttonClassName={inputCls}
+                                    />
                                 </div>
                             </div>
 
                             {/* Project (optional) */}
                             <div className="flex flex-col gap-2">
                                 <Label>Project (Optional)</Label>
-                                <Select
+                                <CustomSelect
                                     value={form.projectId}
-                                    onValueChange={(v) => setForm({ ...form, projectId: v })}
-                                    disabled={!form.clientId}
-                                >
-                                    <SelectTrigger className={inputCls}>
-                                        <SelectValue placeholder={form.clientId ? "Select project..." : "Select client first"} />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl dark:bg-zinc-900 dark:border-white/10">
-                                        {filteredProjects.length === 0 && (
-                                            <SelectItem value="__none" disabled>No projects for this client</SelectItem>
-                                        )}
-                                        {filteredProjects.map((p) => (
-                                            <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                    options={
+                                        !form.clientId
+                                            ? [{ value: "__none", label: "Select client first" }]
+                                            : filteredProjects.length === 0
+                                                ? [{ value: "__none", label: "No projects for this client" }]
+                                                : filteredProjects.map((p) => ({ value: p.id, label: p.title }))
+                                    }
+                                    onChange={(v) => {
+                                        if (v === "__none") return
+                                        setForm({ ...form, projectId: v })
+                                    }}
+                                    placeholder={form.clientId ? "Select project..." : "Select client first"}
+                                    buttonClassName={cn(inputCls, !form.clientId && "opacity-50 pointer-events-none")}
+                                />
                             </div>
 
                             {/* Role */}

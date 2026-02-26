@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 
 import { ClientPortalSidebar } from "@/components/layout/client-portal-sidebar"
 import { getClientSession } from "@/lib/client-auth"
-import { TokenInitializer } from "@/components/portal/token-initializer"
+import { TokenInitializer } from "@/components/shared/token-initializer"
 
 export default async function ClientPortalLayout({
     children,
@@ -23,6 +23,7 @@ export default async function ClientPortalLayout({
             <ClientPortalSidebar client={client} />
             <main className="flex-1 overflow-auto">
                 <TokenInitializer />
+                <div className="lg:hidden h-14" />
                 {children}
             </main>
         </div>

@@ -1,10 +1,8 @@
-import { eq, desc, and, ilike, or } from "drizzle-orm"
+import { eq, desc, and, ilike, or, InferInsertModel } from "drizzle-orm"
 import { placements, talent, clients, projects } from "@/server/db/schema"
-import type { NewPlacement, Placement } from "@/server/db/schema"
+import type { Placement } from "@/server/db/schema"
 import { BaseService } from "./base.service"
 import { activityService } from "./activity.service"
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type PlacementRow = Placement & {
     talentName: string
@@ -13,6 +11,8 @@ export type PlacementRow = Placement & {
     contractStatus: string | null
     contractUrl: string | null
     contractSignedAt: Date | null
+    inquiryStatus: string
+    contractGeneratedAt: Date | null
 }
 
 export type CreatePlacementInput = {
@@ -30,25 +30,19 @@ export type CreatePlacementInput = {
     status?: Placement["status"]
 }
 
-export type UpdatePlacementInput = Partial<Omit<CreatePlacementInput, "talentId" | "clientId">> & {
-    status?: Placement["status"]
-}
-
-// ─── Service ──────────────────────────────────────────────────────────────────
-
+type UpdatePlacementInput = Partial<Omit<InferInsertModel<typeof placements>, "id" | "createdAt">>
 export class PlacementService extends BaseService {
-
-    // ── Private: base query with all joins ───────────────────────────────────
 
     private async queryAll(): Promise<PlacementRow[]> {
         const rows = await this.db
             .select({
-                // all placement columns
                 id: placements.id,
                 talentId: placements.talentId,
                 clientId: placements.clientId,
                 projectId: placements.projectId,
                 inquiryId: placements.inquiryId,
+                inquiryStatus: placements.inquiryStatus,
+                contractGeneratedAt: placements.contractGeneratedAt,
                 role: placements.role,
                 description: placements.description,
                 status: placements.status,
@@ -59,7 +53,6 @@ export class PlacementService extends BaseService {
                 notes: placements.notes,
                 createdAt: placements.createdAt,
                 updatedAt: placements.updatedAt,
-                // joined columns
                 talentName: talent.name,
                 clientName: clients.name,
                 projectTitle: projects.title,
@@ -76,13 +69,9 @@ export class PlacementService extends BaseService {
         return rows as PlacementRow[]
     }
 
-    // ── List all ─────────────────────────────────────────────────────────────
-
     async getAll(): Promise<PlacementRow[]> {
         return this.queryAll()
     }
-
-    // ── Get by ID ─────────────────────────────────────────────────────────────
 
     async getById(id: string): Promise<PlacementRow | null> {
         const rows = await this.db
@@ -92,6 +81,8 @@ export class PlacementService extends BaseService {
                 clientId: placements.clientId,
                 projectId: placements.projectId,
                 inquiryId: placements.inquiryId,
+                inquiryStatus: placements.inquiryStatus,
+                contractGeneratedAt: placements.contractGeneratedAt,
                 role: placements.role,
                 description: placements.description,
                 status: placements.status,
@@ -119,28 +110,20 @@ export class PlacementService extends BaseService {
         return (rows[0] as PlacementRow) ?? null
     }
 
-    // ── Get by client ─────────────────────────────────────────────────────────
-
     async getByClient(clientId: string): Promise<PlacementRow[]> {
         const all = await this.queryAll()
         return all.filter((p) => p.clientId === clientId)
     }
-
-    // ── Get by talent ─────────────────────────────────────────────────────────
 
     async getByTalent(talentId: string): Promise<PlacementRow[]> {
         const all = await this.queryAll()
         return all.filter((p) => p.talentId === talentId)
     }
 
-    // ── Get by project ────────────────────────────────────────────────────────
-
     async getByProject(projectId: string): Promise<PlacementRow[]> {
         const all = await this.queryAll()
         return all.filter((p) => p.projectId === projectId)
     }
-
-    // ── Create ────────────────────────────────────────────────────────────────
 
     async create(
         input: CreatePlacementInput,
@@ -188,8 +171,6 @@ export class PlacementService extends BaseService {
         return row!
     }
 
-    // ── Update ────────────────────────────────────────────────────────────────
-
     async update(
         id: string,
         input: UpdatePlacementInput,
@@ -210,6 +191,8 @@ export class PlacementService extends BaseService {
             projectId: input.projectId,
             inquiryId: input.inquiryId,
             notes: input.notes,
+            inquiryStatus: input.inquiryStatus,
+            contractGeneratedAt: input.contractGeneratedAt,
             updatedAt: new Date(),
         })
 
@@ -218,13 +201,12 @@ export class PlacementService extends BaseService {
             .set(patch)
             .where(eq(placements.id, id))
 
-        // Log status changes specifically for better activity trail
         if (input.status && input.status !== existing.status) {
             await activityService.log({
                 actorType: "admin",
                 actorId,
                 actorName,
-                type: `placement_${input.status}` as any,
+                type: "placement_updated",
                 summary: `Placement for ${existing.talentName} moved to ${input.status}`,
                 entityType: "placement",
                 entityId: id,
@@ -239,8 +221,6 @@ export class PlacementService extends BaseService {
         const row = await this.getById(id)
         return row!
     }
-
-    // ── Delete ────────────────────────────────────────────────────────────────
 
     async delete(
         id: string,
