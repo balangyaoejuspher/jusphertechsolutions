@@ -1,15 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { CustomSelect } from "@/components/ui/custom-select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { SETTINGS_SECTIONS, type SettingsSection } from "@/lib/helpers/constants"
@@ -191,23 +185,22 @@ export default function DashboardSettings() {
                                     <Label htmlFor="timezone" className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">
                                         Timezone
                                     </Label>
-                                    <Select
+                                    <CustomSelect
                                         value={profile.timezone}
-                                        onValueChange={(value) => handleProfileChange("timezone", value)}
-                                    >
-                                        <SelectTrigger id="timezone" className="rounded-xl bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 focus:ring-amber-400">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl">
-                                            <SelectItem value="Asia/Manila">Asia/Manila (GMT+8)</SelectItem>
-                                            <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
-                                            <SelectItem value="America/Los_Angeles">America/Los_Angeles (GMT-8)</SelectItem>
-                                            <SelectItem value="Europe/London">Europe/London (GMT+0)</SelectItem>
-                                            <SelectItem value="Europe/Paris">Europe/Paris (GMT+1)</SelectItem>
-                                            <SelectItem value="Asia/Singapore">Asia/Singapore (GMT+8)</SelectItem>
-                                            <SelectItem value="Australia/Sydney">Australia/Sydney (GMT+11)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                        onChange={(value) => handleProfileChange("timezone", value)}
+                                        options={[
+                                            { value: "Asia/Manila", label: "Asia/Manila (GMT+8)" },
+                                            { value: "America/New_York", label: "America/New_York (GMT-5)" },
+                                            { value: "America/Los_Angeles", label: "America/Los_Angeles (GMT-8)" },
+                                            { value: "Europe/London", label: "Europe/London (GMT+0)" },
+                                            { value: "Europe/Paris", label: "Europe/Paris (GMT+1)" },
+                                            { value: "Asia/Singapore", label: "Asia/Singapore (GMT+8)" },
+                                            { value: "Australia/Sydney", label: "Australia/Sydney (GMT+11)" },
+                                        ]}
+                                        placeholder="Select timezone"
+                                        className="w-full"
+                                        buttonClassName="rounded-xl bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 focus:ring-amber-400"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col gap-2">
