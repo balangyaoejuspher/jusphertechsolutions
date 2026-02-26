@@ -39,10 +39,11 @@ export const serviceRouter = createTRPCRouter({
         tags: z.array(z.string()).default([]),
         status: z.enum(["active", "inactive"]).default("active"),
         order: z.number().default(0),
+        category: z.enum(["Development", "Outsourcing"]),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.insert(services).values(input).returning()
+      const result = await ctx.db.insert(services).values(input as any).returning()
       return result[0]
     }),
 
