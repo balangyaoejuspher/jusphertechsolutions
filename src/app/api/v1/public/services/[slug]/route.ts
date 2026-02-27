@@ -2,7 +2,6 @@ import { NextRequest } from "next/server"
 import { apiResponse, apiError } from "@/lib/api/version"
 import { serviceService } from "@/server/services"
 
-
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ slug: string }> }

@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/shared/theme-provider"
 import { MouseFlashlight } from "@/components/shared/mouse-flashlight"
 import { Toaster } from "@/components/ui/sonner"
 import { AlertCircle, Check, Info, Loader2, X } from "lucide-react"
+import { TokenManager } from "@/components/shared/token-manager"
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -72,6 +73,7 @@ export default function RootLayout({
           <ThemeProvider>
             <TRPCProvider>
               <MouseFlashlight />
+              <TokenManager />
               {children}
               <Toaster
                 richColors

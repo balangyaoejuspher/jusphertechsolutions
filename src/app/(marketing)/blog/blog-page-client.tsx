@@ -2,9 +2,8 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { ArrowRight, Clock, Tag, Search } from "lucide-react"
+import { ArrowRight, Clock, Tag, Search, Sparkles } from "lucide-react"
 import type { Post } from "@/server/db/schema"
-import { Metadata } from "next"
 
 const categoryColors: Record<string, string> = {
   "Outsourcing": "bg-blue-50 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-400/20",
@@ -23,31 +22,174 @@ function CategoryBadge({ category }: { category: string }) {
   )
 }
 
-export const metadata: Metadata = {
-    title: "Blog",
-    description: "Insights on outsourcing, blockchain, software development, and building remote teams — from the Juspher & Co. Tech Solutions team.",
+function FeaturedBadge() {
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-400/20 to-amber-300/10 border border-amber-400/40 text-amber-400 text-xs font-bold tracking-wide">
+      <Sparkles size={10} className="shrink-0" />
+      Featured
+    </span>
+  )
+}
+
+function PrimaryFeaturedCard({ post }: { post: Post }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className="group relative flex flex-col md:flex-row gap-8 md:gap-12 items-start rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border border-white/10 hover:border-amber-400/30 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 p-8 md:p-12"
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px]" />
+      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-400/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-amber-500/5 rounded-full blur-[60px] pointer-events-none" />
+
+      <div className="relative flex-1 min-w-0">
+        <div className="flex items-center gap-3 mb-5 flex-wrap">
+          <FeaturedBadge />
+          <CategoryBadge category={post.category} />
+        </div>
+        <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight mb-4 group-hover:text-amber-50 transition-colors">
+          {post.title}
+        </h2>
+        <p className="text-zinc-400 leading-relaxed mb-8 max-w-2xl text-sm md:text-base line-clamp-3">
+          {post.excerpt}
+        </p>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0">
+              <span className="text-amber-400 text-xs font-black">
+                {post.author.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <p className="text-white text-sm font-semibold leading-none">{post.author}</p>
+              {post.role && <p className="text-zinc-500 text-xs mt-0.5">{post.role}</p>}
+            </div>
+          </div>
+          <div className="flex items-center gap-4 text-zinc-500 text-xs">
+            <span className="flex items-center gap-1.5"><Clock size={12} /> {post.readTime}</span>
+            <span>{post.date}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Arrow CTA */}
+      <div className="relative shrink-0 self-center">
+        <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center group-hover:bg-amber-400 group-hover:border-amber-400 transition-all duration-300">
+          <ArrowRight size={18} className="text-amber-400 group-hover:text-zinc-950 transition-colors" />
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+function SecondaryFeaturedCard({ post }: { post: Post }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className="group relative flex flex-col overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 hover:border-amber-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/10 p-6"
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px]" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/8 rounded-full blur-[50px] pointer-events-none" />
+
+      <div className="relative flex-1 flex flex-col">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <FeaturedBadge />
+          <CategoryBadge category={post.category} />
+        </div>
+        <h3 className="text-base md:text-lg font-bold text-white leading-snug mb-3 group-hover:text-amber-50 transition-colors flex-1">
+          {post.title}
+        </h3>
+        <p className="text-zinc-500 text-xs md:text-sm leading-relaxed mb-5 line-clamp-2">
+          {post.excerpt}
+        </p>
+        <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0">
+              <span className="text-amber-400 text-[10px] font-black">
+                {post.author.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-zinc-500 text-xs">{post.date}</span>
+          </div>
+          <span className="flex items-center gap-1 text-xs text-zinc-600">
+            <Clock size={10} /> {post.readTime}
+          </span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+function GridCard({ post, index }: { post: Post; index: number }) {
+  return (
+    <Link
+      key={post.id}
+      href={`/blog/${post.slug}`}
+      className="group flex flex-col bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:border-amber-400/40 dark:hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300"
+    >
+      <div className={`h-1 w-full ${index % 2 === 0 ? "bg-gradient-to-r from-amber-400/60 to-amber-300/20" : "bg-gradient-to-r from-zinc-300/40 dark:from-zinc-700/40 to-transparent"}`} />
+      <div className="flex flex-col flex-1 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <CategoryBadge category={post.category} />
+          <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-600">
+            <Clock size={11} /> {post.readTime}
+          </span>
+        </div>
+        <h3 className="text-base font-bold text-zinc-900 dark:text-white leading-snug mb-3 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors flex-1">
+          {post.title}
+        </h3>
+        <p className="text-zinc-500 dark:text-zinc-500 text-sm leading-relaxed mb-6 line-clamp-3">
+          {post.excerpt}
+        </p>
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100 dark:border-white/5">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
+              <span className="text-zinc-600 dark:text-zinc-400 text-[10px] font-black">
+                {post.author.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-xs text-zinc-400 dark:text-zinc-600">{post.date}</span>
+          </div>
+          <span className="flex items-center gap-1 text-xs font-semibold text-amber-500 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-all translate-x-1 group-hover:translate-x-0">
+            Read more <ArrowRight size={11} />
+          </span>
+        </div>
+      </div>
+    </Link>
+  )
 }
 
 export default function BlogPageClient({ posts }: { posts: Post[] }) {
   const [activeCategory, setActiveCategory] = useState("All")
   const [search, setSearch] = useState("")
 
-  const featuredPost = useMemo(() => posts.find((p) => p.tag) ?? posts[0] ?? null, [posts])
+  const featuredPosts = useMemo(
+    () => posts.filter((p) => p.tag?.toLowerCase() === "featured"),
+    [posts]
+  )
+
+  const primaryFeatured = featuredPosts[0] ?? null
+  const secondaryFeatured = featuredPosts.slice(1)
+
+  const featuredSlugs = useMemo(
+    () => new Set(featuredPosts.map((p) => p.slug)),
+    [featuredPosts]
+  )
 
   const categories = useMemo(() => {
     const map: Record<string, number> = {}
-    for (const p of posts) {
-      map[p.category] = (map[p.category] ?? 0) + 1
-    }
+    for (const p of posts) map[p.category] = (map[p.category] ?? 0) + 1
     return [
       { label: "All", count: posts.length },
       ...Object.entries(map).map(([label, count]) => ({ label, count })),
     ]
   }, [posts])
 
+  const showFeaturedSection = !!primaryFeatured && activeCategory === "All" && !search.trim()
+
   const filtered = useMemo(() => {
+    const isShowingFeatured = !!primaryFeatured && activeCategory === "All" && !search.trim()
     return posts
-      .filter((p) => p.slug !== featuredPost?.slug)
+      .filter((p) => isShowingFeatured ? !featuredSlugs.has(p.slug) : true)
       .filter((p) => activeCategory === "All" || p.category === activeCategory)
       .filter((p) => {
         if (!search.trim()) return true
@@ -58,12 +200,11 @@ export default function BlogPageClient({ posts }: { posts: Post[] }) {
           p.author.toLowerCase().includes(q)
         )
       })
-  }, [posts, featuredPost, activeCategory, search])
+  }, [posts, featuredSlugs, primaryFeatured, activeCategory, search])
 
   return (
     <div className="bg-white dark:bg-zinc-950 min-h-screen">
 
-      {/* Hero */}
       <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-zinc-50 dark:bg-zinc-950">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:48px_48px]" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-zinc-950" />
@@ -85,7 +226,7 @@ export default function BlogPageClient({ posts }: { posts: Post[] }) {
 
       <div className="container mx-auto px-6 md:px-12 py-12">
 
-        {/* Category filter + Search */}
+        {/* ── Filters ── */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-12">
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
@@ -93,8 +234,8 @@ export default function BlogPageClient({ posts }: { posts: Post[] }) {
                 key={cat.label}
                 onClick={() => setActiveCategory(cat.label)}
                 className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${activeCategory === cat.label
-                  ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950 border-transparent"
-                  : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:border-amber-400/50 hover:text-amber-500 dark:hover:text-amber-400"
+                    ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950 border-transparent"
+                    : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:border-amber-400/50 hover:text-amber-500 dark:hover:text-amber-400"
                   }`}
               >
                 {cat.label}
@@ -114,107 +255,51 @@ export default function BlogPageClient({ posts }: { posts: Post[] }) {
           </div>
         </div>
 
-        {/* Featured post */}
-        {featuredPost && activeCategory === "All" && !search && (
-          <div className="mb-10">
-            <Link
-              href={`/blog/${featuredPost.slug}`}
-              className="group relative block rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border border-white/10 hover:border-amber-400/30 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10"
-            >
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px]" />
-              <div className="absolute top-0 right-0 w-80 h-80 bg-amber-400/10 rounded-full blur-[80px] pointer-events-none" />
+        {/* ── Featured stacked section ── */}
+        {showFeaturedSection && (
+          <div className="mb-14">
+            <div className="flex items-center gap-3 mb-6">
+              <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-[0.2em]">
+                Featured
+              </p>
+              <div className="flex-1 h-px bg-zinc-100 dark:bg-white/5" />
+            </div>
 
-              <div className="relative p-10 md:p-14 flex flex-col md:flex-row gap-10 items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="px-3 py-1 rounded-lg bg-amber-400/20 border border-amber-400/30 text-amber-400 text-xs font-bold">
-                      ★ {featuredPost.tag ?? "Featured"}
-                    </span>
-                    <CategoryBadge category={featuredPost.category} />
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-4 group-hover:text-amber-50 transition-colors">
-                    {featuredPost.title}
-                  </h2>
-                  <p className="text-zinc-400 leading-relaxed mb-8 max-w-2xl">
-                    {featuredPost.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-400/20 border border-amber-400/30 flex items-center justify-center">
-                        <span className="text-amber-400 text-xs font-black">
-                          {featuredPost.author.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-white text-sm font-semibold leading-none">{featuredPost.author}</p>
-                        {featuredPost.role && <p className="text-zinc-500 text-xs mt-0.5">{featuredPost.role}</p>}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-zinc-500 text-xs">
-                      <span className="flex items-center gap-1.5">
-                        <Clock size={12} /> {featuredPost.readTime}
-                      </span>
-                      <span>{featuredPost.date}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="shrink-0 self-center">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center group-hover:bg-amber-400 group-hover:border-amber-400 transition-all duration-300">
-                    <ArrowRight size={20} className="text-amber-400 group-hover:text-zinc-950 transition-colors" />
-                  </div>
-                </div>
+            <div className="mb-4">
+              <PrimaryFeaturedCard post={primaryFeatured} />
+            </div>
+
+            {secondaryFeatured.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {secondaryFeatured.slice(0, 2).map((post) => (
+                  <SecondaryFeaturedCard key={post.slug} post={post} />
+                ))}
               </div>
-            </Link>
+            )}
           </div>
         )}
 
-        {/* Posts grid */}
-        {filtered.length === 0 ? (
+        {showFeaturedSection && filtered.length > 0 && (
+          <div className="flex items-center gap-3 mb-8">
+            <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-[0.2em]">
+              All Posts
+            </p>
+            <div className="flex-1 h-px bg-zinc-100 dark:bg-white/5" />
+          </div>
+        )}
+
+        {filtered.length === 0 && !showFeaturedSection ? (
           <div className="text-center py-20 text-zinc-400 dark:text-zinc-600 text-sm">
             No posts found{search ? ` for "${search}"` : ""}.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             {filtered.map((post, i) => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className="group flex flex-col bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:border-amber-400/40 dark:hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300"
-              >
-                <div className={`h-1 w-full ${i % 2 === 0 ? "bg-gradient-to-r from-amber-400/60 to-amber-300/20" : "bg-gradient-to-r from-zinc-300/40 dark:from-zinc-700/40 to-transparent"}`} />
-                <div className="flex flex-col flex-1 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <CategoryBadge category={post.category} />
-                    <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-600">
-                      <Clock size={11} /> {post.readTime}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white leading-snug mb-3 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors flex-1">
-                    {post.title}
-                  </h3>
-                  <p className="text-zinc-500 dark:text-zinc-500 text-sm leading-relaxed mb-6 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100 dark:border-white/5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
-                        <span className="text-zinc-600 dark:text-zinc-400 text-[10px] font-black">
-                          {post.author.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <span className="text-xs text-zinc-400 dark:text-zinc-600">{post.date}</span>
-                    </div>
-                    <span className="flex items-center gap-1 text-xs font-semibold text-amber-500 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-all translate-x-1 group-hover:translate-x-0">
-                      Read more <ArrowRight size={11} />
-                    </span>
-                  </div>
-                </div>
-              </Link>
+              <GridCard key={post.id} post={post} index={i} />
             ))}
           </div>
         )}
 
-        {/* Newsletter CTA */}
         <div className="relative rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 overflow-hidden p-10 md:p-14 text-center mb-12">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-amber-400/5 rounded-full blur-[40px] pointer-events-none" />

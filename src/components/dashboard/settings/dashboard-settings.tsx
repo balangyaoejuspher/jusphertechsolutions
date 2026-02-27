@@ -230,7 +230,7 @@ export default function DashboardSettings() {
                                     { key: "newInquiry", label: "New Inquiries", desc: "Get notified when a client submits a new inquiry" },
                                     { key: "talentUpdate", label: "Talent Updates", desc: "Get notified when a talent profile is updated" },
                                     { key: "weeklyReport", label: "Weekly Report", desc: "Receive a weekly summary of your agency activity" },
-                                    { key: "marketing", label: "Marketing Emails", desc: "Tips, updates, and news from Portfolio Agency" },
+                                    { key: "marketing", label: "Marketing Emails", desc: "Tips, updates, and news from Juspher & Co" },
                                 ].map((item) => (
                                     <div
                                         key={item.key}

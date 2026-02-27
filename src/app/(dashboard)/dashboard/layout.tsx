@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 import { getAdminSession } from "@/lib/admin-auth"
-import { TokenInitializer } from "@/components/shared/token-initializer"
 
 export const metadata: Metadata = {
     robots: {
@@ -33,7 +32,6 @@ export default async function DashboardLayout({
         <div className="flex min-h-screen">
             <DashboardSidebar admin={admin} />
             <main className="flex-1 overflow-auto">
-                <TokenInitializer />
                 <div className="lg:hidden h-14" />
                 {children}
             </main>

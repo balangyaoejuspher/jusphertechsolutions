@@ -37,24 +37,6 @@ const team = [
     bio: "10+ years in talent acquisition and tech startups. Built this agency to solve the hiring problem he kept running into.",
     gradient: "from-amber-500 to-orange-400",
   },
-  {
-    name: "Lisa Tan",
-    role: "Head of Talent",
-    bio: "Former HR director with a passion for connecting people to the right opportunities. Leads all vetting and matching.",
-    gradient: "from-violet-500 to-purple-400",
-  },
-  {
-    name: "Marcus Webb",
-    role: "Head of Engineering",
-    bio: "Full-stack engineer who ensures our developer talent meets the highest technical bar. Ex-Google, ex-Stripe.",
-    gradient: "from-blue-500 to-cyan-400",
-  },
-  {
-    name: "Nina Reyes",
-    role: "Client Success Lead",
-    bio: "Dedicated to making sure every client gets exactly what they need — and more. Your go-to for anything post-match.",
-    gradient: "from-rose-500 to-pink-400",
-  },
 ]
 
 const stats = [
@@ -66,7 +48,7 @@ const stats = [
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Learn about Portfolio Agency — our story, our values, and the team behind the platform.",
+  description: "Learn about Juspher & Co — our story, our values, and the team behind the platform.",
 }
 
 export default function AboutPage() {
@@ -90,7 +72,7 @@ export default function AboutPage() {
             Great People
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-lg max-w-xl mx-auto leading-relaxed font-light">
-            Portfolio Agency was founded with one mission — make it effortless
+            Juspher & Co was founded with one mission — make it effortless
             for businesses to find and work with exceptional remote talent.
           </p>
         </div>
@@ -128,11 +110,11 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4 text-zinc-500 dark:text-zinc-400 leading-relaxed">
                 <p>
-                  Our founder Rafael spent years struggling to find reliable remote talent for his startups.
+                  Our founder Juspher spent years struggling to find reliable remote talent for his startups.
                   Freelance platforms were a gamble, recruiters were slow, and the good people were always taken.
                 </p>
                 <p>
-                  So he built the solution himself. Portfolio Agency started as a small curated network of
+                  So he built the solution himself. Juspher & Co started as a small curated network of
                   developers he personally trusted — and grew into a full-service talent platform covering
                   developers, VAs, and project managers.
                 </p>
@@ -228,24 +210,35 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             {team.map((member) => (
               <div
                 key={member.name}
-                className="group bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-3xl p-8 hover:border-amber-400/30 dark:hover:border-amber-500/20 hover:-translate-y-1 transition-all duration-300"
+                className="group relative w-full sm:w-72 lg:w-64 overflow-hidden rounded-3xl border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900 hover:border-amber-400/40 dark:hover:border-amber-500/30 hover:-translate-y-1 transition-all duration-300"
               >
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-white font-bold text-xl mb-6 shadow-md`}>
-                  {member.name.charAt(0)}
+                {/* Diagonal streak */}
+                <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+                  <div className="diagonal-streak" />
                 </div>
-                <h3 className="font-bold text-zinc-900 dark:text-white text-base mb-0.5">
-                  {member.name}
-                </h3>
-                <p className="text-amber-500 dark:text-amber-400 text-xs font-semibold mb-4">
-                  {member.role}
-                </p>
-                <p className="text-zinc-500 dark:text-zinc-500 text-sm leading-relaxed">
-                  {member.bio}
-                </p>
+
+                {/* Residual glow */}
+                <div className="absolute bottom-0 right-0 w-28 h-28 bg-amber-400/5 dark:bg-amber-400/8 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity delay-300 duration-500 pointer-events-none" />
+
+                {/* Content */}
+                <div className="relative p-8">
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-white font-bold text-xl mb-6 shadow-md group-hover:shadow-amber-500/20 transition-shadow duration-300`}>
+                    {member.name.charAt(0)}
+                  </div>
+                  <h3 className="font-bold text-zinc-900 dark:text-white text-base mb-0.5">
+                    {member.name}
+                  </h3>
+                  <p className="text-amber-500 dark:text-amber-400 text-xs font-semibold mb-4">
+                    {member.role}
+                  </p>
+                  <p className="text-zinc-500 dark:text-zinc-500 text-sm leading-relaxed">
+                    {member.bio}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

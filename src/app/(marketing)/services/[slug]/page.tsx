@@ -179,7 +179,7 @@ export default async function ServiceSlugPage({ params }: { params: Promise<{ sl
                                 return (
                                     <Link
                                         key={related.id}
-                                        href={`/services/${service.slug}`}
+                                        href={`/services/${related.slug}`}
                                         className="group flex items-center gap-4 p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-2xl hover:border-amber-400/40 dark:hover:border-amber-500/20 transition-all"
                                     >
                                         <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 group-hover:bg-amber-50 dark:group-hover:bg-amber-400/10 transition-colors">

@@ -131,21 +131,6 @@
   display: none !important;
 }
 
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 25s linear infinite;
-}
-
 @keyframes scale-in {
     0% { transform: scale(0.6); opacity: 0; }
     60% { transform: scale(1.15); opacity: 1; }
@@ -154,4 +139,47 @@
 
 .animate-scale-in {
     animation: scale-in 0.25s ease-out;
+}
+
+.marquee-track {
+    animation: marquee 40s linear infinite;
+}
+
+.marquee-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-33.333%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        animation: none !important;
+    }
+}
+
+.diagonal-streak {
+    position: absolute;
+    width: 150%;
+    height: 120px;
+    background: linear-gradient(
+        to left,
+        transparent,
+        rgba(251, 191, 36, 0.15),
+        rgba(253, 230, 138, 0.50),
+        rgba(251, 191, 36, 0.15),
+        transparent
+    );
+    transform: rotate(-45deg);
+    bottom: -120%;
+    right: -25%;
+    transition: bottom 0.7s ease-in-out, right 0.7s ease-in-out;
+    pointer-events: none;
+}
+
+.group:hover .diagonal-streak {
+    bottom: 120%;
+    right: 120%;
 }

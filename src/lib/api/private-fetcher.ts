@@ -1,51 +1,43 @@
-const API_BASE = "/api/v1"
+import { initToken } from "@/components/shared/token-manager"
 
-async function baseFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const url = `${API_BASE}${endpoint}`
+const BASE = typeof window !== "undefined"
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...options?.headers,
-        },
+const PORTAL_BASE = `${BASE}/api/v1`
+
+async function request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    isRetry = false,
+): Promise<T> {
+    const res = await fetch(PORTAL_BASE + path, {
+        method,
         credentials: "include",
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
     })
 
-    const json = await res.json()
-
-    if (!res.ok || !json.success) {
-        throw new Error(json.reason ?? json.error ?? "Request failed")
+    if ((res.status === 401 || res.status === 403) && !isRetry) {
+        console.warn(`[portalFetch] ${res.status} on ${path}, refreshing token...`)
+        await initToken()
+        return request<T>(method, path, body, true)
     }
 
-    return json.data as T
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data?.error ?? data?.message ?? `Request failed: ${res.status}`)
+    }
+
+    const json = await res.json()
+    return (json?.data !== undefined ? json.data : json) as T
 }
 
 export const portalFetch = {
-    get: <T>(endpoint: string, options?: RequestInit) =>
-        baseFetch<T>(endpoint, { ...options, method: "GET" }),
-
-    post: <T>(endpoint: string, body: unknown, options?: RequestInit) =>
-        baseFetch<T>(endpoint, {
-            ...options,
-            method: "POST",
-            body: JSON.stringify(body),
-        }),
-
-    put: <T>(endpoint: string, body: unknown, options?: RequestInit) =>
-        baseFetch<T>(endpoint, {
-            ...options,
-            method: "PUT",
-            body: JSON.stringify(body),
-        }),
-
-    patch: <T>(endpoint: string, body: unknown, options?: RequestInit) =>
-        baseFetch<T>(endpoint, {
-            ...options,
-            method: "PATCH",
-            body: JSON.stringify(body),
-        }),
-
-    delete: <T>(endpoint: string, options?: RequestInit) =>
-        baseFetch<T>(endpoint, { ...options, method: "DELETE" }),
+    get: <T>(path: string) => request<T>("GET", path),
+    post: <T>(path: string, body: unknown) => request<T>("POST", path, body),
+    patch: <T>(path: string, body: unknown) => request<T>("PATCH", path, body),
+    put: <T>(path: string, body: unknown) => request<T>("PUT", path, body),
+    delete: <T>(path: string) => request<T>("DELETE", path),
 }

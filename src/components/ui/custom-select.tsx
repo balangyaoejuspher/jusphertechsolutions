@@ -5,16 +5,16 @@ import { Check, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface SelectOption<T extends string> {
-    value: T;
-    label: string;
+    value: T
+    label: string
 }
 
 interface CustomSelectProps<T extends string> {
-    value: T;
-    options: readonly SelectOption<T>[];
-    onChange: (value: T) => void;
-    placeholder?: string;
-    className?: string;
+    value: T
+    options: readonly SelectOption<T>[]
+    onChange: (value: T) => void
+    placeholder?: string
+    className?: string
     buttonClassName?: string
 }
 
@@ -24,9 +24,12 @@ export function CustomSelect<T extends string = string>({
     onChange,
     placeholder = "Select...",
     className,
+    buttonClassName,
 }: CustomSelectProps<T>) {
     const [open, setOpen] = useState(false)
+    const [dropUp, setDropUp] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
+    const buttonRef = useRef<HTMLButtonElement>(null)
 
     const selected = options.find((o) => o.value === value)
 
@@ -40,11 +43,22 @@ export function CustomSelect<T extends string = string>({
         return () => document.removeEventListener("mousedown", handler)
     }, [])
 
+    const handleToggle = () => {
+        if (!open && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect()
+            const spaceBelow = window.innerHeight - rect.bottom
+            const dropdownHeight = options.length * 42
+            setDropUp(spaceBelow < dropdownHeight && rect.top > dropdownHeight)
+        }
+        setOpen((prev) => !prev)
+    }
+
     return (
         <div ref={ref} className={cn("relative", className)}>
             <button
+                ref={buttonRef}
                 type="button"
-                onClick={() => setOpen(!open)}
+                onClick={handleToggle}
                 className={cn(
                     "w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border text-sm text-left flex items-center justify-between gap-2 transition-colors",
                     open
@@ -52,7 +66,8 @@ export function CustomSelect<T extends string = string>({
                         : "border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20",
                     selected
                         ? "text-zinc-900 dark:text-white"
-                        : "text-zinc-400 dark:text-zinc-600"
+                        : "text-zinc-400 dark:text-zinc-600",
+                    buttonClassName,
                 )}
             >
                 <span className="truncate">{selected?.label ?? placeholder}</span>
@@ -67,7 +82,14 @@ export function CustomSelect<T extends string = string>({
 
             {/* Dropdown */}
             {open && (
-                <div className="absolute z-50 w-full mt-1.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg overflow-hidden">
+                <div
+                    className={cn(
+                        "absolute z-50 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg overflow-hidden",
+                        dropUp
+                            ? "bottom-[calc(100%+6px)]"
+                            : "top-[calc(100%+6px)]"
+                    )}
+                >
                     {options.map((option) => {
                         const isSelected = option.value === value
                         return (
