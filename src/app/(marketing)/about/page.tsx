@@ -14,7 +14,7 @@ const values = [
     icon: Zap,
     title: "Speed & Efficiency",
     description:
-      "We know time is money. Our average talent match time is 48 hours — so you can start building without delay.",
+      "We know time is money. Our goal is to get you matched fast — so you can start building without delay.",
   },
   {
     icon: Heart,
@@ -24,9 +24,9 @@ const values = [
   },
   {
     icon: Globe,
-    title: "Global Reach",
+    title: "Built to Scale",
     description:
-      "Our talent network spans 30+ countries. Wherever you are, we have the right person in the right timezone for your team.",
+      "We're starting small and intentional — rooted in the Philippines, with a clear vision to grow our network globally.",
   },
 ]
 
@@ -34,16 +34,16 @@ const team = [
   {
     name: "Juspher Balangyao",
     role: "Founder, CEO",
-    bio: "10+ years in talent acquisition and tech startups. Built this agency to solve the hiring problem he kept running into.",
+    bio: "Built Juspher & Co to solve a real problem — finding reliable, skilled remote talent. Started in 2026 with a small curated network of people he personally trusts.",
     gradient: "from-amber-500 to-orange-400",
   },
 ]
 
 const stats = [
-  { value: "200+", label: "Businesses Served" },
-  { value: "500+", label: "Professionals Placed" },
-  { value: "30+", label: "Countries Represented" },
-  { value: "98%", label: "Client Satisfaction" },
+  { value: "4", label: "Vetted Professionals" },
+  { value: "1", label: "Country" },
+  { value: "2026", label: "Year Founded" },
+  { value: "∞", label: "Room to Grow" },
 ]
 
 export const metadata: Metadata = {
@@ -61,7 +61,7 @@ export default function AboutPage() {
         <div
           className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/G%3E%3C/svg%3E")`,
           }}
         />
 
@@ -82,17 +82,13 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-zinc-500 dark:text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light">
-            Juspher & Co was founded with one mission — make it effortless
+            Juspher & Co was built with one mission — make it effortless
             for businesses to find and work with exceptional remote talent.
           </p>
 
           <div className="mt-12 flex items-center justify-center gap-6 text-sm text-zinc-400 dark:text-zinc-600">
             <span className="flex items-center gap-2">
               <span className="w-4 h-px bg-zinc-300 dark:bg-zinc-700" />
-              Founded 2020
-            </span>
-            <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-            <span className="flex items-center gap-2">
               Cebu, Philippines
               <span className="w-4 h-px bg-zinc-300 dark:bg-zinc-700" />
             </span>
@@ -103,7 +99,7 @@ export default function AboutPage() {
       <section className="border-y border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-950 overflow-hidden">
         <div className="container mx-auto px-6 md:px-12">
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-zinc-100 dark:divide-white/5">
-            {stats.map((stat, i) => (
+            {stats.map((stat) => (
               <div key={stat.label} className="relative py-14 px-8 text-center group">
                 <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
                 <div className="font-display text-5xl md:text-6xl font-bold text-zinc-900 dark:text-white mb-2 tabular-nums">
@@ -134,17 +130,17 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-5 text-zinc-500 dark:text-zinc-400 leading-relaxed text-[15px]">
                 <p>
-                  Our founder Juspher spent years struggling to find reliable remote talent for his startups.
-                  Freelance platforms were a gamble, recruiters were slow, and the good people were always taken.
+                  Our founder Juspher kept running into the same problem — finding reliable remote talent
+                  was slow, inconsistent, and exhausting. Freelance platforms were a gamble, and the good
+                  people were always hard to find.
                 </p>
                 <p>
-                  So he built the solution himself. Juspher & Co started as a small curated network of
-                  developers he personally trusted — and grew into a full-service talent platform covering
-                  developers, VAs, and project managers.
+                  So he decided to build the solution himself. Juspher & Co started as a small,
+                  handpicked network of professionals he personally vetted — people he'd work with himself.
                 </p>
                 <p>
-                  Today we serve 200+ businesses worldwide, and every professional in our network is someone
-                  we'd hire ourselves.
+                  We're early. We're small. But every person in our network is someone we genuinely stand behind,
+                  and we're building this the right way — one trusted connection at a time.
                 </p>
               </div>
               <Link href="/talent" className="inline-block mt-10">
@@ -157,11 +153,11 @@ export default function AboutPage() {
 
             <div className="grid grid-cols-2 gap-3">
               {[
-                { icon: Users, label: "Talent Network", value: "500+", bg: "bg-amber-50 dark:bg-amber-500/8", border: "border-amber-100 dark:border-amber-500/15", iconBg: "bg-amber-100 dark:bg-amber-500/15", iconColor: "text-amber-600 dark:text-amber-400" },
-                { icon: Globe, label: "Countries", value: "30+", bg: "bg-sky-50 dark:bg-sky-500/8", border: "border-sky-100 dark:border-sky-500/15", iconBg: "bg-sky-100 dark:bg-sky-500/15", iconColor: "text-sky-600 dark:text-sky-400" },
-                { icon: Trophy, label: "Satisfaction", value: "98%", bg: "bg-emerald-50 dark:bg-emerald-500/8", border: "border-emerald-100 dark:border-emerald-500/15", iconBg: "bg-emerald-100 dark:bg-emerald-500/15", iconColor: "text-emerald-600 dark:text-emerald-400" },
-                { icon: Zap, label: "Match Time", value: "48hr", bg: "bg-violet-50 dark:bg-violet-500/8", border: "border-violet-100 dark:border-violet-500/15", iconBg: "bg-violet-100 dark:bg-violet-500/15", iconColor: "text-violet-600 dark:text-violet-400" },
-              ].map((item, i) => (
+                { icon: Users, label: "Talent Network", value: "4", bg: "bg-amber-50 dark:bg-amber-500/8", border: "border-amber-100 dark:border-amber-500/15", iconBg: "bg-amber-100 dark:bg-amber-500/15", iconColor: "text-amber-600 dark:text-amber-400" },
+                { icon: Globe, label: "Country", value: "PH", bg: "bg-sky-50 dark:bg-sky-500/8", border: "border-sky-100 dark:border-sky-500/15", iconBg: "bg-sky-100 dark:bg-sky-500/15", iconColor: "text-sky-600 dark:text-sky-400" },
+                { icon: Trophy, label: "Founded", value: "2026", bg: "bg-emerald-50 dark:bg-emerald-500/8", border: "border-emerald-100 dark:border-emerald-500/15", iconBg: "bg-emerald-100 dark:bg-emerald-500/15", iconColor: "text-emerald-600 dark:text-emerald-400" },
+                { icon: Zap, label: "Vision", value: "Global", bg: "bg-violet-50 dark:bg-violet-500/8", border: "border-violet-100 dark:border-violet-500/15", iconBg: "bg-violet-100 dark:bg-violet-500/15", iconColor: "text-violet-600 dark:text-violet-400" },
+              ].map((item) => (
                 <div
                   key={item.label}
                   className={`${item.bg} border ${item.border} rounded-3xl p-7 flex flex-col gap-5 hover:-translate-y-1 transition-transform duration-300`}
@@ -291,16 +287,16 @@ export default function AboutPage() {
             <div className="relative">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span className="text-white/60 text-xs font-semibold tracking-[0.15em] uppercase">Ready to Start</span>
+                <span className="text-white/60 text-xs font-semibold tracking-[0.15em] uppercase">Let's Build Together</span>
               </div>
 
               <h2 className="font-display text-5xl md:text-7xl font-bold text-white mb-5 tracking-tight leading-[0.92]">
-                Ready to Work
+                Be One of Our
                 <br />
-                <span className="text-zinc-500">With the Best?</span>
+                <span className="text-zinc-500">First Clients.</span>
               </h2>
               <p className="text-zinc-400 text-lg max-w-md mx-auto mb-12 leading-relaxed">
-                Join 200+ businesses that trust us to find their perfect team members.
+                We're just getting started — and that means you get our full attention, care, and commitment.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href="/talent">
