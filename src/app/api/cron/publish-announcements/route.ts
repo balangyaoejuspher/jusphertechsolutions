@@ -9,7 +9,9 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function GET(req: NextRequest) {
-    const secret = req.headers.get("x-cron-secret")
+    const authHeader = req.headers.get("authorization")
+    const secret = authHeader?.replace("Bearer ", "")
+        ?? req.headers.get("x-cron-secret")
         ?? req.nextUrl.searchParams.get("secret")
 
     if (secret !== process.env.CRON_SECRET) {
