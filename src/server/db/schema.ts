@@ -212,6 +212,41 @@ export const postCategoryEnum = pgEnum("post_category", [
   "Products",
 ])
 
+export const notificationTypeEnum = pgEnum("notification_type", [
+  "inquiry",
+  "talent",
+  "invoice",
+  "client",
+  "placement",
+  "system",
+])
+
+export const announcementTypeEnum = pgEnum("announcement_type", [
+  "general",
+  "maintenance",
+  "new_feature",
+  "urgent",
+  "event",
+])
+
+export const announcementAudienceEnum = pgEnum("announcement_audience", [
+  "all",
+  "clients",
+  "talents",
+])
+
+export const announcementStatusEnum = pgEnum("announcement_status", [
+  "draft",
+  "published",
+  "scheduled",
+  "archived",
+])
+
+export const announcementRecipientTypeEnum = pgEnum("announcement_recipient_type", [
+  "client",
+  "talent",
+])
+
 // ─── Tables ───────────────────────────────────────────────────────────────────
 
 export const admins = pgTable("admins", {
@@ -220,6 +255,8 @@ export const admins = pgTable("admins", {
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   role: adminRoleEnum("role").default("editor").notNull(),
+  avatarUrl: text("avatar_url"),
+  isDefault: boolean("is_default").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
@@ -275,6 +312,7 @@ export const clients = pgTable("clients", {
   location: text("location"),
   company: text("company"),
   position: text("position"),
+  avatarUrl: text("avatar_url"),
   status: clientStatusEnum("status").default("prospect").notNull(),
   services: text("services").array().default([]).notNull(),
   notes: text("notes"),
@@ -443,6 +481,78 @@ export const posts = pgTable("posts", {
   ),
 ])
 
+export const companySettings = pgTable("company_settings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyName: text("company_name").notNull().default("Juspher & Co."),
+  email: text("email").notNull().default("support@juspherandco.com"),
+  phone: text("phone"),
+  website: text("website"),
+  description: text("description"),
+  address: text("address"),
+  logoUrl: text("logo_url"),
+  timezone: text("timezone").notNull().default("Asia/Manila"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+export const adminNotificationPreferences = pgTable("admin_notification_preferences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clerkUserId: text("clerk_user_id").notNull().unique().references(() => admins.clerkUserId, { onDelete: "cascade" }),
+  newInquiry: boolean("new_inquiry").notNull().default(true),
+  talentUpdate: boolean("talent_update").notNull().default(true),
+  weeklyReport: boolean("weekly_report").notNull().default(false),
+  marketing: boolean("marketing").notNull().default(false),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+export const notifications = pgTable("notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  adminId: uuid("admin_id").notNull().references(() => admins.id, { onDelete: "cascade" }),
+  type: notificationTypeEnum("type").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  entityId: text("entity_id"),
+  entityType: text("entity_type"),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("notifications_admin_id_idx").on(table.adminId),
+  index("notifications_read_idx").on(table.read),
+  index("notifications_created_at_idx").on(table.createdAt),
+])
+
+export const announcements = pgTable("announcements", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  type: announcementTypeEnum("type").notNull().default("general"),
+  audience: announcementAudienceEnum("audience").notNull().default("all"),
+  status: announcementStatusEnum("status").notNull().default("draft"),
+  scheduledAt: timestamp("scheduled_at"),
+  publishedAt: timestamp("published_at"),
+  emailSent: boolean("email_sent").notNull().default(false),
+  emailSentAt: timestamp("email_sent_at"),
+  createdBy: uuid("created_by").notNull().references(() => admins.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("announcements_status_idx").on(table.status),
+  index("announcements_audience_idx").on(table.audience),
+  index("announcements_scheduled_at_idx").on(table.scheduledAt),
+  index("announcements_created_by_idx").on(table.createdBy),
+])
+
+export const announcementReads = pgTable("announcement_reads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  announcementId: uuid("announcement_id").notNull().references(() => announcements.id, { onDelete: "cascade" }),
+  recipientId: text("recipient_id").notNull(),
+  recipientType: announcementRecipientTypeEnum("recipient_type").notNull(),
+  readAt: timestamp("read_at").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("announcement_reads_unique_idx").on(table.announcementId, table.recipientId),
+  index("announcement_reads_announcement_id_idx").on(table.announcementId),
+  index("announcement_reads_recipient_id_idx").on(table.recipientId),
+])
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -473,6 +583,19 @@ export const placementsRelations = relations(placements, ({ one }) => ({
   talent: one(talent, { fields: [placements.talentId], references: [talent.id] }),
   client: one(clients, { fields: [placements.clientId], references: [clients.id] }),
   inquiry: one(inquiries, { fields: [placements.inquiryId], references: [inquiries.id] }),
+}))
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  admin: one(admins, { fields: [notifications.adminId], references: [admins.id] }),
+}))
+
+export const announcementsRelations = relations(announcements, ({ one, many }) => ({
+  createdBy: one(admins, { fields: [announcements.createdBy], references: [admins.id] }),
+  reads: many(announcementReads),
+}))
+
+export const announcementReadsRelations = relations(announcementReads, ({ one }) => ({
+  announcement: one(announcements, { fields: [announcementReads.announcementId], references: [announcements.id] }),
 }))
 
 // ─── Inferred types ───────────────────────────────────────────────────────────
@@ -512,3 +635,22 @@ export type Post = typeof posts.$inferSelect
 export type NewPost = typeof posts.$inferInsert
 export type PostStatus = Post["status"]
 export type PostCategory = Post["category"]
+
+export type CompanySettings = typeof companySettings.$inferSelect
+export type NewCompanySettings = typeof companySettings.$inferInsert
+
+export type AdminNotificationPreferences = typeof adminNotificationPreferences.$inferSelect
+export type NewAdminNotificationPreferences = typeof adminNotificationPreferences.$inferInsert
+
+export type Notification = typeof notifications.$inferSelect
+export type NewNotification = typeof notifications.$inferInsert
+export type NotificationType = Notification["type"]
+
+export type Announcement = typeof announcements.$inferSelect
+export type NewAnnouncement = typeof announcements.$inferInsert
+export type AnnouncementType = Announcement["type"]
+export type AnnouncementAudience = Announcement["audience"]
+export type AnnouncementStatus = Announcement["status"]
+
+export type AnnouncementRead = typeof announcementReads.$inferSelect
+export type NewAnnouncementRead = typeof announcementReads.$inferInsert

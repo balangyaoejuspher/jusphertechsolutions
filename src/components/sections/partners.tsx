@@ -1,7 +1,7 @@
 "use client"
 
 import { Fragment } from "react"
-import { Code2, Layers3 } from "lucide-react"
+import { Code2, Layers3, Zap } from "lucide-react"
 import Image from "next/image"
 
 const techStack = [
@@ -32,104 +32,174 @@ const badges = [
     { src: "/Regional-Leader-Asia-Winter-2026.png", alt: "Regional Leader Asia 2026" },
 ]
 
-const categoryColor: Record<string, string> = {
-    Language: "text-sky-400",
-    Framework: "text-emerald-400",
-    Runtime: "text-emerald-400",
-    API: "text-pink-400",
-    Blockchain: "text-violet-400",
-    "Smart Contract": "text-amber-400",
+const CATEGORY_STYLE: Record<string, { dot: string; label: string }> = {
+    Language: { dot: "bg-sky-400", label: "text-sky-400" },
+    Framework: { dot: "bg-emerald-400", label: "text-emerald-400" },
+    Runtime: { dot: "bg-emerald-400", label: "text-emerald-400" },
+    API: { dot: "bg-pink-400", label: "text-pink-400" },
+    Blockchain: { dot: "bg-violet-400", label: "text-violet-400" },
+    "Smart Contract": { dot: "bg-amber-400", label: "text-amber-400" },
 }
 
-const legends = [
-    { label: "Language / Runtime", icon: <Code2 size={11} />, color: "text-sky-400" },
-    { label: "Framework / API", icon: <Layers3 size={11} />, color: "text-emerald-400" },
-    { label: "Blockchain / Smart Contract", icon: <span className="text-[10px] font-bold">&#x2B21;</span>, color: "text-violet-400" },
+const LEGEND = [
+    { label: "Language / Runtime", color: "bg-sky-400", icon: Code2 },
+    { label: "Framework / API", color: "bg-emerald-400", icon: Layers3 },
+    { label: "Blockchain / Smart Contract", color: "bg-violet-400", icon: Zap },
 ]
 
 export function Partners() {
-    const tripled = [...techStack, ...techStack, ...techStack]
+    const row1 = [...techStack, ...techStack, ...techStack]
+    const row2 = [...techStack].reverse()
+    const row2tripled = [...row2, ...row2, ...row2]
 
     return (
-        <section className="py-16 md:py-24 bg-white dark:bg-zinc-950 border-y border-zinc-100 dark:border-white/5 overflow-hidden">
+        <section className="relative py-20 md:py-28 bg-zinc-950 overflow-hidden">
+            <div className="absolute top-0 inset-x-0 flex justify-center pointer-events-none">
+                <div className="w-[600px] h-[180px] bg-gradient-to-b from-amber-400/20 via-amber-400/5 to-transparent blur-2xl" />
+            </div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[1px] bg-amber-400/80 blur-sm" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+            <div className="absolute bottom-0 inset-x-0 flex justify-center pointer-events-none">
+                <div className="w-[600px] h-[180px] bg-gradient-to-t from-amber-400/20 via-amber-400/5 to-transparent blur-2xl" />
+            </div>
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[1px] bg-amber-400/80 blur-sm" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
 
-            {/* Header */}
-            <div className="container mx-auto px-6 md:px-12 mb-10 text-center">
-                <p className="text-[10px] md:text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-[0.25em] mb-6">
-                    Our technology expertise
+            <div className="relative container mx-auto px-6 md:px-12 mb-12 text-center">
+                <p className="text-[10px] font-bold text-amber-400/60 uppercase tracking-[0.3em] mb-4">
+                    Technology Expertise
                 </p>
-                <div className="flex items-center justify-center flex-wrap gap-2 md:gap-3">
-                    {legends.map((item) => (
+                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-6">
+                    Built on the Stack
+                    <span className="text-amber-400"> You Trust</span>
+                </h2>
+
+                {/* Legend pills */}
+                <div className="flex items-center justify-center flex-wrap gap-2">
+                    {LEGEND.map(({ label, color, icon: Icon }) => (
                         <div
-                            key={item.label}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-white/5"
+                            key={label}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-white/20 transition-colors"
                         >
-                            <span className={`${item.color} flex items-center`}>{item.icon}</span>
-                            <span className="text-[10px] md:text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
-                                {item.label}
-                            </span>
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${color}`} />
+                            <Icon size={10} className="text-zinc-500" />
+                            <span className="text-[10px] text-zinc-400 whitespace-nowrap font-medium">{label}</span>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Marquee */}
+            <div className="relative mb-3">
+                <div className="absolute left-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
+                <div className="flex gap-3 whitespace-nowrap marquee-track">
+                    {row1.map((tech, i) => (
+                        <TechPill key={i} tech={tech} />
+                    ))}
+                </div>
+            </div>
+
             <div className="relative">
-                <div className="absolute left-0 top-0 bottom-0 w-16 md:w-28 bg-gradient-to-r from-white dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-16 md:w-28 bg-gradient-to-l from-white dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
+                <div className="absolute left-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
+                <div className="flex gap-3 whitespace-nowrap marquee-track-reverse">
+                    {row2tripled.map((tech, i) => (
+                        <TechPill key={i} tech={tech} variant="outline" />
+                    ))}
+                </div>
+            </div>
 
-                <div className="flex gap-3 md:gap-4 whitespace-nowrap marquee-track">
-                    {tripled.map((tech, i) => (
+            <div className="relative container mx-auto px-6 md:px-12 mt-16 mb-12">
+                <div className="flex items-center gap-4">
+                    <div className="flex-1 h-px bg-white/5" />
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] whitespace-nowrap">
+                        Recognized by Industry Leaders
+                    </p>
+                    <div className="flex-1 h-px bg-white/5" />
+                </div>
+            </div>
+
+            <div className="relative container mx-auto px-6 md:px-12">
+                <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                    {badges.map((badge) => (
                         <div
-                            key={i}
-                            className="flex items-center gap-2.5 md:gap-3 shrink-0 px-3.5 md:px-5 py-2.5 md:py-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-xl md:rounded-2xl group hover:border-amber-300 dark:hover:border-amber-500/30 hover:bg-amber-50/60 dark:hover:bg-amber-500/5 transition-all duration-300 cursor-default"
+                            key={badge.src}
+                            className="relative h-14 md:h-16 w-28 md:w-36 group"
                         >
-                            <div
-                                className="w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center shrink-0 text-[9px] md:text-[10px] font-bold transition-transform group-hover:scale-110"
-                                style={{
-                                    backgroundColor: tech.color + "18",
-                                    border: `1px solid ${tech.color}35`,
-                                }}
-                            >
-                                <span style={{ color: tech.color }}>{tech.icon}</span>
-                            </div>
-                            <div>
-                                <p className="text-xs md:text-sm font-semibold text-zinc-800 dark:text-zinc-200 whitespace-nowrap leading-tight">
-                                    {tech.name}
-                                </p>
-                                <p className={`text-[10px] md:text-xs whitespace-nowrap font-medium leading-tight ${categoryColor[tech.category] ?? "text-zinc-400"}`}>
-                                    {tech.category}
-                                </p>
-                            </div>
+                            <Image
+                                src={badge.src}
+                                alt={badge.alt}
+                                fill
+                                className="object-contain opacity-30 group-hover:opacity-70 transition-all duration-500 filter grayscale group-hover:grayscale-0"
+                            />
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Badges */}
-            <div className="container mx-auto px-6 md:px-12 mt-14 md:mt-16">
-                <p className="text-[10px] md:text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-[0.2em] text-center mb-8">
-                    Recognized by
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-4 items-center justify-items-center">
-                    {badges.map((badge, i) => (
-                        <Fragment key={badge.src}>
-                            <div className="relative h-16 md:h-20 w-full max-w-[140px] md:max-w-[160px]">
-                                <Image
-                                    src={badge.src}
-                                    alt={badge.alt}
-                                    fill
-                                    className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300"
-                                />
-                            </div>
-                            {i < badges.length - 1 && (
-                                <div className="hidden lg:block w-px h-10 bg-zinc-200 dark:bg-zinc-800" />
-                            )}
-                        </Fragment>
-                    ))}
-                </div>
+            <style jsx>{`
+                @keyframes marquee {
+                    from { transform: translateX(0); }
+                    to   { transform: translateX(-33.333%); }
+                }
+                @keyframes marquee-reverse {
+                    from { transform: translateX(-33.333%); }
+                    to   { transform: translateX(0); }
+                }
+                .marquee-track {
+                    animation: marquee 35s linear infinite;
+                }
+                .marquee-track-reverse {
+                    animation: marquee-reverse 40s linear infinite;
+                }
+                .marquee-track:hover,
+                .marquee-track-reverse:hover {
+                    animation-play-state: paused;
+                }
+            `}</style>
+        </section>
+    )
+}
+
+function TechPill({
+    tech,
+    variant = "filled",
+}: {
+    tech: typeof techStack[number]
+    variant?: "filled" | "outline"
+}) {
+    const cat = CATEGORY_STYLE[tech.category] ?? { dot: "bg-zinc-500", label: "text-zinc-400" }
+
+    return (
+        <div
+            className={`
+                flex items-center gap-2.5 shrink-0 px-4 py-2.5 rounded-xl cursor-default
+                group hover:scale-105 transition-all duration-200
+                ${variant === "filled"
+                    ? "bg-white/5 border border-white/8 hover:bg-white/10 hover:border-white/15"
+                    : "bg-transparent border border-white/5 hover:bg-white/5 hover:border-white/10"
+                }
+            `}
+        >
+            {/* Icon badge */}
+            <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[9px] font-bold transition-transform group-hover:scale-110"
+                style={{
+                    backgroundColor: tech.color + "20",
+                    border: `1px solid ${tech.color}30`,
+                }}
+            >
+                <span style={{ color: tech.color }}>{tech.icon}</span>
             </div>
 
-        </section>
+            {/* Name + category */}
+            <div className="leading-tight">
+                <p className="text-xs font-semibold text-zinc-200 whitespace-nowrap">{tech.name}</p>
+                <p className={`text-[10px] font-medium whitespace-nowrap ${cat.label}`}>{tech.category}</p>
+            </div>
+
+            {/* Category dot */}
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cat.dot} opacity-60`} />
+        </div>
     )
 }

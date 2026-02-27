@@ -4,12 +4,14 @@ import { useState, useEffect, useRef } from "react"
 import {
     X, Eye, Pencil, Clock, Tag,
     ArrowRight, ArrowLeft, Sparkles, Calendar,
-    AlignLeft, Bold, Heading2,
+    AlignLeft,
     FileText, LayoutGrid, Loader2,
+    PenLine,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CustomSelect } from "@/components/ui/custom-select"
 import { cn } from "@/lib/utils"
+import { RichTextEditor } from "@/components/shared/rich-text-editor"
 
 export interface BlogPost {
     id?: string
@@ -60,41 +62,27 @@ function CategoryBadge({ category }: { category: string }) {
 }
 
 function PostBody({ content }: { content: string }) {
-    if (!content.trim()) {
+    if (!content.trim() || content === "<p></p>") {
         return (
             <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
                 <FileText size={28} className="text-zinc-300 dark:text-zinc-700" />
                 <p className="text-xs text-zinc-400 dark:text-zinc-600 italic">
-                    Your article content will render here.<br />
-                    Use <code className="bg-zinc-100 dark:bg-white/5 px-1 rounded">## Heading</code> and <code className="bg-zinc-100 dark:bg-white/5 px-1 rounded">**bold**</code> in the editor.
+                    Your article content will render here.
                 </p>
             </div>
         )
     }
 
-    const paragraphs = content.trim().split(/\n\n+/)
     return (
-        <div className="space-y-6">
-            {paragraphs.map((block, i) => {
-                if (block.startsWith("## ")) {
-                    return (
-                        <h2 key={i} className="text-xl font-bold text-zinc-900 dark:text-white mt-8 mb-2 leading-snug">
-                            {block.replace("## ", "")}
-                        </h2>
-                    )
-                }
-                const parts = block.split(/\*\*(.*?)\*\*/g)
-                return (
-                    <p key={i} className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm">
-                        {parts.map((part, j) =>
-                            j % 2 === 1 ? (
-                                <strong key={j} className="font-semibold text-zinc-900 dark:text-zinc-100">{part}</strong>
-                            ) : part
-                        )}
-                    </p>
-                )
-            })}
-        </div>
+        <div
+            className="prose prose-sm dark:prose-invert max-w-none 
+                prose-p:text-zinc-600 dark:prose-p:text-zinc-400
+                prose-headings:text-zinc-900 dark:prose-headings:text-white
+                prose-strong:text-zinc-900 dark:prose-strong:text-white
+                prose-li:text-zinc-600 dark:prose-li:text-zinc-400
+                prose-blockquote:border-amber-400 prose-blockquote:text-zinc-500"
+            dangerouslySetInnerHTML={{ __html: content }}
+        />
     )
 }
 
@@ -243,70 +231,14 @@ function ArticleHeaderPreview({ form }: { form: BlogPost }) {
 }
 
 function ContentEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-    function insertMarkdown(prefix: string, suffix = "") {
-        const ta = textareaRef.current
-        if (!ta) return
-        const start = ta.selectionStart
-        const end = ta.selectionEnd
-        const selected = value.slice(start, end)
-        const newVal = value.slice(0, start) + prefix + selected + suffix + value.slice(end)
-        onChange(newVal)
-        setTimeout(() => {
-            ta.focus()
-            ta.setSelectionRange(start + prefix.length, end + prefix.length)
-        }, 0)
-    }
-
-    function insertHeading() {
-        const ta = textareaRef.current
-        if (!ta) return
-        const start = ta.selectionStart
-        const lineStart = value.lastIndexOf("\n", start - 1) + 1
-        const before = value.slice(0, lineStart)
-        const after = value.slice(lineStart)
-        if (after.startsWith("## ")) {
-            onChange(before + after.slice(3))
-        } else {
-            onChange(before + "## " + after)
-        }
-        setTimeout(() => ta.focus(), 0)
-    }
-
-    const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0
-    const charCount = value.length
-
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-1 px-1">
-                <button type="button" onClick={() => insertMarkdown("**", "**")}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white transition-all">
-                    <Bold size={12} /> Bold
-                </button>
-                <button type="button" onClick={insertHeading}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white transition-all">
-                    <Heading2 size={12} /> Heading
-                </button>
-                <div className="ml-auto flex items-center gap-3 text-[10px] text-zinc-400 dark:text-zinc-600 pr-1">
-                    <span>{wordCount} words</span>
-                    <span>{charCount} chars</span>
-                </div>
-            </div>
-            <textarea
-                ref={textareaRef}
-                rows={12}
-                placeholder={"Write your article here...\n\nUse ## for headings and **text** for bold.\n\nSeparate paragraphs with a blank line."}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className={cn(inputCls, "resize-none font-mono text-xs leading-relaxed")}
-            />
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-600 flex items-center gap-3">
-                <span><code className="bg-zinc-100 dark:bg-white/5 px-1 rounded">## Heading</code> → section title</span>
-                <span><code className="bg-zinc-100 dark:bg-white/5 px-1 rounded">**text**</code> → bold</span>
-                <span>blank line → new paragraph</span>
-            </p>
-        </div>
+        <RichTextEditor
+            value={value}
+            onChange={onChange}
+            placeholder="Write your article here..."
+            maxCharacters={20000}
+            editorClassName="min-h-[280px]"
+        />
     )
 }
 
@@ -318,7 +250,7 @@ function PreviewPanel({ form }: { form: BlogPost }) {
     const tabs: { key: PreviewTab; label: string; icon: React.ReactNode }[] = [
         { key: "card", label: "Cards", icon: <LayoutGrid size={10} /> },
         { key: "article", label: "Header", icon: <FileText size={10} /> },
-        { key: "content", label: "Content", icon: <AlignLeft size={10} /> },
+        { key: "content", label: "Content", icon: <PenLine size={10} /> },
     ]
 
     return (
@@ -415,7 +347,7 @@ export function BlogPostModal({ open, editPost, onClose, onSave, BLOG_CATEGORIES
     const [form, setForm] = useState<BlogPost>(defaultForm)
     const [step, setStep] = useState<FormStep>("meta")
     const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit")
-    const [saving, setSaving] = useState(false)   // ← new
+    const [saving, setSaving] = useState(false)
 
     useEffect(() => {
         if (open) {
@@ -457,13 +389,11 @@ export function BlogPostModal({ open, editPost, onClose, onSave, BLOG_CATEGORIES
         }
     }
 
-    // ── Async save: delegates to parent, stays open on error ──
     async function handleSave() {
         if (!canSave) return
         setSaving(true)
         try {
             await onSave(form)
-            // parent closes modal on success
         } catch {
             // parent shows toast; modal stays open
         } finally {
@@ -479,7 +409,7 @@ export function BlogPostModal({ open, editPost, onClose, onSave, BLOG_CATEGORIES
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={saving ? undefined : onClose} />
 
-            <div className="relative bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-white/10 shadow-2xl w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden">
+            <div className="relative bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-white/10 shadow-2xl w-full max-w-5xl max-h-[92dvh] flex flex-col overflow-hidden">
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-white/5 shrink-0">
@@ -663,7 +593,7 @@ export function BlogPostModal({ open, editPost, onClose, onSave, BLOG_CATEGORIES
 
                     {/* Right — Preview */}
                     <div className={cn(
-                        "w-full md:w-80 lg:w-96 shrink-0 overflow-y-auto px-5 py-5",
+                        "w-full md:w-96 lg:w-[480px] shrink-0 overflow-y-auto px-5 py-5",
                         "bg-zinc-50/60 dark:bg-zinc-950/40",
                         "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-200 [&::-webkit-scrollbar-thumb]:dark:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full",
                         mobileTab === "edit" ? "hidden md:block" : "block"

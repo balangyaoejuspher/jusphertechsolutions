@@ -89,8 +89,6 @@ const statusDot = (status: Talent["status"]) =>
         : status === "busy" ? "bg-yellow-500"
             : "bg-zinc-400"
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-
 function TalentSkeleton() {
     return (
         <div className="p-6 md:p-8">
@@ -357,8 +355,6 @@ function TalentDetailContent({
     )
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 export default function DashboardTalent() {
     const [talentList, setTalentList] = useState<Talent[]>([])
     const [loading, setLoading] = useState(true)
@@ -463,7 +459,7 @@ export default function DashboardTalent() {
             setShowModal(false)
             toast.success(`${created.name} has been added!`)
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to add talent")
+            toast.error(err.reason ?? "Failed to add talent")
         } finally {
             setSaving(false)
         }
@@ -487,7 +483,7 @@ export default function DashboardTalent() {
             setIsEditing(false)
             toast.success(`${updated.name} updated!`)
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to update talent")
+            toast.error(err.reason ?? "Failed to update talent")
         } finally {
             setSaving(false)
         }
@@ -504,7 +500,7 @@ export default function DashboardTalent() {
             if (selectedTalent?.id === id) closeDetail()
             toast.success(`${target?.name ?? "Talent"} removed.`)
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to delete talent")
+            toast.error(err.reason ?? "Failed to delete talent")
         }
     }
 
@@ -519,7 +515,7 @@ export default function DashboardTalent() {
             setMenuOpen(null)
             toast.success(`${updated.name} is now ${newStatus}.`)
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to update status")
+            toast.error(err.reason ?? "Failed to update status")
         }
     }
 
@@ -534,7 +530,7 @@ export default function DashboardTalent() {
             setMenuOpen(null)
             toast.success(`${target.name} is now ${isVisible ? "visible" : "hidden"}.`)
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to update visibility")
+            toast.error(err.reason ?? "Failed to update visibility")
         }
     }
 

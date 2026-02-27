@@ -16,6 +16,7 @@ interface CustomSelectProps<T extends string> {
     placeholder?: string
     className?: string
     buttonClassName?: string
+    disabled?: boolean
 }
 
 export function CustomSelect<T extends string = string>({
@@ -25,6 +26,7 @@ export function CustomSelect<T extends string = string>({
     placeholder = "Select...",
     className,
     buttonClassName,
+    disabled = false,
 }: CustomSelectProps<T>) {
     const [open, setOpen] = useState(false)
     const [dropUp, setDropUp] = useState(false)
@@ -44,6 +46,7 @@ export function CustomSelect<T extends string = string>({
     }, [])
 
     const handleToggle = () => {
+        if (disabled) return
         if (!open && buttonRef.current) {
             const rect = buttonRef.current.getBoundingClientRect()
             const spaceBelow = window.innerHeight - rect.bottom
@@ -59,6 +62,7 @@ export function CustomSelect<T extends string = string>({
                 ref={buttonRef}
                 type="button"
                 onClick={handleToggle}
+                disabled={disabled}
                 className={cn(
                     "w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border text-sm text-left flex items-center justify-between gap-2 transition-colors",
                     open
@@ -67,6 +71,7 @@ export function CustomSelect<T extends string = string>({
                     selected
                         ? "text-zinc-900 dark:text-white"
                         : "text-zinc-400 dark:text-zinc-600",
+                    disabled && "opacity-50 cursor-not-allowed pointer-events-none",
                     buttonClassName,
                 )}
             >
@@ -81,7 +86,7 @@ export function CustomSelect<T extends string = string>({
             </button>
 
             {/* Dropdown */}
-            {open && (
+            {open && !disabled && (
                 <div
                     className={cn(
                         "absolute z-50 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg overflow-hidden",

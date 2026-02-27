@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 import { getAdminSession } from "@/lib/admin-auth"
+import { NotificationBell } from "@/components/shared/notification-bell"
 
 export const metadata: Metadata = {
     robots: {
@@ -31,10 +32,14 @@ export default async function DashboardLayout({
     return (
         <div className="flex min-h-screen">
             <DashboardSidebar admin={admin} />
-            <main className="flex-1 overflow-auto">
-                <div className="lg:hidden h-14" />
-                {children}
-            </main>
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <header className="h-14 shrink-0 border-b border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-950 flex items-center justify-end px-6 h-16 gap-3">
+                    <NotificationBell />
+                </header>
+                <main className="flex-1 overflow-auto">
+                    {children}
+                </main>
+            </div>
         </div>
     )
 }

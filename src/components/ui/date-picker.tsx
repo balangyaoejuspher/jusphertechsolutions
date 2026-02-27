@@ -4,8 +4,6 @@ import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight, CalendarDays, X } from "lucide-react"
 
-// ── Types ─────────────────────────────────────────────────────
-
 type DatePickerProps = {
     value?: string          // ISO string "YYYY-MM-DD"
     onChange: (val: string) => void
@@ -14,6 +12,7 @@ type DatePickerProps = {
     minDate?: Date
     maxDate?: Date
     className?: string
+    disabled?: boolean
 }
 
 const MONTHS = [
@@ -53,6 +52,7 @@ export function DatePicker({
     minDate,
     maxDate,
     className,
+    disabled = false,
 }: DatePickerProps) {
     const today = new Date()
     const selected = parseDate(value)
@@ -137,8 +137,8 @@ export function DatePicker({
             <div
                 role="button"
                 tabIndex={0}
-                onClick={() => setOpen((o) => !o)}
-                onKeyDown={(e) => e.key === "Enter" && setOpen((o) => !o)}
+                onClick={() => !disabled && setOpen((o) => !o)}
+                onKeyDown={(e) => !disabled && e.key === "Enter" && setOpen((o) => !o)}
                 className={cn(
                     "w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl",
                     "border border-zinc-200 dark:border-white/10",
@@ -148,6 +148,7 @@ export function DatePicker({
                     open
                         ? "border-amber-400 dark:border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.12)]"
                         : "",
+                    disabled && "opacity-50 cursor-not-allowed pointer-events-none",
                 )}
             >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -178,7 +179,7 @@ export function DatePicker({
             </div>
 
             {/* Calendar Dropdown */}
-            {open && (
+            {open && !disabled && (
                 <div className={cn(
                     "absolute z-50 top-full mt-2 left-0",
                     "w-72 rounded-2xl overflow-hidden",

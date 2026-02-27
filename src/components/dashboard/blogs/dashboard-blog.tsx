@@ -11,7 +11,7 @@ import { BLOG_CATEGORIES, BLOG_CATEGORY_COLORS } from "@/lib/helpers/constants"
 import { type BlogPost, BlogPostModal } from "./create-blog-modal"
 import { portalFetch } from "@/lib/api/private-fetcher"
 import { toast } from "sonner"
-import type { Post, PostStatus, PostCategory } from "@/server/db/schema"
+import type { Post, PostStatus } from "@/server/db/schema"
 
 type DashboardPost = Post
 

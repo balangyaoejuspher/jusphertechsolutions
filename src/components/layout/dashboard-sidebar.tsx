@@ -22,10 +22,12 @@ import {
   UserPlus,
   Calendar,
   Briefcase,
+  Megaphone,
 } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { useState, useEffect } from "react"
+import { NotificationBell } from "@/components/shared/notification-bell"
 
 type Admin = {
   id: string
@@ -63,6 +65,7 @@ const navGroups = [
   {
     label: "Content",
     items: [
+      { label: "Announcements", href: "/dashboard/announcements", icon: Megaphone },
       { label: "Blog", href: "/dashboard/blog", icon: NotebookPen },
       { label: "Products", href: "/dashboard/products", icon: Package },
       { label: "Services", href: "/dashboard/services", icon: BriefcaseBusiness },
@@ -232,6 +235,7 @@ export function DashboardSidebar({ admin }: { admin: Admin }) {
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <NotificationBell />
           <button
             onClick={() => setMobileOpen(true)}
             className="w-9 h-9 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"

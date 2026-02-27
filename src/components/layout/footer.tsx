@@ -1,134 +1,117 @@
 import Link from "next/link"
 import Image from "next/image"
 import { siteConfig } from "@/config/site"
-import { MapPin, Mail, Clock } from "lucide-react"
+import { MapPin, Mail, Clock, ArrowUpRight } from "lucide-react"
 import { footerServiceLinks, footerProductLinks, footerCompanyLinks } from "@/config/navigation"
 
 export function Footer() {
   return (
-    <footer className="relative bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-white/5 overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:72px_72px]" />
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+    <footer className="relative bg-background border-t border-border overflow-hidden">
+
+      <div className="absolute inset-0 bg-[linear-gradient(var(--border)_1px,transparent_1px),linear-gradient(90deg,var(--border)_1px,transparent_1px)] bg-[size:64px_64px] opacity-40 pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[280px] bg-[--chart-1] opacity-5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[--chart-1] to-transparent opacity-20" />
 
       <div className="relative container mx-auto px-6 md:px-12">
 
-        {/* Main grid — 5 cols: brand(2) + services + products + company */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 py-16">
+        <div className="pt-20 pb-14 border-b border-white/5">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
 
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2.5 group mb-5 w-fit">
-              <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 transition-transform group-hover:scale-105">
-                <Image
-                  src="/icon.svg"
-                  alt={siteConfig.fullName}
-                  width={32}
-                  height={32}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">
-                  {siteConfig.name.toUpperCase()}
+            <div className="max-w-xl">
+              <Link href="/" className="flex items-center gap-3 group w-fit mb-8">
+                <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 transition-transform group-hover:scale-105">
+                  <Image
+                    src="/icon.svg"
+                    alt={siteConfig.fullName}
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="text-sm font-black text-foreground tracking-tight">
+                    {siteConfig.name.toUpperCase()}
+                  </span>
+                  <span className="text-[10px] font-semibold text-[--chart-1] tracking-widest uppercase mt-0.5 opacity-70">
+                    {siteConfig.slogan}
+                  </span>
+                </div>
+              </Link>
+
+              <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-[1.1]">
+                <span className="text-foreground">The talent layer for</span>
+                <br />
+                <span className="text-muted-foreground">modern remote teams.</span>
+              </h2>
+
+              <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-sm">
+                {siteConfig.description}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 shrink-0 pb-1">
+              <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest mb-1">
+                Get in touch
+              </p>
+              {[
+                { icon: MapPin, label: "Cebu City, Philippines" },
+                { icon: Mail, label: "support@juspherandco.com" },
+                { icon: Clock, label: "Mon–Fri, 9am–6pm PHT" },
+              ].map(({ icon: Icon, label }) => (
+                <span
+                  key={label}
+                  className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-default"
+                >
+                  <Icon size={13} className="text-[--chart-1] shrink-0 opacity-60" />
+                  {label}
                 </span>
-                <span className="text-[10px] font-semibold text-zinc-400 dark:text-amber-400/70 tracking-widest uppercase mt-0.5">
-                  {siteConfig.slogan}
-                </span>
-              </div>
-            </Link>
-
-            <p className="text-zinc-500 dark:text-zinc-500 text-sm leading-relaxed max-w-xs mb-6">
-              {siteConfig.description}
-            </p>
-
-            <div className="flex flex-col gap-2.5 text-sm">
-              <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-600">
-                <MapPin size={14} className="shrink-0 text-amber-500/60" />
-                Cebu City, Philippines
-              </span>
-              <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-600">
-                <Mail size={14} className="shrink-0 text-amber-500/60" />
-                support@juspherandco.com
-              </span>
-              <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-600">
-                <Clock size={14} className="shrink-0 text-amber-500/60" />
-                Mon–Fri, 9am–6pm PHT
-              </span>
+              ))}
             </div>
           </div>
-
-          {/* Services */}
-          <div>
-            <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-5">
-              Services
-            </p>
-            <ul className="flex flex-col gap-3">
-              {footerServiceLinks.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-zinc-500 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Products */}
-          <div>
-            <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-5">
-              Products
-            </p>
-            <ul className="flex flex-col gap-3">
-              {footerProductLinks.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-zinc-500 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-5">
-              Company
-            </p>
-            <ul className="flex flex-col gap-3">
-              {footerCompanyLinks.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-zinc-500 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-zinc-100 dark:border-white/5 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-zinc-400 dark:text-zinc-600">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-10 py-14 border-b border-border">
+          {[
+            { title: "Services", links: footerServiceLinks },
+            { title: "Products", links: footerProductLinks },
+            { title: "Company", links: footerCompanyLinks },
+          ].map(({ title, links }) => (
+            <div key={title}>
+              <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-6">
+                {title}
+              </p>
+              <ul className="flex flex-col gap-3.5">
+                {links.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="group flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors duration-150"
+                    >
+                      {item.label}
+                      <ArrowUpRight
+                        size={11}
+                        className="opacity-0 -translate-y-0.5 translate-x-0.5 group-hover:opacity-40 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-150"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground/40">
             © {new Date().getFullYear()} {siteConfig.fullName}. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            <span className="text-xs text-zinc-300 dark:text-zinc-700">
-              Built with Next.js & ❤️
+          <div className="flex items-center gap-5">
+            <span className="text-xs text-muted-foreground/30">
+              Built with Next.js & ♥
             </span>
+            <div className="w-px h-3 bg-border" />
             <Link
               href="/sign-in"
-              className="text-xs text-zinc-200 dark:text-zinc-900 hover:text-zinc-400 dark:hover:text-zinc-700 transition-colors"
+              className="text-xs text-muted-foreground/30 hover:text-muted-foreground transition-colors"
             >
               Admin
             </Link>

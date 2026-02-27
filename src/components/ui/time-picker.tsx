@@ -9,6 +9,7 @@ type TimePickerProps = {
     onChange: (val: string) => void
     placeholder?: string
     className?: string
+    disabled?: boolean
 }
 
 const pad = (n: number) => String(n).padStart(2, "0")
@@ -89,9 +90,7 @@ function Spinner({
     )
 }
 
-// ── Main Component ────────────────────────────────────────────
-
-export function TimePicker({ value, onChange, placeholder = "Pick a time", className }: TimePickerProps) {
+export function TimePicker({ value, onChange, placeholder = "Pick a time", className, disabled = false }: TimePickerProps) {
     const parsed = parseTime(value)
     const [open, setOpen] = useState(false)
     const [hour, setHour] = useState(parsed.hour)
@@ -100,7 +99,6 @@ export function TimePicker({ value, onChange, placeholder = "Pick a time", class
 
     const ref = useRef<HTMLDivElement>(null)
 
-    // Close on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
@@ -109,7 +107,6 @@ export function TimePicker({ value, onChange, placeholder = "Pick a time", class
         return () => document.removeEventListener("mousedown", handler)
     }, [])
 
-    // Sync state when value changes externally
     useEffect(() => {
         if (value) {
             const p = parseTime(value)
@@ -155,8 +152,8 @@ export function TimePicker({ value, onChange, placeholder = "Pick a time", class
             <div
                 role="button"
                 tabIndex={0}
-                onClick={() => setOpen((o) => !o)}
-                onKeyDown={(e) => e.key === "Enter" && setOpen((o) => !o)}
+                onClick={() => !disabled && setOpen((o) => !o)}
+                onKeyDown={(e) => !disabled && e.key === "Enter" && setOpen((o) => !o)}
                 className={cn(
                     "w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl",
                     "border border-zinc-200 dark:border-white/10",
@@ -164,6 +161,7 @@ export function TimePicker({ value, onChange, placeholder = "Pick a time", class
                     "text-sm transition-all outline-none cursor-pointer select-none",
                     "hover:border-zinc-300 dark:hover:border-white/20",
                     open && "border-amber-400 dark:border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.12)]",
+                    disabled && "opacity-50 cursor-not-allowed pointer-events-none",
                 )}
             >
                 <div className="flex items-center gap-2.5">
@@ -174,7 +172,7 @@ export function TimePicker({ value, onChange, placeholder = "Pick a time", class
                         {value ? toDisplay(value) : placeholder}
                     </span>
                 </div>
-                {value && (
+                {value && !disabled && (
                     <div
                         role="button"
                         tabIndex={0}
@@ -188,7 +186,7 @@ export function TimePicker({ value, onChange, placeholder = "Pick a time", class
             </div>
 
             {/* Dropdown */}
-            {open && (
+            {open && !disabled && (
                 <div className={cn(
                     "absolute z-50 top-full mt-2 left-0 w-64",
                     "rounded-2xl overflow-hidden",
