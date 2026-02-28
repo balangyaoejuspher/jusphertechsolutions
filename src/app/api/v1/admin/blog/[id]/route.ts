@@ -35,7 +35,10 @@ export async function PATCH(
         if (!existing) return apiError("Not found", "Post not found", 404)
 
         const body = await req.json()
-        const updated = await postService.update(id, body, verified.admin.id, verified.admin.name)
+        const updated = await postService.update(id, {
+            ...body,
+            date: body.date ? new Date(body.date) : undefined,
+        }, verified.admin.id, verified.admin.name)
         return apiResponse(updated)
     } catch (err) {
         console.error(err)
