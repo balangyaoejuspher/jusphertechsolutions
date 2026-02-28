@@ -3,7 +3,7 @@ import { isVerifyAdmin, isVerifyError, verifyApiRequest } from "@/lib/api/verify
 import { apiResponse, apiError } from "@/lib/api/version"
 import { invoiceService } from "@/server/services/invoice.service"
 
-export async function GET_BY_ID(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)
@@ -18,7 +18,7 @@ export async function GET_BY_ID(req: NextRequest, { params }: { params: { id: st
     }
 }
 
-export async function PATCH_BY_ID(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)
@@ -34,7 +34,7 @@ export async function PATCH_BY_ID(req: NextRequest, { params }: { params: { id: 
     }
 }
 
-export async function DELETE_BY_ID(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)

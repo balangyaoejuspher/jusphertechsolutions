@@ -4,7 +4,7 @@ import { apiResponse, apiError } from "@/lib/api/version"
 import { invoiceService } from "@/server/services/invoice.service"
 
 
-export async function POST_ACTION(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)
