@@ -1,14 +1,15 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
 import {
     Search, X, Mail, Building2, Calendar, MessageSquare,
-    ChevronLeft, ChevronRight, Phone, DollarSign, Tag,
-    User, AlertTriangle, CheckCircle, Clock, Inbox,
-    RefreshCw, Trash2, ArrowRight,
-    UserPlus, FolderKanban,
-    Plus,
+    Phone, DollarSign, Tag, User, AlertTriangle, CheckCircle,
+    Clock, Inbox, RefreshCw, Trash2, ArrowRight,
+    UserPlus, FolderKanban, Plus, ExternalLink,
+    ChevronLeft, ChevronRight, Flame, Zap, Circle,
+    MailOpen, Filter, SlidersHorizontal, ArrowUpRight,
+    Star, TrendingUp, Hash,
 } from "lucide-react"
 import ConvertInquiryModal from "./convert-inquiry-modal"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -17,10 +18,7 @@ import { portalFetch } from "@/lib/api/private-fetcher"
 import { formatDate } from "@/lib/helpers/format"
 import { toast } from "sonner"
 import type { ClientRow, Inquiry, Project } from "@/server/db/schema"
-import { Talent } from "@/types"
 import CreateInquiryModal from "./create-inquiry-modal"
-import { Button } from "@/components/ui/button"
-import { CustomSelect } from "@/components/ui/custom-select"
 
 type InquiryRow = Inquiry & {
     talentName: string | null
@@ -28,19 +26,40 @@ type InquiryRow = Inquiry & {
     projectTitle?: string | null
 }
 
-const PAGE_SIZE = 4
+const PAGE_SIZE = 20
+
+// ─── Config ───────────────────────────────────────────────────────────────────
 
 const PRIORITY_CONFIG = {
-    low: { label: "Low", cls: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400", dot: "bg-zinc-400" },
-    medium: { label: "Medium", cls: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400", dot: "bg-blue-400" },
-    high: { label: "High", cls: "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400", dot: "bg-orange-400" },
-    urgent: { label: "Urgent", cls: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400", dot: "bg-red-500" },
+    low: {
+        label: "Low",
+        cls: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400",
+        dot: "bg-zinc-400",
+        bar: "bg-zinc-300 dark:bg-zinc-600",
+        icon: Circle,
+    },
+    medium: {
+        label: "Medium",
+        cls: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",
+        dot: "bg-blue-400",
+        bar: "bg-blue-400",
+        icon: TrendingUp,
+    },
+    high: {
+        label: "High",
+        cls: "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400",
+        dot: "bg-orange-400",
+        bar: "bg-orange-400",
+        icon: Flame,
+    },
+    urgent: {
+        label: "Urgent",
+        cls: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400",
+        dot: "bg-red-500",
+        bar: "bg-red-500",
+        icon: Zap,
+    },
 } as const
-
-const PRIORITY_OPTIONS = [
-    { value: "all", label: "All Priority" },
-    ...Object.entries(PRIORITY_CONFIG).map(([val, cfg]) => ({ value: val, label: cfg.label })),
-] as const
 
 const PRIORITY_ORDER: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 }
 
@@ -61,242 +80,447 @@ const STATUS_ACTIONS: Record<string, {
     ],
     in_progress: [
         { label: "Mark Resolved", next: "resolved", icon: CheckCircle, cls: "bg-emerald-500 hover:bg-emerald-400 text-white" },
-        { label: "Move Back to New", next: "new", icon: Inbox, cls: "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300" },
+        { label: "Move to New", next: "new", icon: Inbox, cls: "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300" },
     ],
     resolved: [
         { label: "Reopen", next: "in_progress", icon: RefreshCw, cls: "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300" },
     ],
 }
 
-const EXTENDED_STATUSES = [
-    ...INQUIRY_STATUSES,
+const STATUS_FILTERS = [
+    { value: "all", label: "All" },
+    { value: "new", label: "New" },
+    { value: "in_progress", label: "In Progress" },
+    { value: "resolved", label: "Resolved" },
     { value: "converted", label: "Converted" },
 ]
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function timeAgo(date: Date | string | null | undefined): string {
+    if (!date) return "—"
+    const d = new Date(date)
+    const diff = (Date.now() - d.getTime()) / 1000
+    if (diff < 60) return "just now"
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`
+    return formatDate(date)
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
 function InquiriesSkeleton() {
     return (
-        <div className="p-6 md:p-8">
-            <div className="mb-8"><Skeleton className="h-7 w-32 mb-2" /><Skeleton className="h-4 w-48" /></div>
-            <div className="flex gap-2 mb-6">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-9 w-28 rounded-xl" />)}</div>
-            <Skeleton className="h-11 w-80 rounded-xl mb-6" />
-            <div className="flex flex-col gap-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl p-5">
-                        <div className="flex justify-between mb-3">
-                            <div><Skeleton className="h-4 w-32 mb-1" /><Skeleton className="h-3 w-24" /></div>
-                            <Skeleton className="h-6 w-20 rounded-lg" />
+        <div className="flex h-[100dvh] overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+            {/* List pane */}
+            <div className="w-full lg:w-[360px] xl:w-[400px] shrink-0 border-r border-zinc-100 dark:border-white/[0.07] bg-white dark:bg-zinc-900 p-4 space-y-3">
+                <Skeleton className="h-9 w-full rounded-xl" />
+                <div className="flex gap-1.5">
+                    {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-7 flex-1 rounded-lg" />)}
+                </div>
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="p-3 space-y-2">
+                        <div className="flex justify-between">
+                            <Skeleton className="h-3.5 w-28 rounded" />
+                            <Skeleton className="h-3 w-12 rounded" />
                         </div>
-                        <Skeleton className="h-3 w-full mb-1" /><Skeleton className="h-3 w-3/4 mb-3" />
-                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-3 w-full rounded" />
+                        <Skeleton className="h-3 w-2/3 rounded" />
                     </div>
                 ))}
+            </div>
+            {/* Detail pane — desktop only */}
+            <div className="hidden lg:block flex-1 p-8 space-y-4">
+                <Skeleton className="h-8 w-48 rounded-xl" />
+                <Skeleton className="h-32 w-full rounded-2xl" />
+                <Skeleton className="h-24 w-full rounded-2xl" />
             </div>
         </div>
     )
 }
 
-function InquiryDetail({
-    selected,
+// ─── List Item ────────────────────────────────────────────────────────────────
+
+function InquiryListItem({
+    inquiry,
+    isSelected,
+    onClick,
+}: {
+    inquiry: InquiryRow
+    isSelected: boolean
+    onClick: () => void
+}) {
+    const pCfg = PRIORITY_CONFIG[inquiry.priority as keyof typeof PRIORITY_CONFIG]
+    const sCfg = INQUIRY_STATUS_CONFIG[inquiry.status]
+    const PriorityIcon = pCfg?.icon ?? Circle
+    const isUnread = inquiry.status === "new"
+    const isUrgent = inquiry.priority === "urgent"
+
+    return (
+        <button
+            onClick={onClick}
+            className={cn(
+                "w-full text-left px-3.5 py-3 rounded-xl transition-all duration-150 group relative",
+                isSelected
+                    ? "bg-amber-50 dark:bg-amber-500/10 ring-1 ring-amber-300/60 dark:ring-amber-500/30"
+                    : "hover:bg-zinc-50 dark:hover:bg-white/[0.03]",
+                isUrgent && !isSelected && "border-l-2 border-l-red-500 rounded-l-none pl-[calc(0.875rem-2px)]"
+            )}
+        >
+            {/* Unread dot */}
+            {isUnread && (
+                <span className="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+            )}
+
+            <div className="flex items-start justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-2 min-w-0">
+                    {/* Avatar */}
+                    <div className={cn(
+                        "w-6 h-6 rounded-md flex items-center justify-center text-white font-bold text-[10px] shrink-0",
+                        isUrgent ? "bg-gradient-to-br from-red-500 to-orange-500"
+                            : "bg-gradient-to-br from-amber-400 to-orange-400"
+                    )}>
+                        {inquiry.name.charAt(0)}
+                    </div>
+                    <span className={cn(
+                        "text-sm truncate",
+                        isUnread ? "font-semibold text-zinc-900 dark:text-white" : "font-medium text-zinc-700 dark:text-zinc-300"
+                    )}>
+                        {inquiry.name}
+                    </span>
+                    {inquiry.clientId && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Converted" />
+                    )}
+                </div>
+                <span className="text-[10px] text-zinc-400 whitespace-nowrap shrink-0 mt-0.5">
+                    {timeAgo(inquiry.createdAt)}
+                </span>
+            </div>
+
+            {/* Company + message preview */}
+            <div className="pl-8">
+                {inquiry.company && (
+                    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate mb-0.5">{inquiry.company}</p>
+                )}
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    {inquiry.message}
+                </p>
+            </div>
+
+            {/* Tags row */}
+            <div className="flex items-center gap-1.5 mt-2 pl-8">
+                <span className={cn(
+                    "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold",
+                    pCfg?.cls
+                )}>
+                    <PriorityIcon size={8} />
+                    {pCfg?.label}
+                </span>
+                <span className={cn(
+                    "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                    sCfg?.className ?? "bg-zinc-100 text-zinc-500"
+                )}>
+                    {sCfg?.label ?? inquiry.status}
+                </span>
+            </div>
+        </button>
+    )
+}
+
+// ─── Detail Panel ─────────────────────────────────────────────────────────────
+
+function InquiryDetailPanel({
+    inquiry,
     updating,
     onStatusChange,
     onPriorityChange,
     onConvert,
     onDelete,
 }: {
-    selected: InquiryRow
+    inquiry: InquiryRow
     updating: boolean
     onStatusChange: (id: string, status: Inquiry["status"]) => void
     onPriorityChange: (id: string, priority: Inquiry["priority"]) => void
     onConvert: () => void
     onDelete: () => void
 }) {
+    const pCfg = PRIORITY_CONFIG[inquiry.priority as keyof typeof PRIORITY_CONFIG]
+    const sCfg = INQUIRY_STATUS_CONFIG[inquiry.status]
+    const PriorityIcon = pCfg?.icon ?? Circle
+    const isUrgent = inquiry.priority === "urgent"
+    const isHigh = inquiry.priority === "high"
+    const actions = STATUS_ACTIONS[inquiry.status] ?? []
+
     return (
-        <>
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5
-                [&::-webkit-scrollbar]:w-1.5
+        <div className="flex flex-col h-full overflow-hidden">
+
+            {/* Top strip — priority accent for urgent/high */}
+            {(isUrgent || isHigh) && (
+                <div className={cn(
+                    "h-1 w-full shrink-0",
+                    isUrgent ? "bg-gradient-to-r from-red-500 via-orange-500 to-red-500"
+                        : "bg-gradient-to-r from-orange-400 via-amber-400 to-orange-400"
+                )} />
+            )}
+
+            <div className="flex-1 overflow-y-auto
+                [&::-webkit-scrollbar]:w-1
                 [&::-webkit-scrollbar-track]:bg-transparent
-                [&::-webkit-scrollbar-thumb]:bg-zinc-200
-                [&::-webkit-scrollbar-thumb]:dark:bg-white/10
+                [&::-webkit-scrollbar-thumb]:bg-zinc-200 dark:[&::-webkit-scrollbar-thumb]:bg-white/10
                 [&::-webkit-scrollbar-thumb]:rounded-full">
 
-                {/* Contact info */}
-                <div>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center text-white font-bold text-lg shrink-0">
-                            {selected.name.charAt(0)}
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <p className="font-bold text-zinc-900 dark:text-white text-sm">{selected.name}</p>
-                                {selected.clientId && (
-                                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                                        <CheckCircle size={9} /> Converted
-                                    </span>
-                                )}
+                {/* Hero section */}
+                <div className="px-4 md:px-8 pt-5 md:pt-8 pb-5 md:pb-6 border-b border-zinc-100 dark:border-white/[0.07]">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className={cn(
+                                "w-11 h-11 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl md:text-2xl shrink-0 shadow-md",
+                                isUrgent ? "bg-gradient-to-br from-red-500 to-orange-500 shadow-red-200 dark:shadow-red-500/20"
+                                    : "bg-gradient-to-br from-amber-400 to-orange-400 shadow-amber-200 dark:shadow-amber-500/20"
+                            )}>
+                                {inquiry.name.charAt(0)}
                             </div>
-                            <p className="text-zinc-400 dark:text-zinc-500 text-xs">{selected.company ?? "No company"}</p>
-                        </div>
-                    </div>
-                    <div className="flex flex-col gap-2 bg-zinc-50 dark:bg-white/5 rounded-2xl p-4">
-                        {[
-                            { icon: Mail, value: selected.email, href: `mailto:${selected.email}`, amber: true },
-                            { icon: Phone, value: selected.phone, href: null, amber: false },
-                            { icon: Building2, value: selected.company, href: null, amber: false },
-                            { icon: Calendar, value: formatDate(selected.createdAt), href: null, amber: false },
-                            { icon: DollarSign, value: selected.budget, href: null, amber: false },
-                            { icon: Tag, value: SOURCE_LABEL[selected.source] ?? selected.source, href: null, amber: false },
-                            { icon: User, value: selected.talentName ? `Talent: ${selected.talentName}` : null, href: null, amber: false },
-                            { icon: User, value: selected.adminName ? `Handler: ${selected.adminName}` : null, href: null, amber: true },
-                            { icon: FolderKanban, value: selected.projectTitle ? `Project: ${selected.projectTitle}` : null, href: null, amber: false },
-                        ].filter((r) => r.value).map(({ icon: Icon, value, href, amber }, i) => (
-                            <div key={i} className="flex items-center gap-2.5">
-                                <Icon size={13} className="text-zinc-400 shrink-0" />
-                                {href
-                                    ? <a href={href} className="text-amber-500 hover:underline text-xs truncate">{value}</a>
-                                    : <span className={cn("text-xs", amber ? "text-amber-500" : "text-zinc-600 dark:text-zinc-400")}>{value}</span>
-                                }
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Message */}
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <MessageSquare size={13} className="text-zinc-400" />
-                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Message</p>
-                    </div>
-                    <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed bg-zinc-50 dark:bg-white/5 rounded-2xl p-4">
-                        {selected.message}
-                    </p>
-                </div>
-
-                {/* Notes */}
-                {selected.notes && (
-                    <div>
-                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-2">Internal Notes</p>
-                        <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed bg-amber-50 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/20 rounded-2xl p-4">
-                            {selected.notes}
-                        </p>
-                    </div>
-                )}
-
-                {/* Move Inquiry */}
-                {(STATUS_ACTIONS[selected.status] ?? []).length > 0 && (
-                    <div>
-                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">Move Inquiry</p>
-                        <div className="flex flex-col gap-2">
-                            {(STATUS_ACTIONS[selected.status] ?? []).map((action) => (
-                                <button
-                                    key={action.next}
-                                    disabled={updating}
-                                    onClick={() => onStatusChange(selected.id, action.next)}
-                                    className={cn(
-                                        "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-                                        action.cls
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h2 className="text-lg md:text-xl font-bold text-zinc-900 dark:text-white tracking-tight truncate">
+                                        {inquiry.name}
+                                    </h2>
+                                    {inquiry.clientId && (
+                                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 shrink-0">
+                                            <CheckCircle size={9} /> Client
+                                        </span>
                                     )}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        {updating
-                                            ? <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                                            : <action.icon size={15} />
-                                        }
-                                        {action.label}
+                                </div>
+                                <p className="text-xs md:text-sm text-zinc-400 mt-0.5 truncate">{inquiry.company ?? inquiry.email}</p>
+                            </div>
+                        </div>
+
+                        {/* Status + Priority badges */}
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                            <span className={cn(
+                                "flex items-center gap-1.5 px-2 md:px-2.5 py-1 rounded-lg text-xs font-semibold",
+                                sCfg?.className ?? "bg-zinc-100 text-zinc-500"
+                            )}>
+                                {sCfg?.label ?? inquiry.status}
+                            </span>
+                            <span className={cn(
+                                "flex items-center gap-1.5 px-2 md:px-2.5 py-1 rounded-lg text-xs font-semibold",
+                                pCfg?.cls
+                            )}>
+                                <PriorityIcon size={10} />
+                                {pCfg?.label}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="px-4 md:px-8 py-5 md:py-6 space-y-5 md:space-y-6">
+
+                    {/* Message — main content, hero treatment */}
+                    <div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <MailOpen size={13} className="text-zinc-400" />
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.12em]">Message</span>
+                        </div>
+                        <div className="bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/[0.06] rounded-2xl p-5">
+                            <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                                {inquiry.message}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Info grid */}
+                    <div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <Hash size={13} className="text-zinc-400" />
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.12em]">Details</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { icon: Mail, label: "Email", value: inquiry.email, href: `mailto:${inquiry.email}` },
+                                { icon: Phone, label: "Phone", value: inquiry.phone ?? "—", href: null },
+                                { icon: Building2, label: "Company", value: inquiry.company ?? "—", href: null },
+                                { icon: Calendar, label: "Received", value: timeAgo(inquiry.createdAt), href: null },
+                                { icon: DollarSign, label: "Budget", value: inquiry.budget ?? "—", href: null },
+                                { icon: Tag, label: "Source", value: SOURCE_LABEL[inquiry.source] ?? inquiry.source, href: null },
+                                ...(inquiry.talentName ? [{ icon: User, label: "Talent", value: inquiry.talentName, href: null }] : []),
+                                ...(inquiry.adminName ? [{ icon: User, label: "Handler", value: inquiry.adminName, href: null }] : []),
+                                ...(inquiry.projectTitle ? [{ icon: FolderKanban, label: "Project", value: inquiry.projectTitle, href: null }] : []),
+                            ].map(({ icon: Icon, label, value, href }, i) => (
+                                <div key={i} className="bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/[0.05] rounded-xl p-3">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                        <Icon size={10} className="text-zinc-400 shrink-0" />
+                                        <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">{label}</span>
                                     </div>
-                                    <ArrowRight size={14} />
-                                </button>
+                                    {href ? (
+                                        <a href={href} className="text-xs font-semibold text-amber-500 hover:underline truncate block">
+                                            {value}
+                                        </a>
+                                    ) : (
+                                        <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">{value}</p>
+                                    )}
+                                </div>
                             ))}
                         </div>
-                        {selected.status === "resolved" && selected.resolvedAt && (
-                            <p className="flex items-center gap-1.5 mt-2 text-xs text-emerald-600 dark:text-emerald-400">
-                                <CheckCircle size={11} /> Resolved on {formatDate(selected.resolvedAt)}
-                            </p>
-                        )}
                     </div>
-                )}
 
-                {/* Priority */}
-                <div>
-                    <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">Priority</p>
-                    <div className="grid grid-cols-4 gap-2">
-                        {(Object.entries(PRIORITY_CONFIG) as [keyof typeof PRIORITY_CONFIG, typeof PRIORITY_CONFIG[keyof typeof PRIORITY_CONFIG]][]).map(([val, cfg]) => (
-                            <button
-                                key={val}
-                                disabled={updating || selected.priority === val}
-                                onClick={() => onPriorityChange(selected.id, val as Inquiry["priority"])}
-                                className={cn(
-                                    "flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border text-xs font-semibold transition-all",
-                                    selected.priority === val
-                                        ? cn(cfg.cls, "border-current ring-1 ring-current/20 scale-105")
-                                        : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-zinc-600 hover:border-zinc-300 dark:hover:border-white/20 hover:scale-105 disabled:opacity-40"
-                                )}
-                            >
-                                <span className={cn("w-2 h-2 rounded-full", cfg.dot)} />
-                                {cfg.label}
-                            </button>
-                        ))}
+                    {/* Notes */}
+                    {inquiry.notes && (
+                        <div className="bg-amber-50/80 dark:bg-amber-500/5 border border-amber-200/60 dark:border-amber-500/20 rounded-2xl p-4">
+                            <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">
+                                Internal Notes
+                            </p>
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">{inquiry.notes}</p>
+                        </div>
+                    )}
+
+                    {/* Priority selector */}
+                    <div>
+                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.12em] mb-3">Set Priority</p>
+                        <div className="grid grid-cols-4 gap-2">
+                            {(Object.entries(PRIORITY_CONFIG) as [keyof typeof PRIORITY_CONFIG, typeof PRIORITY_CONFIG[keyof typeof PRIORITY_CONFIG]][]).map(([val, cfg]) => {
+                                const Icon = cfg.icon
+                                const isActive = inquiry.priority === val
+                                return (
+                                    <button
+                                        key={val}
+                                        disabled={updating || isActive}
+                                        onClick={() => onPriorityChange(inquiry.id, val as Inquiry["priority"])}
+                                        className={cn(
+                                            "flex flex-col items-center gap-1.5 py-3 rounded-xl border text-[11px] font-semibold transition-all active:scale-95",
+                                            isActive
+                                                ? cn(cfg.cls, "ring-2 ring-current/20 scale-[1.03] border-transparent")
+                                                : "bg-zinc-50 dark:bg-white/[0.03] border-zinc-200 dark:border-white/[0.08] text-zinc-400 hover:border-zinc-300 dark:hover:border-white/20 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-40"
+                                        )}
+                                    >
+                                        <Icon size={12} />
+                                        {cfg.label}
+                                    </button>
+                                )
+                            })}
+                        </div>
                     </div>
+
+                    {/* Status actions */}
+                    {actions.length > 0 && (
+                        <div>
+                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.12em] mb-3">Move Inquiry</p>
+                            <div className="flex flex-col gap-2">
+                                {actions.map((action) => (
+                                    <button
+                                        key={action.next}
+                                        disabled={updating}
+                                        onClick={() => onStatusChange(inquiry.id, action.next)}
+                                        className={cn(
+                                            "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 active:scale-[0.99]",
+                                            action.cls
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-2.5">
+                                            {updating
+                                                ? <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                                                : <action.icon size={14} />
+                                            }
+                                            {action.label}
+                                        </div>
+                                        <ArrowRight size={13} className="opacity-50" />
+                                    </button>
+                                ))}
+                                {inquiry.status === "resolved" && inquiry.resolvedAt && (
+                                    <p className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 px-1">
+                                        <CheckCircle size={10} /> Resolved {timeAgo(inquiry.resolvedAt)}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="px-5 py-4 border-t border-zinc-100 dark:border-white/5 flex flex-col gap-2 shrink-0">
-                {/* Convert / already converted */}
-                {!selected.clientId ? (
+            {/* Sticky action footer */}
+            <div className="shrink-0 px-4 md:px-8 py-4 md:py-5 border-t border-zinc-100 dark:border-white/[0.07] bg-white dark:bg-zinc-900 space-y-2.5">
+
+                {/* Convert CTA — visually dominant */}
+                {!inquiry.clientId ? (
                     <button
                         onClick={onConvert}
-                        className="flex items-center justify-center gap-2 h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm transition-colors"
+                        className="w-full flex items-center justify-between px-5 h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-white font-bold text-sm transition-all shadow-md shadow-emerald-200 dark:shadow-emerald-500/20 group"
                     >
-                        <UserPlus size={15} /> Accept & Convert to Client
+                        <div className="flex items-center gap-2.5">
+                            <UserPlus size={15} />
+                            Accept & Convert to Client
+                        </div>
+                        <ArrowUpRight size={14} className="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </button>
                 ) : (
-                    <div className="flex items-center justify-center gap-2 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
-                        <CheckCircle size={13} /> Already converted to client
+                    <div className="w-full flex items-center justify-center gap-2 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200/60 dark:border-emerald-500/20">
+                        <CheckCircle size={12} /> Already converted to client
                     </div>
                 )}
 
-                <a
-                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${selected.email}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 h-11 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-sm transition-all"
-                >
-                    <Mail size={15} /> Reply via Email
-                </a>
-                <button
-                    onClick={onDelete}
-                    className="flex items-center justify-center gap-2 h-11 rounded-xl border border-red-200 dark:border-red-500/20 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 font-medium text-sm transition-colors"
-                >
-                    <Trash2 size={15} /> Delete Inquiry
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                    <a
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${inquiry.email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 h-10 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-zinc-950 font-bold text-xs transition-all"
+                    >
+                        <Mail size={13} /> Reply via Email
+                    </a>
+                    <button
+                        onClick={onDelete}
+                        className="flex items-center justify-center gap-2 h-10 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-red-200 dark:hover:border-red-500/30 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/5 font-medium text-xs transition-all"
+                    >
+                        <Trash2 size={13} /> Delete
+                    </button>
+                </div>
             </div>
-        </>
-    )
-}
-
-function PanelHeader({ selected, onClose }: { selected: InquiryRow; onClose: () => void }) {
-    return (
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-white/5 shrink-0">
-            <div className="flex items-center gap-2 min-w-0">
-                <h3 className="font-bold text-zinc-900 dark:text-white text-sm truncate">Inquiry Details</h3>
-                <span className={cn(
-                    "flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium shrink-0",
-                    PRIORITY_CONFIG[selected.priority as keyof typeof PRIORITY_CONFIG]?.cls
-                )}>
-                    <AlertTriangle size={10} />
-                    {PRIORITY_CONFIG[selected.priority as keyof typeof PRIORITY_CONFIG]?.label}
-                </span>
-            </div>
-            <button
-                onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors shrink-0"
-            >
-                <X size={16} />
-            </button>
         </div>
     )
 }
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
+function EmptyState({ hasFilter }: { hasFilter: boolean }) {
+    return (
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-12">
+            <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                <Inbox size={24} className="text-zinc-400" />
+            </div>
+            <div>
+                <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                    {hasFilter ? "No matching inquiries" : "No inquiries yet"}
+                </p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+                    {hasFilter ? "Try adjusting your search or filters" : "New inquiries will appear here"}
+                </p>
+            </div>
+        </div>
+    )
+}
+
+// ─── No Selection ─────────────────────────────────────────────────────────────
+
+function NoSelection({ count }: { count: number }) {
+    return (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-12 bg-zinc-50 dark:bg-zinc-950">
+            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/[0.07] flex items-center justify-center shadow-sm">
+                <MailOpen size={22} className="text-zinc-400" />
+            </div>
+            <div>
+                <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                    Select an inquiry
+                </p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+                    {count} {count === 1 ? "inquiry" : "inquiries"} in your inbox
+                </p>
+            </div>
+        </div>
+    )
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function DashboardInquiries() {
     const [inquiries, setInquiries] = useState<InquiryRow[]>([])
@@ -307,11 +531,11 @@ export default function DashboardInquiries() {
     const [sortByPriority, setSortByPriority] = useState(false)
     const [selected, setSelected] = useState<InquiryRow | null>(null)
     const [deleteModal, setDeleteModal] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
     const [updating, setUpdating] = useState(false)
     const [deleting, setDeleting] = useState(false)
     const [convertModal, setConvertModal] = useState(false)
     const [createModal, setCreateModal] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(() => {
         portalFetch.get<InquiryRow[]>("/admin/inquiries")
@@ -323,16 +547,17 @@ export default function DashboardInquiries() {
     useEffect(() => setCurrentPage(1), [search, filterStatus, filterPriority])
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setSelected(null) }
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (deleteModal) { setDeleteModal(false); return }
+                if (convertModal) { setConvertModal(false); return }
+                if (createModal) { setCreateModal(false); return }
+                setSelected(null)
+            }
+        }
         window.addEventListener("keydown", handler)
         return () => window.removeEventListener("keydown", handler)
-    }, [])
-
-    useEffect(() => {
-        if (selected) document.body.style.overflow = "hidden"
-        else document.body.style.overflow = ""
-        return () => { document.body.style.overflow = "" }
-    }, [selected])
+    }, [deleteModal, convertModal, createModal])
 
     const filtered = useMemo(() => {
         let list = inquiries
@@ -347,34 +572,34 @@ export default function DashboardInquiries() {
                 (i.company ?? "").toLowerCase().includes(search.toLowerCase()) ||
                 i.email.toLowerCase().includes(search.toLowerCase())
             )
-
         if (sortByPriority) {
             list = [...list].sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 9) - (PRIORITY_ORDER[b.priority] ?? 9))
         }
-
         return list
     }, [inquiries, filterStatus, filterPriority, search, sortByPriority])
 
-    const totalPages = useMemo(() => Math.ceil(filtered.length / PAGE_SIZE), [filtered])
-    const paginated = useMemo(() =>
-        filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
-        [filtered, currentPage]
-    )
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+    const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
     const counts = useMemo(() => ({
         all: inquiries.length,
-        new: inquiries.filter((i) => i.status === "new").length,
-        in_progress: inquiries.filter((i) => i.status === "in_progress").length,
-        resolved: inquiries.filter((i) => i.status === "resolved").length,
-        converted: inquiries.filter((i) => !!i.clientId).length,
+        new: inquiries.filter(i => i.status === "new").length,
+        in_progress: inquiries.filter(i => i.status === "in_progress").length,
+        resolved: inquiries.filter(i => i.status === "resolved").length,
+        converted: inquiries.filter(i => !!i.clientId).length,
     }), [inquiries])
+
+    const urgentCount = useMemo(() =>
+        inquiries.filter(i => i.priority === "urgent" && i.status !== "resolved").length,
+        [inquiries]
+    )
 
     const patchInquiry = async (id: string, payload: Partial<Inquiry>) => {
         setUpdating(true)
         try {
             const updated = await portalFetch.patch<InquiryRow>(`/admin/inquiries/${id}`, payload)
-            setInquiries((prev) => prev.map((i) => i.id === id ? { ...i, ...updated } : i))
-            setSelected((prev) => prev?.id === id ? { ...prev, ...updated } : prev)
+            setInquiries(prev => prev.map(i => i.id === id ? { ...i, ...updated } : i))
+            setSelected(prev => prev?.id === id ? { ...prev, ...updated } : prev)
             return updated
         } finally {
             setUpdating(false)
@@ -386,16 +611,16 @@ export default function DashboardInquiries() {
             await patchInquiry(id, { status })
             toast.success(`Moved to ${INQUIRY_STATUS_CONFIG[status]?.label ?? status}`)
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to update status")
+            toast.error(err.message ?? "Failed to update")
         }
     }
 
     const handlePriorityChange = async (id: string, priority: Inquiry["priority"]) => {
         try {
             await patchInquiry(id, { priority })
-            toast.success(`Priority set to ${PRIORITY_CONFIG[priority]?.label ?? priority}`)
+            toast.success(`Priority → ${PRIORITY_CONFIG[priority]?.label}`)
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to update priority")
+            toast.error(err.message ?? "Failed to update")
         }
     }
 
@@ -404,287 +629,285 @@ export default function DashboardInquiries() {
         setDeleting(true)
         try {
             await portalFetch.delete(`/admin/inquiries/${selected.id}`)
-            setInquiries((prev) => prev.filter((i) => i.id !== selected.id))
+            setInquiries(prev => prev.filter(i => i.id !== selected.id))
             setSelected(null)
             setDeleteModal(false)
             toast.success("Inquiry deleted")
         } catch (err: any) {
-            toast.error(err.message ?? "Failed to delete inquiry")
+            toast.error(err.message ?? "Failed to delete")
         } finally {
             setDeleting(false)
         }
     }
 
     const handleConverted = (result: { client: ClientRow; project: Project }) => {
-        setInquiries((prev) => prev.map((i) =>
+        setInquiries(prev => prev.map(i =>
             i.id === selected?.id
                 ? { ...i, clientId: result.client.id, status: "in_progress", projectTitle: result.project.title }
                 : i
         ))
         setSelected(null)
-        toast.success(`${result.client.name} is now a client! Project "${result.project.title}" created.`)
+        toast.success(`${result.client.name} is now a client!`)
     }
-
-    const detailProps = selected ? {
-        selected,
-        updating,
-        onStatusChange: handleStatusChange,
-        onPriorityChange: handlePriorityChange,
-        onConvert: () => setConvertModal(true),
-        onDelete: () => setDeleteModal(true),
-    } : null
 
     if (loading) return <InquiriesSkeleton />
 
-    return (
-        <div className="p-6 md:p-8">
+    // On mobile: show list OR detail (not both at once)
+    const showDetail = !!selected
+    const showList = !selected // mobile: hide list when detail is open
 
-            {/* Header */}
-            <div className="mb-8 flex items-start justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">Inquiries</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">{inquiries.length} total client inquiries</p>
-                </div>
-
-                <Button
-                    onClick={() => setCreateModal(true)}
-                    className="rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold gap-2 shadow-sm shrink-0"
-                >
-                    <Plus size={15} /> New Inquiry
-                </Button>
-            </div>
-
-            {/* Status Tabs */}
-            <div className="flex gap-2 flex-wrap mb-4">
-                {EXTENDED_STATUSES.map((s) => (
-                    <button
-                        key={s.value}
-                        onClick={() => setFilterStatus(s.value)}
-                        className={cn(
-                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors border",
-                            filterStatus === s.value
-                                ? "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950 border-transparent"
-                                : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700",
-                            s.value === "converted" && filterStatus !== "converted" &&
-                            "border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/5 hover:bg-emerald-100 dark:hover:bg-emerald-500/10"
-                        )}
-                    >
-                        {s.value === "converted" && <FolderKanban size={13} />}
-                        {s.label}
-                        <span className={cn(
-                            "text-xs px-1.5 py-0.5 rounded-md font-semibold",
-                            filterStatus === s.value
-                                ? "bg-white/20"
-                                : s.value === "converted"
-                                    ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                                    : "bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400"
-                        )}>
-                            {counts[s.value as keyof typeof counts] ?? 0}
+    // Shared sidebar content extracted for reuse
+    const sidebarHeader = (
+        <div className="shrink-0 px-4 pt-5 pb-3 border-b border-zinc-100 dark:border-white/[0.07]">
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <h1 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">Inquiries</h1>
+                    {urgentCount > 0 && (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-[10px] font-bold">
+                            <Flame size={9} /> {urgentCount} urgent
                         </span>
-                    </button>
-                ))}
-            </div>
-
-            {/* Search + Priority + Sort */}
-            <div className="flex gap-3 mb-6 flex-wrap">
-                <div className="relative flex-1 max-w-sm min-w-[200px]">
-                    <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                    <input
-                        type="text"
-                        placeholder="Search by name, company or email..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-sm text-zinc-900 dark:text-white bg-white dark:bg-zinc-900 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 outline-none focus:border-amber-400 transition-all"
-                    />
-                </div>
-                <CustomSelect
-                    value={filterPriority}
-                    options={PRIORITY_OPTIONS}
-                    onChange={setFilterPriority}
-                    className="w-36"
-                    buttonClassName="bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
-                />
-                <button
-                    onClick={() => setSortByPriority((v) => !v)}
-                    className={cn(
-                        "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all",
-                        sortByPriority
-                            ? "bg-amber-400 border-amber-400 text-zinc-950"
-                            : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-white/20"
                     )}
+                </div>
+                <button
+                    onClick={() => setCreateModal(true)}
+                    className="flex items-center gap-1 px-2.5 h-7 rounded-lg bg-amber-400 hover:bg-amber-300 active:scale-95 text-zinc-950 font-bold text-xs transition-all"
                 >
-                    <AlertTriangle size={14} />
-                    <span className="hidden sm:inline">{sortByPriority ? "Sorted by Priority" : "Sort by Priority"}</span>
-                    <span className="sm:hidden">Priority</span>
+                    <Plus size={11} /> New
                 </button>
             </div>
 
-            {/* Content */}
-            <div className="flex gap-6">
-
-                {/* List */}
-                <div className={cn(
-                    "flex flex-col gap-3 transition-all duration-300 min-w-0 w-full",
-                    selected ? "lg:w-2/5" : "lg:w-full"
-                )}>
-                    {paginated.length === 0 ? (
-                        <div className="text-center py-16 text-zinc-400 dark:text-zinc-600 text-sm bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl">
-                            {filterStatus === "converted" ? "No converted inquiries yet." : "No inquiries found."}
-                        </div>
-                    ) : paginated.map((inquiry) => (
-                        <div
-                            key={inquiry.id}
-                            onClick={() => setSelected(selected?.id === inquiry.id ? null : inquiry)}
-                            className={cn(
-                                "bg-white dark:bg-zinc-900 border rounded-2xl p-5 cursor-pointer transition-all hover:shadow-sm",
-                                selected?.id === inquiry.id
-                                    ? "border-amber-400 shadow-sm shadow-amber-100 dark:shadow-amber-500/10"
-                                    : "border-zinc-100 dark:border-white/5 hover:border-zinc-200 dark:hover:border-white/10"
-                            )}
-                        >
-                            <div className="flex items-start justify-between gap-3 mb-3">
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold text-zinc-900 dark:text-white text-sm truncate">{inquiry.name}</p>
-                                        {inquiry.clientId && (
-                                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                                                <CheckCircle size={9} /> Client
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-zinc-400 dark:text-zinc-500 text-xs truncate">{inquiry.company ?? "—"}</p>
-                                </div>
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                    <span className={cn(
-                                        "hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium",
-                                        PRIORITY_CONFIG[inquiry.priority as keyof typeof PRIORITY_CONFIG]?.cls
-                                    )}>
-                                        <span className={cn("w-1.5 h-1.5 rounded-full", PRIORITY_CONFIG[inquiry.priority as keyof typeof PRIORITY_CONFIG]?.dot)} />
-                                        {PRIORITY_CONFIG[inquiry.priority as keyof typeof PRIORITY_CONFIG]?.label}
-                                    </span>
-                                    <span className={cn(
-                                        "px-2.5 py-1 rounded-lg text-xs font-medium",
-                                        INQUIRY_STATUS_CONFIG[inquiry.status]?.className ?? "bg-zinc-100 text-zinc-500"
-                                    )}>
-                                        {INQUIRY_STATUS_CONFIG[inquiry.status]?.label ?? inquiry.status}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <p className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed line-clamp-2 mb-3">
-                                {inquiry.message}
-                            </p>
-
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5 text-zinc-300 dark:text-zinc-600 text-xs">
-                                    <Calendar size={11} />
-                                    {formatDate(inquiry.createdAt)}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {inquiry.projectTitle && (
-                                        <span className="text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1 truncate max-w-[100px]">
-                                            <FolderKanban size={11} /> {inquiry.projectTitle}
-                                        </span>
-                                    )}
-                                    {inquiry.talentName && (
-                                        <span className="text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1">
-                                            <User size={11} /> {inquiry.talentName}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-between mt-2">
-                            <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                                Showing {((currentPage - 1) * PAGE_SIZE) + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}
-                            </p>
-                            <div className="flex items-center gap-1">
-                                <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-                                    <ChevronLeft size={15} />
-                                </button>
-                                {(() => {
-                                    const pages: (number | string)[] = []
-                                    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i) }
-                                    else {
-                                        pages.push(1)
-                                        if (currentPage > 3) pages.push("...")
-                                        for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i)
-                                        if (currentPage < totalPages - 2) pages.push("...")
-                                        pages.push(totalPages)
-                                    }
-                                    return pages.map((page, idx) =>
-                                        page === "..." ? (
-                                            <span key={`e-${idx}`} className="w-8 h-8 flex items-center justify-center text-zinc-400 text-sm">…</span>
-                                        ) : (
-                                            <button key={page} onClick={() => setCurrentPage(page as number)}
-                                                className={cn("w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors",
-                                                    currentPage === page ? "bg-amber-400 text-zinc-950" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5"
-                                                )}>{page}</button>
-                                        )
-                                    )
-                                })()}
-                                <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-                                    <ChevronRight size={15} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* ── Desktop side panel (lg+) ── */}
-                {selected && detailProps && (
-                    <div className="hidden lg:flex flex-col flex-1 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl overflow-hidden min-w-0 sticky top-6 max-h-[calc(100vh-6rem)]">
-                        <PanelHeader selected={selected} onClose={() => setSelected(null)} />
-                        <InquiryDetail {...detailProps} />
-                    </div>
+            {/* Search */}
+            <div className="relative mb-3">
+                <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                <input
+                    type="text"
+                    placeholder="Search inquiries..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-8 pr-8 h-8 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/10 transition-all"
+                />
+                {search && (
+                    <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                        <X size={11} />
+                    </button>
                 )}
             </div>
 
-            {/* ── Mobile bottom drawer (below lg) ── */}
-            {selected && detailProps && (
-                <>
-                    {/* Backdrop */}
-                    <div
-                        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
-                        onClick={() => setSelected(null)}
-                    />
-                    {/* Drawer */}
-                    <div
-                        className="fixed inset-x-0 bottom-0 z-50 lg:hidden flex flex-col bg-white dark:bg-zinc-900 rounded-t-3xl border-t border-zinc-100 dark:border-white/10 shadow-2xl"
-                        style={{ maxHeight: "85dvh" }}
-                    >
-                        {/* Pull handle */}
-                        <div className="flex justify-center pt-3 pb-1 shrink-0">
-                            <div className="w-10 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700" />
-                        </div>
-                        <PanelHeader selected={selected} onClose={() => setSelected(null)} />
-                        <InquiryDetail {...detailProps} />
+            {/* Status filter tabs */}
+            <div className="flex gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                {STATUS_FILTERS.map((s) => {
+                    const count = counts[s.value as keyof typeof counts] ?? 0
+                    const isActive = filterStatus === s.value
+                    return (
+                        <button
+                            key={s.value}
+                            onClick={() => setFilterStatus(s.value)}
+                            className={cn(
+                                "flex items-center gap-1.5 px-2.5 h-7 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0",
+                                isActive
+                                    ? s.value === "converted"
+                                        ? "bg-emerald-500 text-white"
+                                        : "bg-zinc-900 dark:bg-amber-400 text-white dark:text-zinc-950"
+                                    : s.value === "converted"
+                                        ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                                        : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5"
+                            )}
+                        >
+                            {s.label}
+                            <span className={cn(
+                                "tabular-nums text-[10px] px-1 py-0.5 rounded font-semibold",
+                                isActive ? "bg-white/20" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+                            )}>
+                                {count}
+                            </span>
+                        </button>
+                    )
+                })}
+            </div>
+
+            {/* Priority + Sort controls */}
+            <div className="flex items-center gap-2 mt-2.5">
+                <div className="flex gap-1 flex-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                    {["all", "urgent", "high", "medium", "low"].map(p => {
+                        const cfg = p !== "all" ? PRIORITY_CONFIG[p as keyof typeof PRIORITY_CONFIG] : null
+                        const isActive = filterPriority === p
+                        return (
+                            <button
+                                key={p}
+                                onClick={() => setFilterPriority(p)}
+                                className={cn(
+                                    "flex items-center gap-1 px-2 h-6 rounded-md text-[10px] font-semibold whitespace-nowrap transition-all shrink-0",
+                                    isActive
+                                        ? cfg ? cfg.cls + " ring-1 ring-current/20" : "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300"
+                                        : "text-zinc-400 dark:text-zinc-500 hover:bg-zinc-50 dark:hover:bg-white/5"
+                                )}
+                            >
+                                {cfg && <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", cfg.dot)} />}
+                                {p === "all" ? "All" : cfg?.label}
+                            </button>
+                        )
+                    })}
+                </div>
+                <button
+                    onClick={() => setSortByPriority(v => !v)}
+                    className={cn(
+                        "w-6 h-6 rounded-md flex items-center justify-center transition-all shrink-0",
+                        sortByPriority ? "bg-amber-400 text-zinc-950" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-600"
+                    )}
+                    title="Sort by priority"
+                >
+                    <SlidersHorizontal size={11} />
+                </button>
+            </div>
+        </div>
+    )
+
+    const sidebarList = (
+        <>
+            {(search || filterStatus !== "all" || filterPriority !== "all") && (
+                <div className="px-4 py-2 text-[10px] text-zinc-400 border-b border-zinc-100 dark:border-white/[0.05] shrink-0">
+                    {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+                </div>
+            )}
+            <div className="flex-1 overflow-y-auto py-2 px-2
+                [&::-webkit-scrollbar]:w-1
+                [&::-webkit-scrollbar-track]:bg-transparent
+                [&::-webkit-scrollbar-thumb]:bg-zinc-200 dark:[&::-webkit-scrollbar-thumb]:bg-white/10
+                [&::-webkit-scrollbar-thumb]:rounded-full">
+                {paginated.length === 0 ? (
+                    <EmptyState hasFilter={!!(search || filterStatus !== "all" || filterPriority !== "all")} />
+                ) : (
+                    <div className="space-y-0.5">
+                        {paginated.map((inquiry) => (
+                            <InquiryListItem
+                                key={inquiry.id}
+                                inquiry={inquiry}
+                                isSelected={selected?.id === inquiry.id}
+                                onClick={() => setSelected(selected?.id === inquiry.id ? null : inquiry)}
+                            />
+                        ))}
                     </div>
-                </>
+                )}
+            </div>
+            {totalPages > 1 && (
+                <div className="shrink-0 flex items-center justify-between px-4 py-3 border-t border-zinc-100 dark:border-white/[0.07]">
+                    <span className="text-[10px] text-zinc-400 tabular-nums">
+                        {((currentPage - 1) * PAGE_SIZE) + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}
+                    </span>
+                    <div className="flex items-center gap-1">
+                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                            className="w-6 h-6 flex items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                            <ChevronLeft size={13} />
+                        </button>
+                        <span className="text-[10px] text-zinc-400 tabular-nums px-1">{currentPage} / {totalPages}</span>
+                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                            className="w-6 h-6 flex items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                            <ChevronRight size={13} />
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
+    )
+
+    return (
+        <div className="flex h-[100dvh] overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+
+            {/* ── MOBILE: List view (hidden when detail is open) ── */}
+            <div className={cn(
+                "flex flex-col w-full bg-white dark:bg-zinc-900 overflow-hidden",
+                "lg:hidden",
+                showList ? "flex" : "hidden"
+            )}>
+                {sidebarHeader}
+                {sidebarList}
+            </div>
+
+            {/* ── MOBILE: Detail view (full screen, shown when item selected) ── */}
+            {showDetail && (
+                <div className="lg:hidden flex flex-col w-full bg-white dark:bg-zinc-900 overflow-hidden">
+                    {/* Mobile detail header with back button */}
+                    <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-white/[0.07] bg-white dark:bg-zinc-900">
+                        <button
+                            onClick={() => setSelected(null)}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        >
+                            <ChevronLeft size={15} />
+                            Back
+                        </button>
+                        <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700" />
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-white truncate">{selected.name}</p>
+                        {selected.priority === "urgent" && (
+                            <span className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-[10px] font-bold shrink-0">
+                                <Zap size={9} /> Urgent
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        <InquiryDetailPanel
+                            inquiry={selected}
+                            updating={updating}
+                            onStatusChange={handleStatusChange}
+                            onPriorityChange={handlePriorityChange}
+                            onConvert={() => setConvertModal(true)}
+                            onDelete={() => setDeleteModal(true)}
+                        />
+                    </div>
+                </div>
             )}
 
-            {/* Delete Modal */}
+            {/* ── DESKTOP: Side-by-side split layout (lg+) ── */}
+            <div className="hidden lg:flex w-full overflow-hidden">
+
+                {/* Left sidebar */}
+                <div className="flex flex-col w-[360px] xl:w-[400px] shrink-0 bg-white dark:bg-zinc-900 border-r border-zinc-100 dark:border-white/[0.07] overflow-hidden">
+                    {sidebarHeader}
+                    {sidebarList}
+                </div>
+
+                {/* Right detail panel */}
+                <div className="flex-1 overflow-hidden bg-white dark:bg-zinc-900 flex flex-col">
+                    {selected ? (
+                        <InquiryDetailPanel
+                            inquiry={selected}
+                            updating={updating}
+                            onStatusChange={handleStatusChange}
+                            onPriorityChange={handlePriorityChange}
+                            onConvert={() => setConvertModal(true)}
+                            onDelete={() => setDeleteModal(true)}
+                        />
+                    ) : (
+                        <NoSelection count={filtered.length} />
+                    )}
+                </div>
+            </div>
+
+            {/* ── MODALS ── */}
+
+            {/* Delete confirm */}
             {deleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-sm p-6">
-                        <h3 className="font-bold text-zinc-900 dark:text-white mb-1">Delete Inquiry</h3>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-5">
-                            Are you sure you want to delete the inquiry from{" "}
-                            <strong className="text-zinc-900 dark:text-white">{selected?.name}</strong>? This cannot be undone.
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-sm p-6 border border-zinc-100 dark:border-white/10">
+                        <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-4">
+                            <Trash2 size={16} className="text-red-500" />
+                        </div>
+                        <h3 className="font-bold text-zinc-900 dark:text-white text-base mb-1.5">Delete Inquiry</h3>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-5 leading-relaxed">
+                            Delete the inquiry from{" "}
+                            <strong className="text-zinc-900 dark:text-white">{selected?.name}</strong>? This can't be undone.
                         </p>
-                        <div className="flex gap-3 justify-end">
-                            <button onClick={() => setDeleteModal(false)}
-                                className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
+                        <div className="flex gap-2.5">
+                            <button
+                                onClick={() => setDeleteModal(false)}
+                                className="flex-1 h-9 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                            >
                                 Cancel
                             </button>
-                            <button onClick={handleDelete} disabled={deleting}
-                                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-red-500 hover:bg-red-400 disabled:opacity-40 text-white text-sm font-bold transition">
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="flex-1 h-9 flex items-center justify-center gap-2 rounded-xl bg-red-500 hover:bg-red-400 active:scale-[0.98] disabled:opacity-50 text-white text-sm font-bold transition-all"
+                            >
                                 {deleting && <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                                 Delete
                             </button>
@@ -705,9 +928,9 @@ export default function DashboardInquiries() {
                 <CreateInquiryModal
                     onClose={() => setCreateModal(false)}
                     onCreated={(newInquiry) => {
-                        setInquiries((prev) => [
+                        setInquiries(prev => [
                             { ...newInquiry, talentName: null, adminName: null, projectTitle: null },
-                            ...prev
+                            ...prev,
                         ])
                         setCreateModal(false)
                     }}

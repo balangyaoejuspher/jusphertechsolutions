@@ -1,7 +1,18 @@
-import type { Metadata } from "next"
+"use client"
+
+import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Heart, Shield, Zap, Globe, Users, Trophy } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { AnimatedNumber } from "@/components/shared/animated-number"
+
+type PublicStats = {
+  talent: number
+  clients: number
+  placements: number
+  projects: number
+  vetted: number
+}
 
 const values = [
   {
@@ -39,22 +50,91 @@ const team = [
   },
 ]
 
-const stats = [
-  { value: "4", label: "Vetted Professionals" },
-  { value: "1", label: "Country" },
-  { value: "2026", label: "Year Founded" },
-  { value: "∞", label: "Room to Grow" },
-]
-
-export const metadata: Metadata = {
-  title: "About Us",
-  description: "Learn about Juspher & Co — our story, our values, and the team behind the platform.",
-}
-
 export default function AboutPage() {
+  const [stats, setStats] = useState<PublicStats | null>(null)
+
+  useEffect(() => {
+    fetch("/api/v1/public/stats")
+      .then((r) => r.json())
+      .then((json) => setStats(json?.data ?? json))
+      .catch(console.error)
+  }, [])
+
+  const statCards = [
+    {
+      value: stats?.vetted ?? null,
+      label: "Vetted Professionals",
+      fallback: "—",
+    },
+    {
+      value: stats?.clients ?? null,
+      label: "Clients Served",
+      fallback: "—",
+    },
+    {
+      value: stats?.placements ?? null,
+      label: "Placements Made",
+      fallback: "—",
+    },
+    {
+      value: "2026",
+      label: "Year Founded",
+      fallback: "2026",
+      static: true,
+    },
+  ]
+
+  const storyCards = [
+    {
+      icon: Users,
+      label: "Talent Network",
+      value: stats?.talent ?? null,
+      suffix: "+",
+      fallback: "—",
+      bg: "bg-amber-50 dark:bg-amber-500/8",
+      border: "border-amber-100 dark:border-amber-500/15",
+      iconBg: "bg-amber-100 dark:bg-amber-500/15",
+      iconColor: "text-amber-600 dark:text-amber-400",
+    },
+    {
+      icon: Globe,
+      label: "Country",
+      value: "PH",
+      fallback: "PH",
+      static: true,
+      bg: "bg-sky-50 dark:bg-sky-500/8",
+      border: "border-sky-100 dark:border-sky-500/15",
+      iconBg: "bg-sky-100 dark:bg-sky-500/15",
+      iconColor: "text-sky-600 dark:text-sky-400",
+    },
+    {
+      icon: Trophy,
+      label: "Placements",
+      value: stats?.placements ?? null,
+      suffix: "+",
+      fallback: "—",
+      bg: "bg-emerald-50 dark:bg-emerald-500/8",
+      border: "border-emerald-100 dark:border-emerald-500/15",
+      iconBg: "bg-emerald-100 dark:bg-emerald-500/15",
+      iconColor: "text-emerald-600 dark:text-emerald-400",
+    },
+    {
+      icon: Zap,
+      label: "Projects",
+      value: stats?.projects ?? null,
+      suffix: "+",
+      fallback: "—",
+      bg: "bg-violet-50 dark:bg-violet-500/8",
+      border: "border-violet-100 dark:border-violet-500/15",
+      iconBg: "bg-violet-100 dark:bg-violet-500/15",
+      iconColor: "text-violet-600 dark:text-violet-400",
+    },
+  ]
+
   return (
     <div className="bg-white dark:bg-zinc-950 min-h-screen">
 
+      {/* Hero */}
       <section className="relative pt-28 pb-24 md:pt-40 md:pb-36 overflow-hidden">
         <div className="absolute inset-0 bg-zinc-50 dark:bg-zinc-950" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(251,191,36,0.08),transparent)]" />
@@ -64,7 +144,6 @@ export default function AboutPage() {
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/G%3E%3C/svg%3E")`,
           }}
         />
-
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="container relative mx-auto px-6 md:px-12 text-center">
@@ -96,22 +175,26 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Stats bar */}
       <section className="border-y border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-950 overflow-hidden">
         <div className="container mx-auto px-6 md:px-12">
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-zinc-100 dark:divide-white/5">
-            {stats.map((stat) => (
+            {statCards.map((stat) => (
               <div key={stat.label} className="relative py-14 px-8 text-center group">
                 <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                <div className="font-display text-5xl md:text-6xl font-bold text-zinc-900 dark:text-white mb-2 tabular-nums">
-                  {stat.value}
+                <div className="font-display text-5xl md:text-6xl font-bold text-zinc-900 dark:text-white mb-2 tabular-nums transition-all duration-300">
+                  <AnimatedNumber value={stat.value ?? stat.fallback} />
                 </div>
-                <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">{stat.label}</div>
+                <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Story */}
       <section className="py-28 md:py-36 bg-white dark:bg-zinc-950">
         <div className="container mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -152,12 +235,7 @@ export default function AboutPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {[
-                { icon: Users, label: "Talent Network", value: "4", bg: "bg-amber-50 dark:bg-amber-500/8", border: "border-amber-100 dark:border-amber-500/15", iconBg: "bg-amber-100 dark:bg-amber-500/15", iconColor: "text-amber-600 dark:text-amber-400" },
-                { icon: Globe, label: "Country", value: "PH", bg: "bg-sky-50 dark:bg-sky-500/8", border: "border-sky-100 dark:border-sky-500/15", iconBg: "bg-sky-100 dark:bg-sky-500/15", iconColor: "text-sky-600 dark:text-sky-400" },
-                { icon: Trophy, label: "Founded", value: "2026", bg: "bg-emerald-50 dark:bg-emerald-500/8", border: "border-emerald-100 dark:border-emerald-500/15", iconBg: "bg-emerald-100 dark:bg-emerald-500/15", iconColor: "text-emerald-600 dark:text-emerald-400" },
-                { icon: Zap, label: "Vision", value: "Global", bg: "bg-violet-50 dark:bg-violet-500/8", border: "border-violet-100 dark:border-violet-500/15", iconBg: "bg-violet-100 dark:bg-violet-500/15", iconColor: "text-violet-600 dark:text-violet-400" },
-              ].map((item) => (
+              {storyCards.map((item) => (
                 <div
                   key={item.label}
                   className={`${item.bg} border ${item.border} rounded-3xl p-7 flex flex-col gap-5 hover:-translate-y-1 transition-transform duration-300`}
@@ -166,8 +244,8 @@ export default function AboutPage() {
                     <item.icon size={18} className={item.iconColor} />
                   </div>
                   <div>
-                    <div className="font-display text-3xl font-bold text-zinc-900 dark:text-white">
-                      {item.value}
+                    <div className="font-display text-3xl font-bold text-zinc-900 dark:text-white tabular-nums">
+                      <AnimatedNumber value={item.value} suffix={item.suffix} fallback={item.fallback} />
                     </div>
                     <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">
                       {item.label}
@@ -180,9 +258,9 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Values */}
       <section className="py-28 md:py-36 bg-zinc-50 dark:bg-zinc-900/20 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#88880a_1px,transparent_1px),linear-gradient(to_bottom,#88880a_1px,transparent_1px)] bg-[size:80px_80px] opacity-[0.025]" />
-
         <div className="container mx-auto px-6 md:px-12 relative">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16">
             <div>
@@ -212,18 +290,15 @@ export default function AboutPage() {
                   <value.icon size={19} className="text-zinc-400 dark:text-zinc-500 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors duration-300" />
                 </div>
                 <div className="text-xs font-bold text-zinc-300 dark:text-zinc-700 mb-3 tabular-nums">0{i + 1}</div>
-                <h3 className="font-bold text-zinc-900 dark:text-white text-base mb-3 leading-snug">
-                  {value.title}
-                </h3>
-                <p className="text-zinc-500 dark:text-zinc-500 text-sm leading-relaxed">
-                  {value.description}
-                </p>
+                <h3 className="font-bold text-zinc-900 dark:text-white text-base mb-3 leading-snug">{value.title}</h3>
+                <p className="text-zinc-500 dark:text-zinc-500 text-sm leading-relaxed">{value.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Team */}
       <section className="py-28 md:py-36 bg-white dark:bg-zinc-950">
         <div className="container mx-auto px-6 md:px-12">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16">
@@ -247,22 +322,14 @@ export default function AboutPage() {
                 className="group relative w-full sm:w-80 overflow-hidden rounded-3xl border border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900 hover:border-zinc-200 dark:hover:border-white/10 hover:-translate-y-1.5 transition-all duration-300"
               >
                 <div className="h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-300" />
-
                 <div className="absolute bottom-0 right-0 w-40 h-40 bg-amber-400/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-
                 <div className="relative p-8">
                   <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-white font-bold text-2xl mb-6 shadow-lg shadow-amber-500/20`}>
                     {member.name.charAt(0)}
                   </div>
-                  <h3 className="font-bold text-zinc-900 dark:text-white text-lg mb-1">
-                    {member.name}
-                  </h3>
-                  <p className="text-amber-500 dark:text-amber-400 text-xs font-bold uppercase tracking-widest mb-5">
-                    {member.role}
-                  </p>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
-                    {member.bio}
-                  </p>
+                  <h3 className="font-bold text-zinc-900 dark:text-white text-lg mb-1">{member.name}</h3>
+                  <p className="text-amber-500 dark:text-amber-400 text-xs font-bold uppercase tracking-widest mb-5">{member.role}</p>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">{member.bio}</p>
                 </div>
               </div>
             ))}
@@ -270,26 +337,24 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* CTA */}
       <section className="py-24 bg-zinc-50 dark:bg-zinc-900/20">
         <div className="container mx-auto px-6 md:px-12">
           <div className="relative overflow-hidden bg-zinc-900 dark:bg-zinc-900 rounded-3xl border border-zinc-800 px-10 py-24 text-center isolate">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_-10%,rgba(251,191,36,0.15),transparent)]" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-amber-400/60 to-transparent" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
-
             <div
               className="absolute inset-0 opacity-[0.03]"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
               }}
             />
-
             <div className="relative">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                 <span className="text-white/60 text-xs font-semibold tracking-[0.15em] uppercase">Let's Build Together</span>
               </div>
-
               <h2 className="font-display text-5xl md:text-7xl font-bold text-white mb-5 tracking-tight leading-[0.92]">
                 Be One of Our
                 <br />
@@ -300,20 +365,13 @@ export default function AboutPage() {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href="/talent">
-                  <Button
-                    size="lg"
-                    className="h-13 px-10 rounded-2xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold shadow-lg shadow-amber-500/20 gap-2 group"
-                  >
+                  <Button size="lg" className="h-13 px-10 rounded-2xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold shadow-lg shadow-amber-500/20 gap-2 group">
                     Browse Talent
                     <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
                   </Button>
                 </Link>
                 <Link href="/services">
-                  <Button
-                    size="lg"
-                    variant="ghost"
-                    className="h-13 px-10 rounded-2xl text-zinc-400 hover:text-white hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all"
-                  >
+                  <Button size="lg" variant="ghost" className="h-13 px-10 rounded-2xl text-zinc-400 hover:text-white hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all">
                     View Services
                   </Button>
                 </Link>

@@ -186,7 +186,6 @@
     right: 120%;
 }
 
-/* TipTap placeholder */
 .tiptap p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     float: left;
@@ -195,7 +194,6 @@
     height: 0;
 }
 
-/* TipTap prose styles */
 .tiptap {
     outline: none;
 }
@@ -317,10 +315,10 @@
 .animation-delay-2000 { animation-delay: 2s; }
 .animation-delay-4000 { animation-delay: 4s; }
 
-.scrollbar-none {
+/* .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
 .scrollbar-none::-webkit-scrollbar {
     display: none;
-}
+} */

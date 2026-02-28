@@ -456,7 +456,6 @@ export default function DashboardClients() {
         individuals: clients.filter((c) => c.type === "individual").length,
     }), [clients])
 
-    // ── Handlers ──────────────────────────────────────────────
     const handleSave = (client: ClientRow) => {
         setClients((prev) =>
             prev.find((c) => c.id === client.id)

@@ -23,6 +23,8 @@ import {
   Calendar,
   Briefcase,
   Megaphone,
+  Activity,
+  Plus,
 } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
@@ -60,6 +62,7 @@ const navGroups = [
       { label: "Invoices", href: "/dashboard/invoices", icon: Send },
       { label: "Applicants", href: "/dashboard/applicants", icon: UserPlus },
       { label: "Meetings", href: "/dashboard/meetings", icon: Calendar },
+      { label: "Create Project", href: "/dashboard/projects/new", icon: Plus },
     ],
   },
   {
@@ -74,6 +77,7 @@ const navGroups = [
   {
     label: "System",
     items: [
+      { label: "Activity Log", href: "/dashboard/activity", icon: Activity },
       { label: "Settings", href: "/dashboard/settings", icon: Settings },
     ],
   },

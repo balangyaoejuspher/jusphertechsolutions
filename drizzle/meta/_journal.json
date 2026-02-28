@@ -78,6 +78,13 @@
       "when": 1772193279818,
       "tag": "0010_marvelous_magdalene",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1772262133506,
+      "tag": "0011_sweet_electro",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+
 export { clientService, ClientService } from "./client.service"
 export { talentService, TalentService } from "./talent.service"
 export { inquiryService, InquiryService } from "./inquiry.service"
@@ -10,4 +11,5 @@ export { settingsService, SettingsService } from "./settings.service"
 export { uploadService, UploadService } from "./upload.service"
 export { productService, ProductService } from "./product.service"
 export { announcementService, AnnouncementService } from "./announcement.service"
+export { contractService, ContractService } from "./contract.service"
 export { BaseService } from "./base.service"

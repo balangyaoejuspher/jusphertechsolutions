@@ -1,21 +1,31 @@
 export type MonthlyDataPoint = {
-  month:      string
-  inquiries:  number
+  month: string
+  inquiries: number
   placements: number
-  talent:     number
-}
-
-export type DashboardStats = {
-  totalTalent:     number
-  totalInquiries:  number
-  totalPlacements: number
-  avgMatchTime:    string
-  monthlyData:     MonthlyDataPoint[]
-  recentActivity:  ActivityItem[]
+  talent: number
+  revenue: number
 }
 
 export type ActivityItem = {
+  type: "inquiry" | "placement" | "talent" | "invoice"
   text: string
   time: string
-  type: "inquiry" | "talent" | "placement"
+  meta?: string
+}
+
+export type DashboardStats = {
+  totalTalent: number
+  vettedTalent: number
+  totalInquiries: number
+  openInquiries: number
+  totalPlacements: number
+  activePlacements: number
+  totalClients: number
+  newClientsThisMonth: number
+  totalRevenue: number
+  pendingRevenue: number
+  pendingInvoices: number
+  monthlyData: MonthlyDataPoint[]
+  recentActivity: ActivityItem[]
+  avgMatchTime: string
 }

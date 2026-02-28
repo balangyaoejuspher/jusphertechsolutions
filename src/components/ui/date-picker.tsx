@@ -13,6 +13,7 @@ type DatePickerProps = {
     maxDate?: Date
     className?: string
     disabled?: boolean
+    dropdownAlign?: "left" | "right"
 }
 
 const MONTHS = [
@@ -53,6 +54,7 @@ export function DatePicker({
     maxDate,
     className,
     disabled = false,
+    dropdownAlign
 }: DatePickerProps) {
     const today = new Date()
     const selected = parseDate(value)
@@ -65,7 +67,6 @@ export function DatePicker({
 
     const ref = useRef<HTMLDivElement>(null)
 
-    // Close on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -77,7 +78,6 @@ export function DatePicker({
         return () => document.removeEventListener("mousedown", handler)
     }, [])
 
-    // Sync view when value changes externally
     useEffect(() => {
         if (selected) {
             setViewYear(selected.getFullYear())
@@ -181,7 +181,8 @@ export function DatePicker({
             {/* Calendar Dropdown */}
             {open && !disabled && (
                 <div className={cn(
-                    "absolute z-50 top-full mt-2 left-0",
+                    "absolute z-50 top-full mt-2",
+                    dropdownAlign === "right" ? "right-0" : "left-0",
                     "w-72 rounded-2xl overflow-hidden",
                     "bg-white dark:bg-zinc-900",
                     "border border-zinc-200 dark:border-white/10",

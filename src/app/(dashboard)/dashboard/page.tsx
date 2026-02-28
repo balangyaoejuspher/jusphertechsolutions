@@ -11,34 +11,10 @@ export default async function Page() {
 
     const user = await currentUser()
 
-    const stats: DashboardStats = {
-        totalTalent: 36,
-        totalInquiries: 23164,
-        totalPlacements: 5234,
-        avgMatchTime: "48hr",
-        monthlyData: [
-            { month: "Sep", inquiries: 210, placements: 42, talent: 3 },
-            { month: "Oct", inquiries: 380, placements: 68, talent: 5 },
-            { month: "Nov", inquiries: 290, placements: 55, talent: 2 },
-            { month: "Dec", inquiries: 420, placements: 89, talent: 7 },
-            { month: "Jan", inquiries: 510, placements: 102, talent: 8 },
-            { month: "Feb", inquiries: 640, placements: 128, talent: 11 },
-        ],
-        recentActivity: [
-            { text: "New inquiry received from Acme Corp", time: "Just now", type: "inquiry" },
-            { text: "Alex R. profile updated", time: "2 hours ago", type: "talent" },
-            { text: "Maria S. placed at TechStartup Inc.", time: "Yesterday", type: "placement" },
-            { text: "New developer application received", time: "2 days ago", type: "talent" },
-            { text: "Follow-up sent to GlobalVentures Ltd.", time: "3 days ago", type: "inquiry" },
-            { text: "James T. successfully placed at DataCo", time: "4 days ago", type: "placement" },
-        ],
-    }
-
     return (
         <Suspense fallback={<PageSkeleton />}>
             <DashboardOverviewClient
                 firstName={user?.firstName ?? null}
-                stats={stats}
             />
         </Suspense>
     )

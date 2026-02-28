@@ -247,7 +247,21 @@ export const announcementRecipientTypeEnum = pgEnum("announcement_recipient_type
   "talent",
 ])
 
-// ─── Tables ───────────────────────────────────────────────────────────────────
+export const contractDocStatusEnum = pgEnum("contract_doc_status", [
+  "draft",
+  "sent",
+  "signed",
+  "expired",
+  "cancelled",
+])
+
+export const contractTypeEnum = pgEnum("contract_type", [
+  "service_agreement",
+  "nda",
+  "retainer",
+  "scope_of_work",
+  "placement",
+])
 
 export const admins = pgTable("admins", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -277,6 +291,7 @@ export const talent = pgTable("talent", {
   rating: decimal("rating", { precision: 3, scale: 1 }).default("5.0"),
   projectsCompleted: integer("projects_completed").default(0),
   isVisible: boolean("is_visible").default(true),
+  isVetted: boolean("is_vetted").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
@@ -553,6 +568,41 @@ export const announcementReads = pgTable("announcement_reads", {
   index("announcement_reads_recipient_id_idx").on(table.recipientId),
 ])
 
+export const contractTemplates = pgTable("contract_templates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: contractTypeEnum("type").notNull().default("service_agreement"),
+  body: text("body").notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+export const contracts = pgTable("contracts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  templateId: uuid("template_id").references(() => contractTemplates.id, { onDelete: "set null" }),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  type: contractTypeEnum("type").notNull().default("service_agreement"),
+  status: contractDocStatusEnum("status").notNull().default("draft"),
+  body: text("body").notNull(),
+  pdfUrl: text("pdf_url"),
+  storagePath: text("storage_path"),
+
+  signerName: text("signer_name"),
+  signerEmail: text("signer_email"),
+  sentAt: timestamp("sent_at"),
+  signedAt: timestamp("signed_at"),
+  expiresAt: timestamp("expires_at"),
+
+  variables: jsonb("variables").$type<Record<string, string>>(),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -654,3 +704,11 @@ export type AnnouncementStatus = Announcement["status"]
 
 export type AnnouncementRead = typeof announcementReads.$inferSelect
 export type NewAnnouncementRead = typeof announcementReads.$inferInsert
+
+export type Invoice = typeof invoices.$inferSelect
+export type NewInvoice = typeof invoices.$inferInsert
+
+export type ContractTemplate = typeof contractTemplates.$inferSelect
+export type NewContractTemplate = typeof contractTemplates.$inferInsert
+export type Contract = typeof contracts.$inferSelect
+export type NewContract = typeof contracts.$inferInsert
