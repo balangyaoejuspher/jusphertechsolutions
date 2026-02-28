@@ -3,12 +3,12 @@ import { isVerifyAdmin, isVerifyError, verifyApiRequest } from "@/lib/api/verify
 import { apiResponse, apiError } from "@/lib/api/version"
 import { invoiceService } from "@/server/services/invoice.service"
 
-
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)
 
+    const { id } = await params
     try {
         const { action, amount } = await req.json()
 
@@ -16,14 +16,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
         switch (action) {
             case "send":
-                invoice = await invoiceService.markSent(params.id)
+                invoice = await invoiceService.markSent(id)
                 break
             case "mark_paid":
-                invoice = await invoiceService.markPaid(params.id)
+                invoice = await invoiceService.markPaid(id)
                 break
             case "record_payment":
                 if (!amount || isNaN(amount)) return apiError("Bad Request", "amount is required", 400)
-                invoice = await invoiceService.recordPayment(params.id, Number(amount))
+                invoice = await invoiceService.recordPayment(id, Number(amount))
                 break
             default:
                 return apiError("Bad Request", `Unknown action: ${action}`, 400)

@@ -3,13 +3,14 @@ import { isVerifyAdmin, isVerifyError, verifyApiRequest } from "@/lib/api/verify
 import { apiResponse, apiError } from "@/lib/api/version"
 import { invoiceService } from "@/server/services/invoice.service"
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)
 
+    const { id } = await params
     try {
-        const invoice = await invoiceService.getById(params.id)
+        const invoice = await invoiceService.getById(id)
         if (!invoice) return apiError("Not Found", "Invoice not found", 404)
         return apiResponse(invoice)
     } catch (err) {
@@ -18,14 +19,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)
 
+    const { id } = await params
     try {
         const body = await req.json()
-        const invoice = await invoiceService.update(params.id, body)
+        const invoice = await invoiceService.update(id, body)
         if (!invoice) return apiError("Not Found", "Invoice not found", 404)
         return apiResponse(invoice)
     } catch (err) {
@@ -34,13 +36,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const verified = await verifyApiRequest(req, "admin")
     if (isVerifyError(verified)) return verified.error
     if (!isVerifyAdmin(verified)) return apiError("Forbidden", "Admins only", 403)
 
+    const { id } = await params
     try {
-        const deleted = await invoiceService.delete(params.id)
+        const deleted = await invoiceService.delete(id)
         if (!deleted) return apiError("Bad Request", "Only draft invoices can be deleted", 400)
         return apiResponse({ deleted: true })
     } catch (err) {
